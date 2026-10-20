@@ -1,6 +1,6 @@
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
-    abort, send_from_directory
+    abort, send_from_directory, Response
 )
 import io
 from PIL import Image, ImageOps
@@ -18,6 +18,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from urllib.parse import urlsplit
+import xml.etree.ElementTree as ET
 
 from flask_login import (
     LoginManager,
@@ -32,7 +33,6 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
-import os
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -43,10 +43,7 @@ if SUPABASE_URL and SUPABASE_KEY:
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 from werkzeug.utils import secure_filename
-
 import mysql.connector
-
-
 from config import Config
 
 
@@ -56,13 +53,6 @@ app.config.from_object(Config)
 # =========================================================
 # FILE UPLOAD CONFIGURATION
 # =========================================================
-
-import io
-import os
-import uuid
-from PIL import Image, ImageOps
-from werkzeug.utils import secure_filename
-from flask import redirect, request, url_for, flash
 
 UPLOAD_FOLDER = os.path.join(
     app.root_path,
@@ -109,9 +99,6 @@ RENT_TYPES = {"house", "bedsitter", "single_room", "apartment", "hostel"}
 SALE_TYPES = {"house", "plot"}
 Image.MAX_IMAGE_PIXELS = 60_000_000
 
-
-import xml.etree.ElementTree as ET
-from flask import Response
 
 # =========================================================
 # SEO: ROBOTS.TXT AND XML SITEMAP
@@ -261,7 +248,6 @@ def sitemap():
         xml_bytes,
         content_type="application/xml; charset=utf-8"
     )
-   
 
 
 @app.errorhandler(413)
