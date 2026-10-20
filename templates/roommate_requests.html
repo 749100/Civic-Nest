@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='civicnest-header.css') }}"
+    />
+
+    <title>Roommate Connections | Civic Nest</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f7f9fc;
+        color: #183b53;
+      }
+
+      .navbar {
+        height: 76px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 7%;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.07);
+      }
+
+      .logo {
+        font-size: 25px;
+        font-weight: 800;
+        color: #092f49;
+        text-decoration: none;
+      }
+
+      .logo span {
+        color: #155b86;
+      }
+
+      .navbar a {
+        text-decoration: none;
+        color: #155b86;
+        font-weight: 700;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1050px;
+        margin: 45px auto;
+      }
+
+      h1 {
+        color: #092f49;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin: 8px 0 30px;
+      }
+
+      .section {
+        margin-bottom: 35px;
+      }
+
+      .section h2 {
+        color: #155b86;
+        margin-bottom: 15px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 5px 20px rgba(20, 40, 70, 0.06);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .person {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #155b86;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 22px;
+      }
+
+      .name {
+        font-weight: 800;
+        color: #092f49;
+      }
+
+      .meta {
+        color: #718096;
+        font-size: 13px;
+        margin-top: 5px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .primary {
+        background: #155b86;
+        color: white;
+      }
+
+      .accept {
+        background: #e9f7ef;
+        color: #20834b;
+      }
+
+      .decline {
+        background: #fff0f0;
+        color: #c0392b;
+      }
+
+      .empty {
+        background: white;
+        padding: 35px;
+        border-radius: 12px;
+        color: #718096;
+      }
+
+      @media (max-width: 650px) {
+        .card {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .actions {
+          width: 100%;
+          flex-direction: column;
+        }
+
+        .btn {
+          text-align: center;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_site_header.html" %}
+
+    <main class="container">
+      <h1>Roommate Connections</h1>
+
+      <p class="subtitle">Manage your roommate requests and connections.</p>
+
+      <!-- =====================================================
+     INCOMING
+===================================================== -->
+
+      <section class="section">
+        <h2>Incoming Requests</h2>
+
+        {% if incoming_requests %} {% for request in incoming_requests %}
+
+        <div class="card">
+          <div class="person">
+            {% if request.profile_image %}
+
+            <img
+              src="{{ url_for(
+        'static',
+        filename='uploads/' ~ request.profile_image
+    ) }}"
+              class="avatar"
+            />
+
+            {% else %}
+
+            <div class="avatar-placeholder">
+              {{ request.full_name[0]|upper }}
+            </div>
+
+            {% endif %}
+
+            <div>
+              <div class="name">{{ request.full_name }}</div>
+
+              <div class="meta">
+                {% if request.campus %} {{ request.campus }} {% endif %} {% if
+                request.preferred_location %} · {{ request.preferred_location }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a
+              href="{{ url_for(
+        'roommate_profile',
+        profile_id=request.profile_id
+    ) }}"
+              class="btn primary"
+            >
+              View
+            </a>
+
+            <form
+              method="POST"
+              action="{{ url_for(
+        'accept_roommate_request',
+        request_id=request.id
+    ) }}"
+            >
+              <button class="btn accept">Accept</button>
+            </form>
+
+            <form
+              method="POST"
+              action="{{ url_for(
+        'decline_roommate_request',
+        request_id=request.id
+    ) }}"
+            >
+              <button class="btn decline">Decline</button>
+            </form>
+          </div>
+        </div>
+
+        {% endfor %} {% else %}
+
+        <div class="empty">You have no pending incoming roommate requests.</div>
+
+        {% endif %}
+      </section>
+
+      <!-- =====================================================
+     SENT
+===================================================== -->
+
+      <section class="section">
+        <h2>Sent Requests</h2>
+
+        {% if sent_requests %} {% for request in sent_requests %}
+
+        <div class="card">
+          <div class="person">
+            {% if request.profile_image %}
+
+            <img
+              src="{{ url_for(
+        'static',
+        filename='uploads/' ~ request.profile_image
+    ) }}"
+              class="avatar"
+            />
+
+            {% else %}
+
+            <div class="avatar-placeholder">
+              {{ request.full_name[0]|upper }}
+            </div>
+
+            {% endif %}
+
+            <div>
+              <div class="name">{{ request.full_name }}</div>
+
+              <div class="meta">Status: {{ request.status|capitalize }}</div>
+            </div>
+          </div>
+
+          <a
+            href="{{ url_for(
+        'roommate_profile',
+        profile_id=request.profile_id
+    ) }}"
+            class="btn primary"
+          >
+            View
+          </a>
+        </div>
+
+        {% endfor %} {% else %}
+
+        <div class="empty">You haven't sent any roommate requests yet.</div>
+
+        {% endif %}
+      </section>
+
+      <!-- =====================================================
+     CONNECTIONS
+===================================================== -->
+
+      <section class="section">
+        <h2>My Connections</h2>
+
+        {% if accepted_connections %} {% for connection in accepted_connections
+        %}
+
+        <div class="card">
+          <div class="person">
+            {% if connection.profile_image %}
+
+            <img
+              src="{{ url_for(
+        'static',
+        filename='uploads/' ~ connection.profile_image
+    ) }}"
+              class="avatar"
+            />
+
+            {% else %}
+
+            <div class="avatar-placeholder">
+              {{ connection.full_name[0]|upper }}
+            </div>
+
+            {% endif %}
+
+            <div>
+              <div class="name">{{ connection.full_name }}</div>
+
+              <div class="meta">You are connected</div>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %} {% else %}
+
+        <div class="empty">You don't have any roommate connections yet.</div>
+
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,189 @@
+{% extends "base.html" %} {% block title %}{{ property.title }}{% endblock %} {%
+block stage_class %}compact{% endblock %} {% block page_title %}{{
+property.title }}{% endblock %} {% block page_sub %}
+<p class="page-sub">
+  {{ property.location }}{% if property.campus %} · near {{ property.campus }}{%
+  endif %}
+</p>
+{% endblock %} {% block content %} {% macro fact(label, value) %}{% if value is
+defined and value is not none and value != '' %}
+<div class="fact"><span>{{ label }}</span><strong>{{ value }}</strong></div>
+{% endif %}{% endmacro %} {% set is_sale = (property.listing_type or 'rent') ==
+'sale' %} {% set photo_dir = 'uploads/properties/' %} {% if property.status !=
+'active' %}
+<div class="flash warning" role="status">
+  This listing is not live yet (status: {{ property.status|title }}). Only you
+  and the review team can see this page.
+</div>
+{% endif %}
+
+<div class="detail">
+  <div class="stack">
+    <div class="card">
+      <div class="gallery-main">
+        {% if images %}
+        <img
+          id="mainPhoto"
+          src="{{ url_for('static', filename=photo_dir + images[0].filename) }}"
+          alt="{{ property.title }}"
+        />
+        {% else %}
+        <div class="no-photo">No photo available</div>
+        {% endif %} {% if property.is_verified %}<span class="badge"
+          >Verified</span
+        >{% endif %}
+      </div>
+      {% if images|length > 1 %}
+      <div class="thumbs">
+        {% for img in images %}
+        <button
+          type="button"
+          class="thumb {{ 'on' if loop.first else '' }}"
+          data-src="{{ url_for('static', filename=photo_dir + img.filename) }}"
+          aria-label="Show photo {{ loop.index }}"
+        >
+          <img
+            src="{{ url_for('static', filename=photo_dir + img.filename) }}"
+            alt=""
+          />
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="sec-title" style="margin-top: 0">Details</h2>
+      <div class="facts">
+        {{ fact('Type', property.property_type|replace('_', ' ')|title) }} {{
+        fact('Listed for', 'Sale' if is_sale else 'Rent') }} {{ fact('Bedrooms',
+        property.bedrooms) }} {{ fact('Bathrooms', property.bathrooms) }} {{
+        fact('Size', (property.size_sqm|string ~ ' sqm') if property.size_sqm
+        else none) }} {{ fact('Furnished', 'Yes' if property.furnished else
+        none) }} {{ fact('Distance from campus',
+        (property.distance_from_campus|string ~ ' km') if
+        property.distance_from_campus is not none else none) }} {{ fact('Vacant
+        units', property.vacant_units ~ ' of ' ~ property.total_units) if not
+        is_sale else '' }}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec-title" style="margin-top: 0">About this property</h2>
+      <p class="prose">{{ property.description }}</p>
+    </div>
+
+    {% if amenities %}
+    <div class="card">
+      <h2 class="sec-title" style="margin-top: 0">Amenities</h2>
+      <div class="tags">
+        {% for a in amenities %}<span class="tag">{{ a.name }}</span>{% endfor
+        %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="detail-side stack">
+    <div class="card">
+      <div class="price">
+        KSh {{ "{:,.0f}".format(property.price) }}{% if not is_sale %}
+        <small>/ month</small>{% endif %}
+      </div>
+      {% if not is_sale and property.deposit %}
+      <p class="muted" style="margin-top: 4px">
+        Deposit: KSh {{ "{:,.0f}".format(property.deposit) }}
+      </p>
+      {% endif %}
+      <p style="margin-top: 10px">
+        {% if property.available and property.vacant_units > 0 %}
+        <span class="pill ok">Available</span>
+        {% else %}
+        <span class="pill st-unavailable">Not available</span>
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="who">
+        <span class="avatar">
+          {% if property.landlord_image %}<img
+            src="{{ url_for('static', filename='uploads/profiles/' + property.landlord_image) }}"
+            alt=""
+          />{% else %}{{ property.landlord_name[:1]|upper }}{% endif %}
+        </span>
+        <div>
+          <strong>{{ property.landlord_name }}</strong>
+          <p class="muted">{{ 'Seller' if is_sale else 'Landlord' }}</p>
+        </div>
+      </div>
+
+      {% if property.landlord_phone %}
+      <div class="links">
+        <a
+          class="btn ghost"
+          href="{{ url_for('track_contact', property_id=property.id, method='call') }}"
+          >Call</a
+        >
+        <a
+          class="btn good"
+          href="{{ url_for('track_contact', property_id=property.id, method='whatsapp') }}"
+          target="_blank"
+          rel="noopener"
+          >WhatsApp</a
+        >
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="sec-title" style="margin-top: 0; font-size: 20px">
+        Send an enquiry
+      </h2>
+      {% if current_user.is_authenticated %} {% if current_user.role ==
+      'landlord' %}
+      <p class="muted">Landlord accounts cannot send enquiries.</p>
+      {% elif property.status == 'active' and property.available and
+      property.vacant_units > 0 %}
+      <form
+        method="post"
+        action="{{ url_for('send_inquiry', property_id=property.id) }}"
+        class="stack"
+      >
+        <label class="f"
+          ><span>Your message</span>
+          <textarea
+            name="message"
+            required
+            maxlength="2000"
+            placeholder="Hello, I am interested in this property. Is it still available?"
+          ></textarea>
+        </label>
+        <button class="btn block" type="submit">Send enquiry</button>
+      </form>
+      {% else %}
+      <p class="muted">This property is not taking enquiries right now.</p>
+      {% endif %} {% else %}
+      <p class="muted" style="margin-bottom: 12px">
+        Log in to message the {{ 'seller' if is_sale else 'landlord' }}.
+      </p>
+      <a class="btn block" href="{{ url_for('login', next=request.path) }}"
+        >Log in to send an enquiry</a
+      >
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.querySelectorAll(".thumb").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.getElementById("mainPhoto").src = b.dataset.src;
+      document.querySelectorAll(".thumb").forEach(function (x) {
+        x.classList.remove("on");
+      });
+      b.classList.add("on");
+    });
+  });
+</script>
+{% endblock %}

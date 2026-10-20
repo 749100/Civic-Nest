@@ -1,0 +1,6 @@
+.env
+.venv-1/
+__pycache__/
+instance/
+static/uploads/properties/*
+migrate.py

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit facility' if is_edit else 'Add a facility' }}{% endblock %}
+{% block stage_class %}compact{% endblock %}
+{% block page_title %}{{ 'Edit facility.' if is_edit else 'Add a facility.' }}{% endblock %}
+{% block page_sub %}
+<p class="page-sub">Only the name, type and town are required. Accurate phone numbers and coordinates make the finder far more useful.</p>
+{% endblock %}
+
+{% block head %}
+<style>
+.sf{max-width:860px;margin:0 auto}
+.sf .card{margin-bottom:18px}
+.sf .card > h2{margin-bottom:14px;font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--navy)}
+.fgrid{display:grid;grid-template-columns:1fr;gap:14px}
+.fgrid .full{grid-column:1/-1}
+.hint{font-size:12px;color:var(--muted)}
+.check{display:flex;align-items:center;gap:10px;min-height:48px;font-size:15px;font-weight:500}
+.check input{width:22px;height:22px;accent-color:var(--blue)}
+.form-actions{display:flex;flex-direction:column;gap:10px}
+@media(min-width:700px){.fgrid{grid-template-columns:1fr 1fr}.form-actions{flex-direction:row;justify-content:flex-end}}
+</style>
+{% endblock %}
+
+{% block content %}
+{% set h = hospital %}
+<div class="sf">
+<form method="post">
+
+  <div class="card">
+    <h2>The basics</h2>
+    <div class="fgrid">
+      <label class="f full"><span>Facility name</span>
+        <input type="text" name="name" maxlength="150" required value="{{ h.get('name') or '' }}" placeholder="e.g. Bungoma County Referral Hospital">
+      </label>
+      <label class="f"><span>Type</span>
+        <select name="facility_type" required>
+          <option value="">Choose a type</option>
+          {% for key, label in types %}
+          <option value="{{ key }}" {{ 'selected' if h.get('facility_type') == key else '' }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="f"><span>Ownership</span>
+        <select name="ownership">
+          {% for key, label in ownership_labels.items() %}
+          <option value="{{ key }}" {{ 'selected' if (h.get('ownership') or 'public') == key else '' }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="check full"><input type="checkbox" name="emergency_24h" {{ 'checked' if h.get('emergency_24h') else '' }}> Offers emergency care 24 hours a day</label>
+      <label class="f"><span>Opening hours <small class="hint">(optional)</small></span>
+        <input type="text" name="opening_hours" maxlength="150" value="{{ h.get('opening_hours') or '' }}" placeholder="e.g. Mon–Sat 8am–6pm, open 24 hours">
+      </label>
+      <label class="f"><span>Services <small class="hint">(optional, separated by commas)</small></span>
+        <input type="text" name="services" maxlength="500" value="{{ h.get('services') or '' }}" placeholder="e.g. Maternity, Dental, Laboratory, X-ray">
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Location</h2>
+    <div class="fgrid">
+      <label class="f"><span>Town</span>
+        <input type="text" name="town" maxlength="120" required value="{{ h.get('town') or '' }}" placeholder="e.g. Bungoma Town">
+      </label>
+      <label class="f"><span>Area or address <small class="hint">(optional)</small></span>
+        <input type="text" name="location" maxlength="255" value="{{ h.get('location') or '' }}" placeholder="e.g. Next to the main bus stage">
+      </label>
+      <label class="f"><span>Latitude <small class="hint">(optional)</small></span>
+        <input type="text" name="latitude" inputmode="decimal" value="{{ h.get('latitude') if h.get('latitude') is not none else '' }}" placeholder="e.g. 0.5693">
+      </label>
+      <label class="f"><span>Longitude <small class="hint">(optional)</small></span>
+        <input type="text" name="longitude" inputmode="decimal" value="{{ h.get('longitude') if h.get('longitude') is not none else '' }}" placeholder="e.g. 34.5584">
+      </label>
+      <p class="hint full">Fill in both coordinates or leave both empty. They power the directions button and the "closest to me" sorting. In Google Maps, right-click the building and click the numbers to copy them.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Contact</h2>
+    <div class="fgrid">
+      <label class="f"><span>Phone <small class="hint">(optional)</small></span>
+        <input type="tel" name="phone" maxlength="30" value="{{ h.get('phone') or '' }}" placeholder="e.g. 0712 345 678">
+      </label>
+      <label class="f"><span>Emergency or ambulance line <small class="hint">(optional)</small></span>
+        <input type="tel" name="emergency_phone" maxlength="30" value="{{ h.get('emergency_phone') or '' }}" placeholder="Only if the facility publishes one">
+      </label>
+      <label class="f"><span>Email <small class="hint">(optional)</small></span>
+        <input type="email" name="email" maxlength="150" value="{{ h.get('email') or '' }}" placeholder="info@hospital.co.ke">
+      </label>
+      <label class="f"><span>Website <small class="hint">(optional)</small></span>
+        <input type="text" name="website" maxlength="255" value="{{ h.get('website') or '' }}" placeholder="https://www.hospital.co.ke">
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Description</h2>
+    <div class="fgrid">
+      <label class="f full"><span>About the facility <small class="hint">(optional)</small></span>
+        <textarea name="description" maxlength="4000" placeholder="Departments, specialities or anything useful for patients.">{{ h.get('description') or '' }}</textarea>
+      </label>
+      <label class="check full"><input type="checkbox" name="is_published" {{ 'checked' if h.get('is_published') else '' }}> Show this facility in the public finder</label>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn ghost" href="{{ url_for('admin_hospitals') }}">Cancel</a>
+    <button class="btn" type="submit">{{ 'Save changes' if is_edit else 'Add facility' }}</button>
+  </div>
+</form>
+</div>
+{% endblock %}

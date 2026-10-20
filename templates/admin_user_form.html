@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Create an account{% endblock %}
+{% block stage_class %}compact{% endblock %}
+{% block page_title %}Create an account.{% endblock %}
+{% block page_sub %}
+<p class="page-sub">Make an account for a tenant or a landlord and give them the password. They can change nothing until you share it.</p>
+{% endblock %}
+
+{% block head %}
+<style>
+.sf{max-width:760px;margin:0 auto}
+.fgrid{display:grid;grid-template-columns:1fr;gap:14px}
+.fgrid .full{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:10px;min-height:48px;font-size:15px;font-weight:500}
+.check input{width:22px;height:22px;accent-color:var(--blue)}
+.pw-row{display:flex;gap:10px}
+.pw-row input{flex:1}
+.form-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+@media(min-width:700px){.fgrid{grid-template-columns:1fr 1fr}.form-actions{flex-direction:row;justify-content:flex-end}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sf">
+<form class="card" method="post">
+  <div class="fgrid">
+    <label class="f full"><span>Full name</span>
+      <input type="text" name="full_name" maxlength="150" required value="{{ form.get('full_name') or '' }}">
+    </label>
+    <label class="f"><span>Email</span>
+      <input type="email" name="email" maxlength="255" required value="{{ form.get('email') or '' }}" placeholder="name@example.com">
+    </label>
+    <label class="f"><span>Phone <small>(optional)</small></span>
+      <input type="tel" name="phone" maxlength="30" value="{{ form.get('phone') or '' }}" placeholder="0712 345 678">
+    </label>
+    <label class="f"><span>Account type</span>
+      <select name="role">
+        <option value="student" {{ 'selected' if (form.get('role') or 'student') == 'student' else '' }}>Tenant (looking for a home)</option>
+        <option value="landlord" {{ 'selected' if form.get('role') == 'landlord' else '' }}>Landlord (lists properties)</option>
+      </select>
+    </label>
+    <label class="f"><span>Password</span>
+      <div class="pw-row">
+        <input type="password" id="password" name="password" minlength="8" required placeholder="8+ characters" autocomplete="new-password">
+        <button class="btn ghost" type="button" id="genBtn">Generate</button>
+      </div>
+    </label>
+    <label class="check full"><input type="checkbox" name="is_verified" {{ 'checked' if form.get('is_verified') else '' }}> Mark this person as verified</label>
+  </div>
+  <div class="form-actions">
+    <a class="btn ghost" href="{{ url_for('admin_users') }}">Cancel</a>
+    <button class="btn" type="submit">Create account</button>
+  </div>
+</form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("genBtn").addEventListener("click", function () {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    var values = new Uint32Array(12);
+    crypto.getRandomValues(values);
+    var out = "";
+    for (var i = 0; i < values.length; i++) out += chars[values[i] % chars.length];
+    var field = document.getElementById("password");
+    field.type = "text";
+    field.value = out;
+  });
+</script>
+{% endblock %}

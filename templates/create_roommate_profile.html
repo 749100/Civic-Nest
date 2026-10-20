@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% from "_roommate_form.html" import fields %} {%
+block title %}Create roommate profile{% endblock %} {% block stage_class
+%}compact{% endblock %} {% block page_title %}Create your roommate profile.{%
+endblock %} {% block page_sub %}
+<p class="page-sub">
+  Tell other students what you are looking for so you can find a compatible
+  roommate.
+</p>
+{% endblock %} {% block content %}
+<div class="rm-wrap">
+  <form method="post">
+    {{ fields(form) }}
+    <div class="form-actions">
+      <a class="btn ghost" href="{{ url_for('roommate_finder') }}">Cancel</a>
+      <button class="btn" type="submit">Create profile</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

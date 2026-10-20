@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>{% block title %}Welcome{% endblock %} | CivicNest Africa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='site.css') }}"
+    />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% include "_admin_bar.html" ignore missing %}
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+      </symbol>
+      <symbol id="i-bookmark" viewBox="0 0 24 24">
+        <path d="M6 3h12v18l-6-4-6 4z" />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+    </svg>
+
+    <div class="stage {% block stage_class %}{% endblock %}">
+      <div class="wrap">
+        <header class="top">
+          <button
+            class="icon-btn"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" width="24" height="24"><use href="#i-menu" /></svg>
+          </button>
+
+          <nav class="menu" id="menuPanel" aria-label="Main menu" hidden>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('rent_page') }}">Rent</a>
+            <a href="{{ url_for('buy_page') }}">Buy</a>
+            <a href="{{ url_for('sell_page') }}">List a property</a>
+            <a href="{{ url_for('invest_page') }}">Invest</a>
+            <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+            <a href="{{ url_for('schools_page') }}">Schools finder</a>
+            <a href="{{ url_for('hospitals_page') }}">Hospital finder</a>
+            <hr />
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}">My dashboard</a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin console</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Log out</a>
+            {% else %}
+            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+            <a href="{{ url_for('register') }}">Create account</a>
+            {% endif %}
+          </nav>
+
+          <a
+            class="brand"
+            href="{{ url_for('home') }}"
+            aria-label="CivicNest Africa home"
+          >
+            <span class="brand-mark"
+              ><svg class="i"><use href="#i-house" /></svg
+            ></span>
+            <span class="brand-text"
+              ><span class="brand-name">CivicNest</span
+              ><span class="brand-sub">Africa</span></span
+            >
+          </a>
+
+          <div class="acct">
+            <button
+              class="icon-btn ring"
+              id="acctBtn"
+              type="button"
+              aria-label="Your account"
+              aria-expanded="false"
+              aria-controls="acctMenu"
+            >
+              <svg class="i" width="22" height="22"><use href="#i-user" /></svg>
+            </button>
+            <div class="acct-menu" id="acctMenu" hidden>
+              {% if current_user.is_authenticated %}
+              <div class="acct-who">
+                <strong>{{ current_user.full_name }}</strong>
+                <span>{{ current_user.role|title }}</span>
+              </div>
+              {% if current_user.role in ['landlord', 'admin'] %}
+              <a href="{{ url_for('landlord_dashboard') }}"
+                >Landlord dashboard</a
+              >
+              {% endif %} {% if current_user.role == 'admin' %}
+              <a href="{{ url_for('admin_dashboard') }}">Admin console</a>
+              {% endif %}
+              <a href="{{ url_for('logout') }}">Log out</a>
+              {% else %}
+              <a href="{{ url_for('login') }}">Log in</a>
+              <a href="{{ url_for('register') }}">Create account</a>
+              {% endif %}
+            </div>
+          </div>
+        </header>
+
+        {% block hero %}
+        <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+        {% block page_sub %}{% endblock %} {% block hero_extra %}{% endblock %}
+        {% endblock %}
+      </div>
+    </div>
+
+    <main class="sheet">
+      <div class="wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% for
+        category, message in messages %}
+        <div class="flash {{ category }}" role="alert">{{ message }}</div>
+        {% endfor %} {% endwith %} {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <span>&copy; CivicNest Africa</span>
+        <span>Developed by Mabel Technologies</span>
+      </div>
+    </footer>
+
+    <nav class="tabbar" aria-label="Primary">
+      <a
+        class="tab {{ 'on' if request.path == '/' else '' }}"
+        href="{{ url_for('home') }}"
+        ><svg class="i"><use href="#i-house" /></svg>Home</a
+      >
+      <a class="tab" href="#"
+        ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
+          >0</em
+        ></a
+      >
+      <a class="tab" href="#"
+        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+      >
+    </nav>
+
+    <script>
+      var menuBtn = document.getElementById("menuBtn");
+      var menuPanel = document.getElementById("menuPanel");
+      var acctBtn = document.getElementById("acctBtn");
+      var acctMenu = document.getElementById("acctMenu");
+
+      function closeMenu() {
+        menuPanel.hidden = true;
+        menuBtn.setAttribute("aria-expanded", "false");
+      }
+      function closeAcct() {
+        acctMenu.hidden = true;
+        acctBtn.setAttribute("aria-expanded", "false");
+      }
+
+      menuBtn.addEventListener("click", function () {
+        var open = menuPanel.hidden;
+        menuPanel.hidden = !open;
+        menuBtn.setAttribute("aria-expanded", String(open));
+        closeAcct();
+      });
+
+      acctBtn.addEventListener("click", function () {
+        var open = acctMenu.hidden;
+        acctMenu.hidden = !open;
+        acctBtn.setAttribute("aria-expanded", String(open));
+        closeMenu();
+      });
+
+      document.addEventListener("click", function (e) {
+        if (
+          !menuPanel.hidden &&
+          !menuPanel.contains(e.target) &&
+          !menuBtn.contains(e.target)
+        )
+          closeMenu();
+        if (
+          !acctMenu.hidden &&
+          !acctMenu.contains(e.target) &&
+          !acctBtn.contains(e.target)
+        )
+          closeAcct();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          closeMenu();
+          closeAcct();
+        }
+      });
+
+      try {
+        var saved = JSON.parse(
+          localStorage.getItem("civicNestFavorites") || "[]",
+        );
+        document.getElementById("savedCount").textContent = saved.length;
+      } catch (e) {}
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

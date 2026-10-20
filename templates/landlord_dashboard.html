@@ -1,0 +1,161 @@
+{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
+stage_class %}compact{% endblock %} {% block page_title %}Your dashboard{%
+endblock %} {% block page_sub %}
+<p class="page-sub">
+  Manage your listings, vacancies and enquiries in one place.
+</p>
+{% endblock %} {% block hero_extra %}
+<a class="btn light" href="{{ url_for('add_property') }}">List a property</a>
+{% endblock %} {% block content %} {% set photo_dir = 'uploads/properties/' %}
+
+<div class="stats">
+  <div class="stat">
+    <strong>{{ total_properties }}</strong><span>Listings</span>
+  </div>
+  <div class="stat">
+    <strong>{{ active_listings }}</strong><span>Live now</span>
+  </div>
+  <div class="stat">
+    <strong>{{ new_inquiries }}</strong><span>New enquiries</span>
+  </div>
+  <div class="stat">
+    <strong>{{ total_inquiries }}</strong><span>All enquiries</span>
+  </div>
+  <div class="stat">
+    <strong>{{ vacant_units }}</strong><span>Vacant units</span>
+  </div>
+  <div class="stat">
+    <strong>{{ occupied_units }}</strong><span>Occupied units</span>
+  </div>
+</div>
+
+<h2 class="sec-title">Your listings</h2>
+<div class="stack">
+  {% for p in properties %}
+  <article class="card row-card">
+    <div class="row-photo">
+      {% if p.cover_image %}
+      <img
+        src="{{ url_for('static', filename=photo_dir + p.cover_image) }}"
+        alt="{{ p.title }}"
+        loading="lazy"
+      />
+      {% else %}
+      <div class="no-photo">No photo</div>
+      {% endif %}
+    </div>
+    <div>
+      <div class="row-head">
+        <div>
+          <h3>{{ p.title }}</h3>
+          <p class="muted">
+            {{ p.property_type|replace('_', ' ')|title }} · KSh {{
+            "{:,.0f}".format(p.price) }} · {{ p.location }}
+          </p>
+        </div>
+        <div>
+          <span class="pill st-{{ p.status }}">{{ p.status|title }}</span>
+          {% if p.is_verified %}<span class="pill ok">Verified</span>{% endif %}
+        </div>
+      </div>
+
+      {% if p.status == 'pending' %}
+      <p class="note">
+        Waiting for review. It will go live once it has been approved.
+      </p>
+      {% elif p.status == 'rejected' %}
+      <p class="note bad">
+        Not approved{% if p.rejection_reason %}: {{ p.rejection_reason }}{%
+        endif %}. Edit the listing and it will be reviewed again.
+      </p>
+      {% endif %}
+
+      <form
+        class="qty"
+        method="post"
+        action="{{ url_for('update_property_availability', property_id=p.id) }}"
+      >
+        <label
+          >Total units
+          <input
+            type="number"
+            name="total_units"
+            min="1"
+            value="{{ p.total_units }}"
+            required
+          />
+        </label>
+        <label
+          >Vacant units
+          <input
+            type="number"
+            name="vacant_units"
+            min="0"
+            value="{{ p.vacant_units }}"
+            required
+          />
+        </label>
+        <button class="btn ghost" type="submit">Update vacancy</button>
+      </form>
+
+      <div class="links">
+        <a class="btn" href="{{ url_for('edit_property', property_id=p.id) }}"
+          >Edit</a
+        >
+        <a
+          class="btn ghost"
+          href="{{ url_for('property_details', property_id=p.id) }}"
+          >View page</a
+        >
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <div class="empty">
+    You have not listed anything yet.<br /><br />
+    <a class="btn" href="{{ url_for('add_property') }}"
+      >List your first property</a
+    >
+  </div>
+  {% endfor %}
+</div>
+
+<h2 class="sec-title">Recent enquiries</h2>
+<div class="stack">
+  {% for i in inquiries %}
+  <article class="card">
+    <div class="row-head">
+      <div>
+        <h3>{{ i.seeker_name }}</h3>
+        <p class="muted">
+          About
+          <a
+            href="{{ url_for('property_details', property_id=i.property_id) }}"
+            style="color: var(--blue); font-weight: 600"
+            >{{ i.property_title }}</a
+          >{% if i.created_at %} · {{ i.created_at.strftime('%d %b %Y') }}{%
+          endif %}
+        </p>
+      </div>
+      <span class="pill {{ 'st-pending' if i.status == 'new' else '' }}"
+        >{{ i.status|title }}</span
+      >
+    </div>
+    <p class="prose" style="margin-top: 10px">{{ i.message }}</p>
+    <div class="links">
+      {% if i.seeker_phone %}<a
+        class="btn ghost"
+        href="tel:{{ i.seeker_phone }}"
+        >Call {{ i.seeker_phone }}</a
+      >{% endif %} {% if i.seeker_email %}<a
+        class="btn ghost"
+        href="mailto:{{ i.seeker_email }}"
+        >Email</a
+      >{% endif %}
+    </div>
+  </article>
+  {% else %}
+  <div class="empty">No enquiries yet. They will show up here.</div>
+  {% endfor %}
+</div>
+{% endblock %}

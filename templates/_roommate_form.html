@@ -1,0 +1,138 @@
+{% macro fields(data) %}
+<style>
+    .rm-wrap {
+        max-width: 860px;
+        margin: 0 auto
+    }
+
+    .rm-wrap .card {
+        margin-bottom: 18px
+    }
+
+    .rm-wrap .card>h2 {
+        margin-bottom: 14px;
+        font-family: 'Fraunces', serif;
+        font-weight: 600;
+        font-size: 22px;
+        color: var(--navy)
+    }
+
+    .fgrid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px
+    }
+
+    .fgrid .full {
+        grid-column: 1/-1
+    }
+
+    .hint {
+        font-size: 12px;
+        color: var(--muted)
+    }
+
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 6px
+    }
+
+    @media(min-width:700px) {
+        .fgrid {
+            grid-template-columns: 1fr 1fr
+        }
+
+        .form-actions {
+            flex-direction: row;
+            justify-content: flex-end
+        }
+    }
+</style>
+
+<div class="card">
+    <h2>Contact</h2>
+    <div class="fgrid">
+        <label class="f full"><span>WhatsApp number</span>
+            <input type="tel" name="phone" value="{{ data.get('phone') or '' }}"
+                placeholder="e.g. 0712 345 678 or +254 712 345 678" autocomplete="tel" required>
+            <small class="hint">Used for the WhatsApp contact link shown to other students.</small>
+        </label>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Accommodation preferences</h2>
+    <div class="fgrid">
+        <label class="f"><span>Preferred campus</span>
+            <input type="text" name="campus" value="{{ data.get('campus') or '' }}"
+                placeholder="e.g. Kibabii University">
+        </label>
+        <label class="f"><span>Preferred location</span>
+            <input type="text" name="preferred_location" value="{{ data.get('preferred_location') or '' }}"
+                placeholder="e.g. Bungoma Town">
+        </label>
+        <p class="hint full">Enter at least a campus or a location so other students can find you.</p>
+
+        <label class="f"><span>Minimum budget (KSh)</span>
+            <input type="number" name="budget_min" min="0" step="100" inputmode="numeric"
+                value="{{ data.get('budget_min') or '' }}" placeholder="5000">
+        </label>
+        <label class="f"><span>Maximum budget (KSh)</span>
+            <input type="number" name="budget_max" min="0" step="100" inputmode="numeric"
+                value="{{ data.get('budget_max') or '' }}" placeholder="8000">
+        </label>
+
+        <label class="f"><span>Accommodation type</span>
+            <select name="accommodation_type">
+                <option value="">Select type</option>
+                {% for t in ['Single Room', 'Bedsitter', 'Apartment', 'House', 'Hostel', 'Other'] %}
+                <option value="{{ t }}" {{ 'selected' if data.get('accommodation_type')==t else '' }}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="f"><span>Expected move-in date</span>
+            <input type="date" name="move_in_date" value="{{ data.get('move_in_date') or '' }}">
+        </label>
+
+        <label class="f"><span>People needed</span>
+            <input type="number" name="people_needed" min="1" inputmode="numeric"
+                value="{{ data.get('people_needed') or 1 }}">
+            <small class="hint">How many people are you looking to share with?</small>
+        </label>
+        <label class="f"><span>Preferred roommate gender</span>
+            <select name="gender_preference">
+                {% for value, label in [('any', 'Anyone'), ('male', 'Male'), ('female', 'Female')] %}
+                <option value="{{ value }}" {{ 'selected' if (data.get('gender_preference') or 'any' )==value else ''
+                    }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Lifestyle &amp; study</h2>
+    <div class="fgrid">
+        <label class="f full"><span>Lifestyle preferences</span>
+            <textarea name="lifestyle_preferences"
+                placeholder="Things that matter to you: quiet environment, cleanliness, social lifestyle, smoking, pets, sleeping schedule...">{{ data.get('lifestyle_preferences') or '' }}</textarea>
+        </label>
+        <label class="f full"><span>Study preferences</span>
+            <textarea name="study_preferences"
+                placeholder="For example: I prefer a quiet room for studying, I study mostly in the evening...">{{ data.get('study_preferences') or '' }}</textarea>
+        </label>
+    </div>
+</div>
+
+<div class="card">
+    <h2>About you</h2>
+    <div class="fgrid">
+        <label class="f full"><span>Short bio</span>
+            <textarea name="bio"
+                placeholder="Tell potential roommates a little about yourself and what you are looking for...">{{ data.get('bio') or '' }}</textarea>
+        </label>
+    </div>
+</div>
+{% endmacro %}

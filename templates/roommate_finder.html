@@ -1,0 +1,310 @@
+{% extends "base.html" %} {% block title %}Find a roommate{% endblock %} {%
+block page_title %}Find your roommate.{% endblock %} {% block page_sub %}
+<p class="page-sub">
+  Compare preferences, budgets and locations, then connect with people looking
+  for a place to share.
+</p>
+{% endblock %} {% block head %}
+<style>
+  .rm-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 20px;
+  }
+  .rm-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+  .rm-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 26px 50px rgba(30, 79, 163, 0.2);
+  }
+  .rm-card .avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+  .rm-card .bio {
+    min-height: 66px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .rm-card .links {
+    margin-top: auto;
+    flex-direction: column;
+  }
+  @media (min-width: 700px) {
+    .rm-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1000px) {
+    .rm-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+{% endblock %} {% block hero_extra %}
+<form class="search" id="searchForm" role="search">
+  <svg class="i" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-4-4" />
+  </svg>
+  <input
+    type="search"
+    id="searchInput"
+    aria-label="Search by name, campus or location"
+    placeholder="Search by name, campus or location..."
+  />
+  <button class="go" type="submit" aria-label="Search">
+    <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+  </button>
+</form>
+
+<div class="label">Your profile</div>
+<div class="grid">
+  {% if my_profile %}
+  <a class="tile" href="{{ url_for('edit_roommate_profile') }}">
+    <span class="ico"
+      ><svg class="i" viewBox="0 0 24 24">
+        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg
+    ></span>
+    <strong>Edit my profile</strong><small>Update your details</small>
+  </a>
+  <form method="post" action="{{ url_for('toggle_roommate_profile') }}">
+    <button class="tile" type="submit">
+      <span class="ico"
+        ><svg class="i" viewBox="0 0 24 24">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+          <circle cx="12" cy="12" r="3" /></svg
+      ></span>
+      <strong
+        >{{ 'Hide my profile' if my_profile.is_active else 'Publish my profile'
+        }}</strong
+      >
+      <small
+        >{{ 'Visible to other students' if my_profile.is_active else 'Currently
+        hidden' }}</small
+      >
+    </button>
+  </form>
+  {% elif current_user.role == 'student' %}
+  <a class="tile" href="{{ url_for('create_roommate_profile') }}">
+    <span class="ico"
+      ><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg
+    ></span>
+    <strong>Create my profile</strong><small>Let others find you</small>
+  </a>
+  {% else %}
+  <div class="tile">
+    <span class="ico"
+      ><svg class="i" viewBox="0 0 24 24">
+        <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /></svg
+    ></span>
+    <strong>Browsing as admin</strong
+    ><small>Only students create profiles</small>
+  </div>
+  {% endif %}
+</div>
+
+<div class="label">Refine your search</div>
+<div class="filters">
+  <label class="field"
+    ><span>Accommodation type</span>
+    <select id="typeFilter">
+      <option value="">Any type</option>
+      <option value="single room">Single Room</option>
+      <option value="bedsitter">Bedsitter</option>
+      <option value="apartment">Apartment</option>
+      <option value="house">House</option>
+      <option value="hostel">Hostel</option>
+    </select>
+  </label>
+  <label class="field"
+    ><span>Budget</span>
+    <select id="budgetFilter">
+      <option value="">Any budget</option>
+      <option value="5000">Up to KSh 5,000</option>
+      <option value="8000">Up to KSh 8,000</option>
+      <option value="10000">Up to KSh 10,000</option>
+      <option value="15000">Up to KSh 15,000</option>
+    </select>
+  </label>
+  <label class="field"
+    ><span>Sort by</span>
+    <select id="sortFilter">
+      <option value="">Newest first</option>
+      <option value="low">Budget: low to high</option>
+      <option value="high">Budget: high to low</option>
+    </select>
+  </label>
+  <button class="ghost" type="button" id="clearBtn">Clear filters</button>
+</div>
+{% endblock %} {% block content %}
+<h2 class="sec-title" style="margin-top: 0">Available roommates</h2>
+<p class="count" id="countText">
+  {{ roommates|length }} {{ 'person' if roommates|length == 1 else 'people' }}
+  looking for a roommate
+</p>
+
+{% if roommates %}
+<div class="rm-grid" id="roommatesGrid">
+  {% for roommate in roommates %}
+  <article
+    class="card rm-card roommate-card"
+    data-name="{{ roommate.full_name|lower }}"
+    data-campus="{{ (roommate.campus or '')|lower }}"
+    data-location="{{ (roommate.preferred_location or '')|lower }}"
+    data-type="{{ (roommate.accommodation_type or '')|lower }}"
+    data-budget="{{ roommate.budget_max or 0 }}"
+  >
+    <div class="who">
+      <span class="avatar">
+        {% if roommate.profile_image %}
+        <img
+          src="{{ url_for('static', filename='uploads/' ~ roommate.profile_image) }}"
+          alt="{{ roommate.full_name }}"
+        />
+        {% else %} {{ roommate.full_name[0]|upper }} {% endif %}
+      </span>
+      <div>
+        <strong>{{ roommate.full_name }}</strong>
+        <p class="muted">{{ roommate.campus or 'Campus not specified' }}</p>
+      </div>
+    </div>
+
+    <div class="tags">
+      {% if roommate.preferred_location %}<span class="tag"
+        >{{ roommate.preferred_location }}</span
+      >{% endif %} {% if roommate.budget_min or roommate.budget_max %}
+      <span class="tag"
+        >KSh {% if roommate.budget_min %}{{
+        "{:,.0f}".format(roommate.budget_min) }}{% endif %}{% if
+        roommate.budget_min and roommate.budget_max %} – {% endif %}{% if
+        roommate.budget_max %}{{ "{:,.0f}".format(roommate.budget_max) }}{%
+        endif %}</span
+      >
+      {% endif %} {% if roommate.accommodation_type %}<span class="tag"
+        >{{ roommate.accommodation_type }}</span
+      >{% endif %}
+    </div>
+
+    <p class="bio">
+      {% if roommate.bio %}{{ roommate.bio[:150] }}{% if roommate.bio|length >
+      150 %}...{% endif %}{% else %}This person has not added a bio yet.{% endif
+      %}
+    </p>
+
+    <div class="links">
+      <a
+        class="btn block"
+        href="{{ url_for('roommate_profile', profile_id=roommate.id) }}"
+        >View profile</a
+      >
+      {% if roommate.whatsapp_phone %}
+      <a
+        class="btn good block"
+        href="https://wa.me/{{ roommate.whatsapp_phone }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Message on WhatsApp</a
+      >
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<div class="empty" id="noMatch" hidden style="margin-top: 18px">
+  No roommates match your search. Try different words or clear the filters.
+</div>
+
+{% else %}
+<div class="empty" style="margin-top: 18px">
+  <strong>No roommate profiles yet</strong>
+  <p style="margin: 6px 0 16px">
+    Be one of the first people to create a roommate profile.
+  </p>
+  {% if not my_profile and current_user.role == 'student' %}
+  <a class="btn" href="{{ url_for('create_roommate_profile') }}"
+    >Create my profile</a
+  >
+  {% endif %}
+</div>
+{% endif %} {% endblock %} {% block scripts %}
+<script>
+  var grid = document.getElementById("roommatesGrid");
+  var cards = Array.prototype.slice.call(
+    document.querySelectorAll(".roommate-card"),
+  );
+  var originalOrder = cards.slice();
+  var searchInput = document.getElementById("searchInput");
+  var typeFilter = document.getElementById("typeFilter");
+  var budgetFilter = document.getElementById("budgetFilter");
+  var sortFilter = document.getElementById("sortFilter");
+  var noMatch = document.getElementById("noMatch");
+  var countText = document.getElementById("countText");
+
+  function applyFilters() {
+    var q = searchInput.value.toLowerCase().trim();
+    var type = typeFilter.value.toLowerCase();
+    var budget = budgetFilter.value;
+    var shown = 0;
+
+    cards.forEach(function (card) {
+      var maxBudget = parseFloat(card.dataset.budget || "0");
+      var ok =
+        (!q ||
+          (card.dataset.name || "").indexOf(q) !== -1 ||
+          (card.dataset.campus || "").indexOf(q) !== -1 ||
+          (card.dataset.location || "").indexOf(q) !== -1) &&
+        (!type || (card.dataset.type || "").indexOf(type) !== -1) &&
+        (!budget || maxBudget <= parseFloat(budget));
+      card.style.display = ok ? "" : "none";
+      if (ok) shown++;
+    });
+
+    if (grid) {
+      var ordered = sortFilter.value
+        ? cards.slice().sort(function (a, b) {
+            var d = parseFloat(a.dataset.budget) - parseFloat(b.dataset.budget);
+            return sortFilter.value === "low" ? d : -d;
+          })
+        : originalOrder;
+      ordered.forEach(function (c) {
+        grid.appendChild(c);
+      });
+    }
+
+    countText.textContent =
+      shown + (shown === 1 ? " person" : " people") + " looking for a roommate";
+    if (noMatch) noMatch.hidden = shown !== 0;
+  }
+
+  [searchInput, typeFilter, budgetFilter, sortFilter].forEach(function (el) {
+    el.addEventListener("input", applyFilters);
+  });
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      applyFilters();
+      document
+        .getElementById("countText")
+        .scrollIntoView({ behavior: "smooth" });
+    });
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    searchInput.value = "";
+    typeFilter.value = "";
+    budgetFilter.value = "";
+    sortFilter.value = "";
+    applyFilters();
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin console | CivicNest Africa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+:root{--blue:#1E4FA3;--blue2:#2D63C8;--navy:#0A2260;--tint:#E1EBFA;--bg:#F3F7FD;--line:#D9E3F3;--ink:#14213D;--muted:#55627A;--ok:#0F7A55;--warn:#9A6700;--bad:#B42318}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--blue);text-decoration:none;font-weight:600}
+a:hover{text-decoration:underline}
+button,input,select{font-family:inherit}
+:focus-visible{outline:3px solid #9DC0FF;outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+
+.head{padding:26px 0 22px;color:#fff;background:linear-gradient(135deg,#0A2260,#1E4FA3)}
+.head .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:'Fraunces',serif;font-weight:600;font-size:26px}
+.brand small{display:block;margin-top:4px;font:600 10px 'DM Sans',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.head h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,4vw,36px)}
+
+main{padding-bottom:60px}
+.flash{margin-top:18px;padding:12px 16px;border-radius:12px;font-size:14px;border:1px solid transparent}
+.flash.success{background:#EAF7EF;color:#1F6B42;border-color:#CCEBD7}
+.flash.error,.flash.danger{background:#FCEEEE;color:#9C3333;border-color:#F3D4D4}
+.flash.info{background:#E8F0FC;color:var(--blue);border-color:#CFDCF3}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:22px}
+.stat{padding:16px;background:#fff;border:1px solid var(--line);border-radius:16px}
+.stat strong{display:block;font-size:28px;font-weight:700;color:var(--navy)}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.alert strong{color:var(--bad)}
+
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;margin:22px -20px 0;padding:10px 20px;overflow-x:auto;background:rgba(243,247,253,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.tabs a{flex:none;display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border:1px solid var(--line);border-radius:21px;background:#fff;color:var(--navy);font-size:14px}
+.tabs a:hover{background:var(--tint);text-decoration:none}
+
+section{scroll-margin-top:70px;margin-top:30px}
+section > h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--navy)}
+section > p.sub{margin:4px 0 14px;color:var(--muted);font-size:14px}
+.list{display:grid;gap:12px;margin-top:14px}
+.card{padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(20,33,61,.04),0 8px 22px rgba(30,79,163,.06)}
+.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.item h3{font-size:17px;font-weight:600}
+.meta{margin-top:3px;font-size:13px;color:var(--muted);line-height:1.5}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:14px}
+
+.pill{flex:none;display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--tint);color:#2B4A82}
+.st-active,.st-resolved,.pill.ok{background:#E3F4EB;color:var(--ok)}
+.st-pending,.st-reviewed{background:#FFF3D6;color:var(--warn)}
+.st-rejected,.st-removed,.st-dismissed,.pill.bad{background:#FCE4E2;color:var(--bad)}
+.st-unavailable{background:#ECEFF4;color:var(--muted)}
+
+.actions{display:grid;gap:10px;margin-top:14px}
+form.inline{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+select,input[type=text]{min-height:44px;padding:0 12px;border:1px solid #C9D6EC;border-radius:12px;font-size:15px;color:var(--ink);background:#fff}
+input[type=text]{flex:1;min-width:180px}
+.check{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:500}
+.check input{width:20px;height:20px;accent-color:var(--blue)}
+.btn{min-height:44px;padding:0 18px;border:0;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--blue2),#173f85)}
+.btn:hover{filter:brightness(1.08)}
+.btn.good{background:var(--ok)}
+.btn.danger{background:var(--bad)}
+.btn.ghost{color:var(--navy);background:#fff;border:1px solid #C9D6EC}
+
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--blue);min-height:36px;display:flex;align-items:center}
+details form{margin-top:10px}
+
+.empty{padding:26px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #9DB4DD;border-radius:18px;font-size:14px}
+
+@media(min-width:760px){.stats{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.stats{grid-template-columns:repeat(6,1fr)}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+{% include "_admin_bar.html" ignore missing %}
+
+<header class="head">
+  <div class="wrap">
+    <div class="brand">CivicNest<small>Africa</small></div>
+    <h1>Admin console</h1>
+  </div>
+</header>
+
+<main class="wrap">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if error %}
+  <div class="flash error" role="alert">The console could not load all its data. Check the terminal for the error.</div>
+  {% endif %}
+
+  {% if stats %}
+  <div class="stats">
+    <div class="stat"><strong>{{ stats.total_users }}</strong><span>Users</span></div>
+    <div class="stat"><strong>{{ stats.students }}</strong><span>Students</span></div>
+    <div class="stat"><strong>{{ stats.landlords }}</strong><span>Landlords</span></div>
+    <div class="stat"><strong>{{ stats.total_properties }}</strong><span>Listings</span></div>
+    <div class="stat {{ 'alert' if stats.pending_properties else '' }}"><strong>{{ stats.pending_properties }}</strong><span>Waiting for review</span></div>
+    <div class="stat {{ 'alert' if stats.pending_reports else '' }}"><strong>{{ stats.pending_reports }}</strong><span>Open reports</span></div>
+  </div>
+  {% endif %}
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#pending">Waiting for review</a>
+    <a href="#properties">All listings</a>
+    <a href="#users">Users</a>
+    <a href="#reports">Reports</a>
+  </nav>
+
+  <!-- WAITING FOR REVIEW -->
+  <section id="pending">
+    <h2>Waiting for review</h2>
+    <p class="sub">New and edited listings stay hidden until you approve them.</p>
+    <div class="list">
+      {% for p in properties if p.status == 'pending' %}
+      <article class="card item">
+        <div class="item-head">
+          <div>
+            <h3>{{ p.title }}</h3>
+            <p class="meta">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }}</p>
+            <p class="meta">{{ p.location }} · posted by {{ p.landlord_name }} · listed as {{ p.ownership_role or 'not stated' }}</p>
+          </div>
+          <span class="pill st-pending">Pending</span>
+        </div>
+        <div class="links">
+          <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">Preview listing</a>
+          {% if p.proof_doc %}
+          <a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">View proof of ownership</a>
+          {% else %}
+          <span class="meta">No proof uploaded</span>
+          {% endif %}
+        </div>
+        <div class="actions">
+          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+            <input type="hidden" name="status" value="active">
+            <input type="hidden" name="available" value="1">
+            <label class="check"><input type="checkbox" name="is_verified" value="1"> Mark as Verified</label>
+            <button class="btn good" type="submit">Approve</button>
+          </form>
+          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+            <input type="hidden" name="status" value="rejected">
+            <input type="hidden" name="available" value="0">
+            <input type="text" name="rejection_reason" maxlength="255" required placeholder="Reason shown to the landlord">
+            <button class="btn danger" type="submit">Reject</button>
+          </form>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty">Nothing is waiting for review.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ALL LISTINGS -->
+  <section id="properties">
+    <h2>All listings</h2>
+    <p class="sub">Change the status, availability or Verified badge of any listing.</p>
+    <div class="list">
+      {% for p in properties %}
+      <article class="card item">
+        <div class="item-head">
+          <div>
+            <h3>{{ p.title }}</h3>
+            <p class="meta">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }} · {{ p.location }}</p>
+            <p class="meta">By {{ p.landlord_name }}{% if p.created_at %} · {{ p.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+          </div>
+          <div>
+            <span class="pill st-{{ p.status }}">{{ p.status|title }}</span>
+            {% if p.is_verified %}<span class="pill ok">Verified</span>{% endif %}
+          </div>
+        </div>
+        <div class="links">
+          <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">View</a>
+          {% if p.proof_doc %}
+          <a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">Proof of ownership</a>
+          {% endif %}
+        </div>
+        <details>
+          <summary>Manage this listing</summary>
+          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+            <select name="status" aria-label="Status">
+              <option value="active" {{ 'selected' if p.status == 'active' else '' }}>Active</option>
+              <option value="pending" {{ 'selected' if p.status == 'pending' else '' }}>Pending</option>
+              <option value="unavailable" {{ 'selected' if p.status == 'unavailable' else '' }}>Unavailable</option>
+              <option value="removed" {{ 'selected' if p.status == 'removed' else '' }}>Removed</option>
+              <option value="rejected" {{ 'selected' if p.status == 'rejected' else '' }}>Rejected</option>
+            </select>
+            <select name="available" aria-label="Availability">
+              <option value="1" {{ 'selected' if p.available else '' }}>Available</option>
+              <option value="0" {{ '' if p.available else 'selected' }}>Not available</option>
+            </select>
+            <label class="check"><input type="checkbox" name="is_verified" value="1" {{ 'checked' if p.is_verified else '' }}> Verified</label>
+            <input type="text" name="rejection_reason" maxlength="255" placeholder="Reason (only used when rejecting)">
+            <button class="btn" type="submit">Save</button>
+          </form>
+        </details>
+      </article>
+      {% else %}
+      <div class="empty">There are no listings yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section id="users">
+    <h2>Users</h2>
+    <p class="sub">Verify landlords after you have checked their details, and change account types.</p>
+    <div class="list">
+      {% for u in users %}
+      <article class="card item">
+        <div class="item-head">
+          <div>
+            <h3>{{ u.full_name }}</h3>
+            <p class="meta">{{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+          </div>
+          <div>
+            <span class="pill">{{ u.role|title }}</span>
+            {% if u.is_verified %}<span class="pill ok">Verified</span>{% endif %}
+          </div>
+        </div>
+        {% if u.role == 'admin' or u.id == current_user.id %}
+        <p class="meta" style="margin-top:10px">Administrator accounts are protected and cannot be changed here.</p>
+        {% else %}
+        <div class="actions">
+          <form class="inline" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
+            <select name="role" aria-label="Account type">
+              <option value="student" {{ 'selected' if u.role == 'student' else '' }}>Student</option>
+              <option value="landlord" {{ 'selected' if u.role == 'landlord' else '' }}>Landlord</option>
+            </select>
+            <button class="btn ghost" type="submit">Change type</button>
+          </form>
+          <form class="inline" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
+            <input type="hidden" name="is_verified" value="{{ '0' if u.is_verified else '1' }}">
+            <button class="btn {{ 'ghost' if u.is_verified else 'good' }}" type="submit">{{ 'Remove verification' if u.is_verified else 'Verify this user' }}</button>
+          </form>
+        </div>
+        {% endif %}
+      </article>
+      {% else %}
+      <div class="empty">There are no users yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section id="reports">
+    <h2>Reports</h2>
+    <p class="sub">Listings that people have reported.</p>
+    <div class="list">
+      {% for r in reports %}
+      <article class="card item">
+        <div class="item-head">
+          <div>
+            <h3>{{ r.reason }}</h3>
+            <p class="meta">On <a href="{{ url_for('property_details', property_id=r.property_id) }}" target="_blank" rel="noopener">{{ r.property_title }}</a> · reported by {{ r.reporter_name }}{% if r.created_at %} · {{ r.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+            {% if r.details %}<p class="meta">{{ r.details }}</p>{% endif %}
+          </div>
+          <span class="pill st-{{ r.status }}">{{ r.status|title }}</span>
+        </div>
+        <div class="actions">
+          <form class="inline" method="post" action="{{ url_for('admin_update_report_status', report_id=r.id) }}">
+            <select name="status" aria-label="Report status">
+              <option value="pending" {{ 'selected' if r.status == 'pending' else '' }}>Pending</option>
+              <option value="reviewed" {{ 'selected' if r.status == 'reviewed' else '' }}>Reviewed</option>
+              <option value="resolved" {{ 'selected' if r.status == 'resolved' else '' }}>Resolved</option>
+              <option value="dismissed" {{ 'selected' if r.status == 'dismissed' else '' }}>Dismissed</option>
+            </select>
+            <button class="btn ghost" type="submit">Update</button>
+          </form>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty">No reports. Good news.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<header class="cn-site-header">
+  <div class="cn-header-inner">
+    <nav class="cn-primary-nav" aria-label="Main navigation">
+      <a href="{{ url_for('rent_page') }}" {% if request.endpoint == 'rent_page' %}aria-current="page"{% endif %}>Rent</a>
+      <a href="{{ url_for('buy_page') }}" {% if request.endpoint == 'buy_page' %}aria-current="page"{% endif %}>Buy</a>
+      <a href="{{ url_for('sell_page') }}" {% if request.endpoint == 'sell_page' %}aria-current="page"{% endif %}>Sell</a>
+      <a href="{{ url_for('invest_page') }}" {% if request.endpoint == 'invest_page' %}aria-current="page"{% endif %}>Invest</a>
+      <a href="{{ url_for('roommate_finder') }}" {% if request.endpoint in ['roommate_finder', 'roommate_profile', 'roommate_requests', 'create_roommate_profile', 'edit_roommate_profile'] %}aria-current="page"{% endif %}>Roommate Finder</a>
+    </nav>
+
+    <div class="cn-header-actions">
+      <a class="cn-saved-link" href="{{ url_for('home') }}#properties">
+        <span aria-hidden="true">♡</span>
+        Saved
+        <span id="savedCount">0</span>
+      </a>
+      {% if current_user.is_authenticated %}
+      <a class="cn-account-link" href="{{ url_for('dashboard') }}">My account</a>
+      {% if current_user.role == 'admin' %}
+      <a class="cn-account-link" href="{{ url_for('admin_dashboard') }}">Admin</a>
+      {% endif %}
+      <a class="cn-header-cta" href="{{ url_for('logout') }}">Sign out</a>
+      {% else %}
+      <a class="cn-account-link" href="{{ url_for('login') }}">Log in</a>
+      <a class="cn-header-cta" href="{{ url_for('register') }}">Get started</a>
+      {% endif %}
+      <button
+        class="cn-menu-toggle"
+        type="button"
+        aria-label="Open site navigation"
+        aria-expanded="false"
+        aria-controls="cn-site-drawer"
+      >
+        <span></span>
+        <span></span>
+        <span class="cn-visually-hidden">Menu</span>
+      </button>
+    </div>
+
+    <a class="cn-brand" href="{{ url_for('home') }}" aria-label="Civic Nest home">
+      <span class="cn-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" focusable="false">
+          <path d="M6.5 22.3 24 7.8l17.5 14.5" />
+          <path d="M11.5 20.5v20h25v-20M20 40.5V28h8v12.5" />
+          <path d="M31.5 14v-4h5v8" />
+        </svg>
+      </span>
+      <span class="cn-brand-copy">
+        <strong>Civic Nest</strong>
+        <small>FIND YOUR PLACE</small>
+      </span>
+    </a>
+  </div>
+</header>
+
+<div class="cn-drawer-backdrop" data-cn-close-drawer hidden></div>
+<aside
+  class="cn-site-drawer"
+  id="cn-site-drawer"
+  aria-label="Site navigation"
+  aria-hidden="true"
+  inert
+>
+  <div class="cn-drawer-heading">
+    <div>
+      <span class="cn-drawer-brand">
+        <span class="cn-drawer-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false">
+            <path d="M6.5 22.3 24 7.8l17.5 14.5" />
+            <path d="M11.5 20.5v20h25v-20M20 40.5V28h8v12.5" />
+            <path d="M31.5 14v-4h5v8" />
+          </svg>
+        </span>
+        <span>Civic Nest</span>
+      </span>
+      <h2>Explore</h2>
+    </div>
+    <button class="cn-drawer-close" type="button" aria-label="Close site navigation">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <nav class="cn-drawer-nav" aria-label="All pages">
+    <a href="{{ url_for('home') }}">Home <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('rent_page') }}" {% if request.endpoint == 'rent_page' %}aria-current="page"{% endif %}>Rent <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('rent_page', category='hostels') }}">Student hostels <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('rent_page', category='rentals') }}">Homes &amp; rentals <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('buy_page') }}" {% if request.endpoint == 'buy_page' %}aria-current="page"{% endif %}>Buy <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('sell_page') }}" {% if request.endpoint == 'sell_page' %}aria-current="page"{% endif %}>Sell / List property <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('invest_page') }}" {% if request.endpoint == 'invest_page' %}aria-current="page"{% endif %}>Invest <span aria-hidden="true">→</span></a>
+    <a href="{{ url_for('roommate_finder') }}" {% if request.endpoint in ['roommate_finder', 'roommate_profile', 'roommate_requests', 'create_roommate_profile', 'edit_roommate_profile'] %}aria-current="page"{% endif %}>Roommate finder <span aria-hidden="true">→</span></a>
+  </nav>
+  <div class="cn-drawer-footer">
+    <a class="cn-drawer-secondary" href="{{ url_for('home') }}#properties">Saved properties</a>
+    {% if current_user.is_authenticated %}
+    <a class="cn-drawer-secondary" href="{{ url_for('dashboard') }}">My account</a>
+    {% if current_user.role == 'admin' %}
+    <a class="cn-drawer-secondary" href="{{ url_for('admin_dashboard') }}">Admin console</a>
+    {% endif %}
+    <a class="cn-header-cta" href="{{ url_for('logout') }}">Sign out</a>
+    {% else %}
+    <a class="cn-drawer-secondary" href="{{ url_for('login') }}">Log in</a>
+    <a class="cn-header-cta" href="{{ url_for('register') }}">Create account</a>
+    {% endif %}
+  </div>
+</aside>
+<script src="{{ url_for('static', filename='civicnest-header.js') }}" defer></script>

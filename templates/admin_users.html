@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+{% block stage_class %}compact{% endblock %}
+{% block page_title %}Manage users.{% endblock %}
+{% block page_sub %}
+<p class="page-sub">Create accounts, reset passwords, verify, suspend or delete tenants and landlords.</p>
+{% endblock %}
+{% block hero_extra %}
+<a class="btn light" href="{{ url_for('admin_create_user') }}">Create an account</a>
+{% endblock %}
+
+{% block content %}
+<form class="card" method="get" action="{{ url_for('admin_users') }}" style="margin-bottom:16px">
+  <label class="f"><span>Search by name, email or phone</span>
+    <input type="search" name="q" value="{{ q }}" placeholder="e.g. mary or gmail.com">
+  </label>
+  <button class="btn" type="submit" style="margin-top:12px">Search</button>
+</form>
+
+<p class="muted" style="margin-bottom:14px">{{ users|length }} {{ 'account' if users|length == 1 else 'accounts' }}{% if q %} matching "{{ q }}"{% endif %}.</p>
+
+<div class="stack">
+  {% for u in users %}
+  <article class="card">
+    <div class="row-head">
+      <div>
+        <h3>{{ u.full_name }}</h3>
+        <p class="muted">{{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+      </div>
+      <div>
+        <span class="pill">{{ 'Tenant' if u.role == 'student' else u.role|title }}</span>
+        {% if u.is_verified %}<span class="pill ok">Verified</span>{% endif %}
+        {% if not u.is_active %}<span class="pill st-rejected">Suspended</span>{% endif %}
+      </div>
+    </div>
+
+    {% if u.role == 'admin' %}
+    <p class="muted" style="margin-top:10px">Administrator accounts are protected. Use create_admin.py to change them.</p>
+    {% else %}
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue);min-height:36px">Manage this account</summary>
+      <div class="stack" style="margin-top:12px">
+
+        <form class="qty" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
+          <label>Account type
+            <select name="role" style="min-height:44px;border:1px solid #C9D6EC;border-radius:12px;padding:0 10px">
+              <option value="student" {{ 'selected' if u.role == 'student' else '' }}>Tenant</option>
+              <option value="landlord" {{ 'selected' if u.role == 'landlord' else '' }}>Landlord</option>
+            </select>
+          </label>
+          <button class="btn ghost" type="submit">Change type</button>
+        </form>
+
+        <form class="qty" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
+          <input type="hidden" name="is_verified" value="{{ '0' if u.is_verified else '1' }}">
+          <button class="btn {{ 'ghost' if u.is_verified else 'good' }}" type="submit">{{ 'Remove verification' if u.is_verified else 'Verify this user' }}</button>
+        </form>
+
+        <form class="qty" method="post" action="{{ url_for('admin_reset_password', user_id=u.id) }}">
+          <label>New password
+            <input type="text" name="new_password" minlength="8" required placeholder="8+ characters" style="width:220px">
+          </label>
+          <button class="btn ghost" type="submit">Reset password</button>
+        </form>
+
+        <form class="qty" method="post" action="{{ url_for('admin_set_user_active', user_id=u.id) }}">
+          <input type="hidden" name="is_active" value="{{ '0' if u.is_active else '1' }}">
+          <button class="btn {{ 'ghost' if u.is_active else 'good' }}" type="submit">{{ 'Suspend account' if u.is_active else 'Reactivate account' }}</button>
+        </form>
+
+        <form class="qty" method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all its listings permanently?');">
+          <button class="btn danger" type="submit">Delete account</button>
+        </form>
+
+      </div>
+    </details>
+    {% endif %}
+  </article>
+  {% else %}
+  <div class="empty">No accounts found.</div>
+  {% endfor %}
+</div>
+{% endblock %}

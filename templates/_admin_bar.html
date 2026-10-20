@@ -1,0 +1,75 @@
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+<style>
+  .adminbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #0a2260;
+    color: #fff;
+    font:
+      600 13px/1 "DM Sans",
+      system-ui,
+      sans-serif;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .adminbar-label {
+    margin-right: 6px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.16);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .adminbar a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 18px;
+    color: #cfdcf5;
+    text-decoration: none;
+  }
+  .adminbar a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+  .adminbar a.on {
+    background: #fff;
+    color: #0a2260;
+  }
+  .adminbar .spacer {
+    flex: 1;
+  }
+  .adminbar a:focus-visible {
+    outline: 3px solid #9dc0ff;
+    outline-offset: 2px;
+  }
+</style>
+<nav class="adminbar" aria-label="Switch view">
+  <span class="adminbar-label">Admin</span>
+  <a
+    class="{{ 'on' if request.path.startswith('/admin') else '' }}"
+    href="{{ url_for('admin_dashboard') }}"
+    >Admin console</a
+  >
+  <a
+    class="{{ 'on' if request.path.startswith('/landlord') else '' }}"
+    href="{{ url_for('landlord_dashboard') }}"
+    >Landlord side</a
+  >
+  <a
+    class="{{ 'on' if not (request.path.startswith('/admin') or request.path.startswith('/landlord')) else '' }}"
+    href="{{ url_for('home') }}"
+    >Tenant side</a
+  >
+  <a href="{{ url_for('roommate_finder') }}">Roommates</a>
+  <a href="{{ url_for('admin_schools') }}">Schools</a>
+  <a href="{{ url_for('admin_hospitals') }}">Facilities</a>
+  <a href="{{ url_for('admin_users') }}">Users</a>
+  <span class="spacer"></span>
+  <a href="{{ url_for('logout') }}">Log out</a>
+</nav>
+{% endif %}

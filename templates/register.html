@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Create Account | CivicNest Africa</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --blue: #1e4fa3;
+        --blue2: #2d63c8;
+        --navy: #0a2260;
+        --tint: #e1ebfa;
+        --bg: #f3f7fd;
+        --line: #d9e3f3;
+        --ink: #14213d;
+        --muted: #55627a;
+        --white: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: "DM Sans", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 8% 15%,
+            rgba(45, 99, 200, 0.08),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 92% 85%,
+            rgba(30, 79, 163, 0.07),
+            transparent 30%
+          ),
+          var(--bg);
+      }
+
+      /* PAGE */
+
+      .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 35px 18px;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 540px;
+        padding: 46px 52px;
+        background: var(--white);
+        border: 1px solid rgba(217, 227, 243, 0.9);
+        border-radius: 24px;
+        box-shadow: 0 22px 65px rgba(10, 34, 96, 0.1);
+      }
+
+      /* CENTERED BRAND */
+
+      .auth-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 35px;
+      }
+
+      .auth-logo {
+        width: 76px;
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 17px;
+        border: 1px solid var(--line);
+        border-radius: 23px;
+        background: var(--tint);
+        box-shadow: 0 8px 22px rgba(30, 79, 163, 0.08);
+      }
+
+      .auth-logo svg {
+        width: 45px;
+        height: 45px;
+      }
+
+      .auth-brand-name {
+        color: var(--navy);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 33px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -0.8px;
+      }
+
+      .auth-brand-name span {
+        color: var(--blue);
+      }
+
+      .auth-brand-tagline {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+      }
+
+      .brand-line {
+        width: 48px;
+        height: 3px;
+        margin-top: 18px;
+        border-radius: 10px;
+        background: var(--blue2);
+      }
+
+      /* HEADING */
+
+      .heading {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin-bottom: 10px;
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .heading h1 {
+        margin-bottom: 10px;
+        color: var(--navy);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 35px;
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .heading p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      /* FLASH MESSAGES */
+
+      .flash {
+        margin-bottom: 17px;
+        padding: 12px 14px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .flash.success {
+        color: #247044;
+        background: #eaf7ef;
+        border-color: #ccebd7;
+      }
+
+      .flash.error,
+      .flash.danger {
+        color: #9c3333;
+        background: #fceeee;
+        border-color: #f3d4d4;
+      }
+
+      .flash.warning {
+        color: #806100;
+        background: #fff7e4;
+        border-color: #f0e1b6;
+      }
+
+      .flash.info {
+        color: #1e4fa3;
+        background: #e8f0fc;
+        border-color: #cfdcf3;
+      }
+
+      /* FORM */
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .login-card input[type="text"],
+      .login-card input[type="email"],
+      .login-card input[type="tel"],
+      .login-card input[type="password"] {
+        display: block;
+        width: 100%;
+        height: 51px;
+        padding: 0 15px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        outline: none;
+        background: #fbfdff;
+        color: var(--ink);
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        transition: 0.2s ease;
+      }
+
+      .login-card input::placeholder {
+        color: #8a96ab;
+      }
+
+      .login-card input:focus {
+        border-color: var(--blue2);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(45, 99, 200, 0.1);
+      }
+
+      .hint {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      /* ACCOUNT TYPE */
+
+      .account-type {
+        min-width: 0;
+        margin: 4px 0 24px;
+        border: 0;
+      }
+
+      .account-type legend {
+        margin-bottom: 10px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .role-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .role-option {
+        position: relative;
+        display: block;
+        cursor: pointer;
+      }
+
+      .role-option input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+
+      .role-content {
+        display: flex;
+        min-height: 82px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fbfdff;
+        transition: 0.2s ease;
+      }
+
+      .role-title {
+        color: var(--navy);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .role-description {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .role-option input:checked + .role-content {
+        border-color: var(--blue2);
+        background: var(--tint);
+        box-shadow: 0 0 0 3px rgba(45, 99, 200, 0.1);
+      }
+
+      .role-option input:focus-visible + .role-content {
+        outline: 3px solid rgba(45, 99, 200, 0.35);
+        outline-offset: 3px;
+      }
+
+      /* BUTTON */
+
+      .submit-btn {
+        width: 100%;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 7px;
+        padding: 13px 18px;
+        border: none;
+        border-radius: 10px;
+        background: var(--blue);
+        color: var(--white);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .submit-btn:hover {
+        background: var(--blue2);
+        box-shadow: 0 8px 20px rgba(30, 79, 163, 0.18);
+        transform: translateY(-1px);
+      }
+
+      .submit-btn:focus-visible,
+      .register-text a:focus-visible {
+        outline: 3px solid rgba(45, 99, 200, 0.35);
+        outline-offset: 3px;
+      }
+
+      .button-arrow {
+        font-size: 18px;
+        transition: transform 0.2s ease;
+      }
+
+      .submit-btn:hover .button-arrow {
+        transform: translateX(3px);
+      }
+
+      /* DIVIDER */
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin: 27px 0 23px;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .divider span {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+      }
+
+      /* SIGN IN LINK */
+
+      .register-text {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.9;
+        text-align: center;
+      }
+
+      .register-text a {
+        display: inline-block;
+        margin-left: 3px;
+        color: var(--blue);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .register-text a:hover {
+        color: var(--blue2);
+        text-decoration: underline;
+      }
+
+      /* SECURITY NOTE */
+
+      .security-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #edf1f8;
+        color: #7b879c;
+        font-size: 10px;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      .security-icon {
+        color: var(--blue);
+        font-size: 13px;
+      }
+
+      /* MOBILE */
+
+      @media (max-width: 600px) {
+        .login-page {
+          padding: 22px 14px;
+        }
+
+        .login-card {
+          max-width: 460px;
+          padding: 34px 24px;
+          border-radius: 20px;
+        }
+
+        .auth-brand {
+          margin-bottom: 29px;
+        }
+
+        .auth-logo {
+          width: 65px;
+          height: 65px;
+          border-radius: 19px;
+        }
+
+        .auth-logo svg {
+          width: 39px;
+          height: 39px;
+        }
+
+        .auth-brand-name {
+          font-size: 28px;
+        }
+
+        .auth-brand-tagline {
+          font-size: 9px;
+          letter-spacing: 2px;
+        }
+
+        .heading h1 {
+          font-size: 30px;
+        }
+
+        .role-options {
+          grid-template-columns: 1fr;
+        }
+
+        .role-content {
+          min-height: 72px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .login-card {
+          padding: 29px 19px;
+        }
+
+        .auth-brand-name {
+          font-size: 25px;
+        }
+
+        .heading h1 {
+          font-size: 27px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="login-page">
+      <section class="login-card" aria-labelledby="register-heading">
+        <!-- CENTERED CIVICNEST AFRICA BRAND -->
+        <div class="auth-brand">
+          <div class="auth-logo" aria-hidden="true">
+            <svg
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22L24 7L42 22"
+                stroke="#1e4fa3"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M11 20V40H37V20"
+                stroke="#1e4fa3"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M20 40V28H28V40"
+                stroke="#1e4fa3"
+                stroke-width="3"
+                stroke-linejoin="round"
+              />
+              <circle cx="36" cy="10" r="4" fill="#2d63c8" />
+            </svg>
+          </div>
+
+          <div class="auth-brand-name">CivicNest <span>Africa</span></div>
+
+          <div class="auth-brand-tagline">Find your place</div>
+
+          <div class="brand-line"></div>
+        </div>
+
+        <!-- REGISTER HEADING -->
+        <div class="heading">
+          <div class="eyebrow">Your next chapter starts here</div>
+
+          <h1 id="register-heading">
+            {% if selected_role == "landlord" %} Create a landlord account {%
+            else %} Create your account {% endif %}
+          </h1>
+
+          {% if selected_role == "landlord" %}
+          <p>
+            Register as a landlord to list your properties once your account is
+            approved.
+          </p>
+          {% else %}
+          <p>
+            Join CivicNest Africa to find a place that feels like home, or to
+            list your property.
+          </p>
+          {% endif %}
+        </div>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="flash {{ category }}" role="alert">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+
+        <!-- REGISTER FORM -->
+        <form
+          method="POST"
+          action="{{ url_for('register') }}"
+          id="registerForm"
+        >
+          <div class="form-group">
+            <label for="full_name">Full name</label>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              placeholder="Enter your full name"
+              required
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone number</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="e.g. 0712 345 678"
+              required
+              autocomplete="tel"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              required
+              minlength="8"
+              autocomplete="new-password"
+            />
+            <div class="hint">Use at least 8 characters.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirm password</label>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              placeholder="Enter your password again"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+
+          <fieldset class="account-type">
+            <legend>Choose your account type</legend>
+
+            <div class="role-options">
+              <label class="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="tenant"
+                  id="role_tenant"
+                  checked
+                />
+                <span class="role-content">
+                  <span class="role-title">Looking for a home</span>
+                  <span class="role-description">
+                    Browse properties and find your next place.
+                  </span>
+                </span>
+              </label>
+
+              <label class="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="landlord"
+                  id="role_landlord"
+                />
+                <span class="role-content">
+                  <span class="role-title">Property owner</span>
+                  <span class="role-description">
+                    List and manage your properties.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="submit-btn">
+            Create Account
+            <span class="button-arrow" aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <!-- SIGN IN LINK -->
+        <div class="divider">
+          <span>CIVICNEST AFRICA</span>
+        </div>
+
+        <div class="register-text">
+          Already have an account? {% if selected_role == "landlord" %}
+          <a href="{{ url_for('login', role='landlord') }}"
+            >Sign in as a landlord</a
+          >
+          {% else %}
+          <a href="{{ url_for('login') }}">Sign in</a>
+          {% endif %}
+        </div>
+
+        <!-- SECURITY NOTE -->
+        <div class="security-note">
+          <span class="security-icon" aria-hidden="true">◆</span>
+          Your account credentials are securely handled by CivicNest.
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Preselect the landlord option when arriving from "List a property"
+      if ("{{ selected_role }}" === "landlord") {
+        document.getElementById("role_landlord").checked = true;
+      }
+
+      // Check that both passwords match before submitting
+      const form = document.getElementById("registerForm");
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirm_password");
+
+      function checkMatch() {
+        confirmPassword.setCustomValidity(
+          confirmPassword.value && confirmPassword.value !== password.value
+            ? "Passwords do not match."
+            : "",
+        );
+      }
+      password.addEventListener("input", checkMatch);
+      confirmPassword.addEventListener("input", checkMatch);
+      form.addEventListener("submit", checkMatch);
+    </script>
+  </body>
+</html>

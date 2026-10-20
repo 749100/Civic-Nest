@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% from "_roommate_form.html" import fields %} {%
+block title %}Edit roommate profile{% endblock %} {% block stage_class
+%}compact{% endblock %} {% block page_title %}Edit your roommate profile.{%
+endblock %} {% block page_sub %}
+<p class="page-sub">
+  Keep your details up to date so the right people can reach you.
+</p>
+{% endblock %} {% block content %} {% set data = form if (form is defined and
+form) else profile %}
+<div class="rm-wrap">
+  <form method="post">
+    {{ fields(data) }}
+    <div class="form-actions">
+      <a class="btn ghost" href="{{ url_for('roommate_finder') }}">Cancel</a>
+      <button class="btn" type="submit">Save changes</button>
+    </div>
+  </form>
+
+  <div class="card" style="margin-top: 22px">
+    <h2 style="margin-bottom: 6px">Visibility</h2>
+    <p class="muted" style="margin-bottom: 14px">
+      Your profile is currently
+      <strong
+        >{{ 'visible to other students' if profile.is_active else 'hidden'
+        }}</strong
+      >.
+    </p>
+    <form method="post" action="{{ url_for('toggle_roommate_profile') }}">
+      <button class="btn ghost" type="submit">
+        {{ 'Hide my profile' if profile.is_active else 'Show my profile' }}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

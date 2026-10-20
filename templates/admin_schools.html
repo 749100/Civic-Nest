@@ -1,0 +1,59 @@
+{% extends "base.html" %} {% block title %}Manage schools{% endblock %} {% block
+stage_class %}compact{% endblock %} {% block page_title %}Manage schools.{%
+endblock %} {% block page_sub %}
+<p class="page-sub">
+  Add, edit, hide or delete the schools shown in the finder.
+</p>
+{% endblock %} {% block hero_extra %}
+<a class="btn light" href="{{ url_for('admin_school_form') }}">Add a school</a>
+{% endblock %} {% block content %}
+<p class="muted" style="margin-bottom: 14px">
+  {{ schools|length }} {{ 'school' if schools|length == 1 else 'schools' }} in
+  total.
+</p>
+
+<div class="stack">
+  {% for s in schools %}
+  <article class="card">
+    <div class="row-head">
+      <div>
+        <h3>{{ s.name }}</h3>
+        <p class="muted">
+          {{ level_labels.get(s.level, s.level) }} · {{ s.ownership|title }} ·
+          {{ s.town }}{% if s.website %} · {{ s.website_clicks }} {{ 'visit' if
+          s.website_clicks == 1 else 'visits' }} to website{% else %} ·
+          <strong>no website</strong>{% endif %}
+        </p>
+      </div>
+      <span class="pill {{ 'ok' if s.is_published else 'st-unavailable' }}"
+        >{{ 'Published' if s.is_published else 'Hidden' }}</span
+      >
+    </div>
+    <div class="links">
+      <a class="btn" href="{{ url_for('admin_school_form', school_id=s.id) }}"
+        >Edit</a
+      >
+      <a
+        class="btn ghost"
+        href="{{ url_for('school_details', school_id=s.id) }}"
+        >View page</a
+      >
+      <form
+        method="post"
+        action="{{ url_for('admin_delete_school', school_id=s.id) }}"
+        onsubmit="return confirm('Delete this school permanently?');"
+      >
+        <button class="btn danger" type="submit">Delete</button>
+      </form>
+    </div>
+  </article>
+  {% else %}
+  <div class="empty">
+    No schools yet.<br /><br />
+    <a class="btn" href="{{ url_for('admin_school_form') }}"
+      >Add the first school</a
+    >
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

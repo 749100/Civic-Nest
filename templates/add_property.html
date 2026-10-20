@@ -1,0 +1,1692 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='civicnest-header.css') }}"
+    />
+
+    <title>Add Property | Civic Nest</title>
+
+    <style>
+      :root {
+        --white: #ffffff;
+        --background: #f7f9fc;
+        --soft-blue: #eef5fa;
+        --light-blue: #dcecf6;
+
+        --blue: #155b86;
+        --blue-bright: #1677b8;
+
+        --navy: #092f49;
+        --deep-navy: #06263d;
+
+        --gold: #b79a68;
+
+        --text: #183b53;
+        --muted: #71889a;
+        --border: #dce6ed;
+
+        --success: #155b86;
+        --danger: #dc3545;
+        --warning: #d99400;
+
+        --shadow: 0 10px 30px rgba(9, 47, 73, 0.08);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: var(--background);
+        color: var(--text);
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+      }
+
+      /* =====================================================
+           NAVBAR
+      ===================================================== */
+
+      .topbar {
+        height: 78px;
+
+        background: rgba(255, 255, 255, 0.97);
+
+        border-bottom: 1px solid var(--border);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 5%;
+
+        position: sticky;
+        top: 0;
+
+        z-index: 1000;
+
+        box-shadow: 0 4px 20px rgba(9, 47, 73, 0.05);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 43px;
+        height: 43px;
+
+        border-radius: 50%;
+
+        background: var(--deep-navy);
+
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-family: Georgia, serif;
+        font-size: 15px;
+        font-weight: bold;
+
+        border: 2px solid var(--gold);
+      }
+
+      .brand-title {
+        font-family: Georgia, serif;
+
+        font-size: 17px;
+        font-weight: bold;
+
+        letter-spacing: 2px;
+
+        color: var(--navy);
+      }
+
+      .brand-subtitle {
+        font-size: 9px;
+
+        letter-spacing: 2px;
+
+        color: var(--gold);
+
+        margin-top: 3px;
+      }
+
+      .back-link {
+        color: var(--blue);
+
+        font-size: 14px;
+        font-weight: 600;
+
+        padding: 10px 15px;
+
+        border-radius: 8px;
+      }
+
+      .back-link:hover {
+        background: var(--soft-blue);
+      }
+
+      /* =====================================================
+           PAGE
+      ===================================================== */
+
+      .page {
+        width: 92%;
+        max-width: 1100px;
+
+        margin: auto;
+
+        padding: 42px 0 70px;
+      }
+
+      .page-heading {
+        margin-bottom: 28px;
+      }
+
+      .page-heading h1 {
+        font-family: Georgia, serif;
+
+        color: var(--navy);
+
+        font-size: clamp(28px, 4vw, 38px);
+
+        margin-bottom: 8px;
+      }
+
+      .page-heading p {
+        color: var(--muted);
+
+        font-size: 14px;
+
+        line-height: 1.6;
+      }
+
+      /* =====================================================
+           FORM
+      ===================================================== */
+
+      .form-card {
+        background: var(--white);
+
+        border: 1px solid var(--border);
+
+        border-radius: 15px;
+
+        box-shadow: var(--shadow);
+
+        overflow: hidden;
+
+        margin-bottom: 25px;
+      }
+
+      .form-section {
+        padding: 28px;
+
+        border-bottom: 1px solid var(--border);
+      }
+
+      .form-section:last-child {
+        border-bottom: none;
+      }
+
+      .section-heading {
+        margin-bottom: 22px;
+      }
+
+      .section-heading h2 {
+        font-family: Georgia, serif;
+
+        color: var(--navy);
+
+        font-size: 21px;
+
+        margin-bottom: 5px;
+      }
+
+      .section-heading p {
+        color: var(--muted);
+
+        font-size: 12px;
+      }
+
+      .form-grid {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 20px;
+      }
+
+      .form-group {
+        display: flex;
+
+        flex-direction: column;
+      }
+
+      .form-group.full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        font-size: 13px;
+
+        font-weight: bold;
+
+        color: var(--navy);
+
+        margin-bottom: 8px;
+      }
+
+      label span {
+        color: var(--danger);
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+
+        border: 1px solid var(--border);
+
+        background: #fff;
+
+        color: var(--text);
+
+        border-radius: 8px;
+
+        padding: 12px 13px;
+
+        font-size: 13px;
+
+        outline: none;
+
+        transition: 0.2s;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--blue-bright);
+
+        box-shadow: 0 0 0 3px rgba(22, 119, 184, 0.08);
+      }
+
+      textarea {
+        min-height: 135px;
+
+        resize: vertical;
+
+        line-height: 1.6;
+      }
+
+      .input-help {
+        font-size: 11px;
+
+        color: var(--muted);
+
+        margin-top: 6px;
+
+        line-height: 1.5;
+      }
+
+      /* =====================================================
+           AVAILABILITY
+      ===================================================== */
+
+      .availability-section {
+        background: #fbfdff;
+
+        border: 1px solid var(--light-blue);
+
+        border-radius: 12px;
+
+        padding: 20px;
+
+        margin-top: 5px;
+      }
+
+      .availability-intro {
+        display: flex;
+
+        align-items: flex-start;
+
+        gap: 12px;
+
+        margin-bottom: 18px;
+      }
+
+      .availability-icon {
+        width: 38px;
+        height: 38px;
+
+        flex-shrink: 0;
+
+        border-radius: 10px;
+
+        background: var(--light-blue);
+
+        color: var(--blue);
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        font-size: 18px;
+      }
+
+      .availability-intro h3 {
+        color: var(--navy);
+
+        font-size: 14px;
+
+        margin-bottom: 3px;
+      }
+
+      .availability-intro p {
+        color: var(--muted);
+
+        font-size: 11px;
+
+        line-height: 1.5;
+      }
+
+      .availability-grid {
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 15px;
+      }
+
+      .availability-field {
+        display: flex;
+
+        flex-direction: column;
+      }
+
+      .availability-field label {
+        margin-bottom: 7px;
+      }
+
+      .availability-field input {
+        background: white;
+
+        font-weight: 700;
+      }
+
+      .availability-field input[readonly] {
+        background: var(--soft-blue);
+
+        color: var(--blue);
+
+        cursor: not-allowed;
+      }
+
+      .availability-preview {
+        margin-top: 16px;
+
+        padding: 12px 14px;
+
+        border-radius: 9px;
+
+        background: #eaf7ef;
+
+        border: 1px solid #ccebd8;
+
+        color: var(--success);
+
+        font-size: 12px;
+
+        font-weight: 700;
+      }
+
+      .availability-preview.full {
+        background: #fcebea;
+
+        border-color: #f3cccc;
+
+        color: var(--danger);
+      }
+
+      .availability-error {
+        display: none;
+
+        margin-top: 10px;
+
+        padding: 10px 12px;
+
+        border-radius: 8px;
+
+        background: #fcebea;
+
+        border: 1px solid #f3cccc;
+
+        color: var(--danger);
+
+        font-size: 11px;
+
+        font-weight: 600;
+      }
+
+      /* =====================================================
+           AMENITIES
+      ===================================================== */
+
+      .amenities-grid {
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 10px;
+      }
+
+      .amenity {
+        position: relative;
+      }
+
+      .amenity input {
+        position: absolute;
+
+        opacity: 0;
+
+        pointer-events: none;
+      }
+
+      .amenity label {
+        margin: 0;
+
+        cursor: pointer;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+
+        padding: 12px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 8px;
+
+        color: var(--text);
+
+        font-size: 12px;
+
+        font-weight: normal;
+
+        transition: 0.2s;
+      }
+
+      .amenity label::before {
+        content: "✓";
+
+        width: 18px;
+        height: 18px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 4px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        color: transparent;
+
+        font-size: 11px;
+
+        flex-shrink: 0;
+      }
+
+      .amenity input:checked + label {
+        background: var(--soft-blue);
+
+        border-color: var(--blue-bright);
+
+        color: var(--blue);
+      }
+
+      .amenity input:checked + label::before {
+        background: var(--blue-bright);
+
+        border-color: var(--blue-bright);
+
+        color: white;
+      }
+
+      /* =====================================================
+           PHOTOS
+      ===================================================== */
+
+      .upload-area {
+        display: block;
+
+        border: 2px dashed var(--light-blue);
+
+        border-radius: 12px;
+
+        padding: 35px 20px;
+
+        text-align: center;
+
+        background: var(--soft-blue);
+
+        cursor: pointer;
+
+        transition: 0.2s;
+      }
+
+      .upload-area:hover {
+        border-color: var(--blue-bright);
+
+        background: #e7f2f9;
+      }
+
+      .upload-icon {
+        font-size: 35px;
+
+        margin-bottom: 10px;
+      }
+
+      .upload-area h3 {
+        color: var(--navy);
+
+        font-family: Georgia, serif;
+
+        font-size: 17px;
+
+        margin-bottom: 6px;
+      }
+
+      .upload-area p {
+        color: var(--muted);
+
+        font-size: 12px;
+
+        line-height: 1.5;
+      }
+
+      .upload-button {
+        display: inline-block;
+
+        margin-top: 14px;
+
+        padding: 9px 15px;
+
+        background: var(--blue);
+
+        color: white;
+
+        border-radius: 7px;
+
+        font-size: 12px;
+
+        font-weight: bold;
+      }
+
+      #photos {
+        display: none;
+      }
+
+      .preview-grid {
+        display: grid;
+
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 12px;
+
+        margin-top: 18px;
+      }
+
+      .preview-item {
+        position: relative;
+
+        height: 130px;
+
+        border-radius: 9px;
+
+        overflow: hidden;
+
+        border: 1px solid var(--border);
+
+        background: var(--soft-blue);
+      }
+
+      .preview-item img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+      }
+
+      .preview-remove {
+        position: absolute;
+
+        top: 6px;
+        right: 6px;
+
+        width: 25px;
+        height: 25px;
+
+        border: none;
+
+        border-radius: 50%;
+
+        background: rgba(6, 38, 61, 0.8);
+
+        color: white;
+
+        cursor: pointer;
+
+        font-size: 13px;
+      }
+
+      .cover-label {
+        position: absolute;
+
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        background: rgba(6, 38, 61, 0.82);
+
+        color: white;
+
+        padding: 6px;
+
+        font-size: 10px;
+
+        text-align: center;
+      }
+
+      /* =====================================================
+           CHECKBOX
+      ===================================================== */
+
+      .check-row {
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+
+        margin-top: 18px;
+      }
+
+      .check-row input {
+        width: 17px;
+        height: 17px;
+
+        accent-color: var(--blue-bright);
+      }
+
+      .check-row label {
+        margin: 0;
+
+        font-size: 12px;
+
+        font-weight: normal;
+
+        color: var(--text);
+      }
+
+      /* =====================================================
+           FLASH MESSAGES
+      ===================================================== */
+
+      .flash-container {
+        margin-bottom: 20px;
+      }
+
+      .flash {
+        padding: 12px 15px;
+
+        border-radius: 8px;
+
+        margin-bottom: 8px;
+
+        font-size: 13px;
+      }
+
+      .flash.success {
+        background: #e8f6ef;
+
+        color: var(--success);
+
+        border: 1px solid #c9ead8;
+      }
+
+      .flash.error {
+        background: #fcebea;
+
+        color: var(--danger);
+
+        border: 1px solid #f3cccc;
+      }
+
+      .flash.warning {
+        background: #fff7e4;
+
+        color: var(--warning);
+
+        border: 1px solid #f1dfae;
+      }
+
+      .flash.info {
+        background: var(--soft-blue);
+
+        color: var(--blue);
+
+        border: 1px solid var(--light-blue);
+      }
+
+      /* =====================================================
+           FORM ACTIONS
+      ===================================================== */
+
+      .form-actions {
+        display: flex;
+
+        justify-content: flex-end;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 22px 28px;
+
+        background: #fbfcfd;
+      }
+
+      .cancel-btn {
+        padding: 12px 18px;
+
+        border: 1px solid var(--border);
+
+        background: white;
+
+        color: var(--text);
+
+        border-radius: 8px;
+
+        font-size: 13px;
+
+        font-weight: bold;
+      }
+
+      .cancel-btn:hover {
+        background: var(--soft-blue);
+      }
+
+      .publish-btn {
+        padding: 12px 22px;
+
+        border: none;
+
+        background: var(--blue-bright);
+
+        color: white;
+
+        border-radius: 8px;
+
+        font-size: 13px;
+
+        font-weight: bold;
+
+        cursor: pointer;
+
+        box-shadow: 0 7px 18px rgba(22, 119, 184, 0.2);
+      }
+
+      .publish-btn:hover {
+        background: var(--blue);
+      }
+
+      .publish-btn:disabled {
+        opacity: 0.6;
+
+        cursor: not-allowed;
+      }
+
+      /* =====================================================
+           FOOTER
+      ===================================================== */
+
+      footer {
+        background: var(--deep-navy);
+
+        color: white;
+
+        text-align: center;
+
+        padding: 28px 5%;
+
+        font-size: 12px;
+      }
+
+      .footer-inner {
+        width: min(1250px, 100%);
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      footer span {
+        color: var(--gold);
+      }
+
+      footer .footer-credit {
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      @media (max-width: 560px) {
+        .footer-inner {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+
+      /* =====================================================
+           RESPONSIVE
+      ===================================================== */
+
+      @media (max-width: 800px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-group.full {
+          grid-column: auto;
+        }
+
+        .availability-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .amenities-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .preview-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 550px) {
+        .topbar {
+          height: 70px;
+
+          padding: 0 4%;
+        }
+
+        .brand-subtitle {
+          display: none;
+        }
+
+        .brand-title {
+          font-size: 14px;
+        }
+
+        .back-link {
+          font-size: 12px;
+        }
+
+        .page {
+          width: 94%;
+
+          padding-top: 28px;
+        }
+
+        .form-section {
+          padding: 20px;
+        }
+
+        .availability-section {
+          padding: 15px;
+        }
+
+        .amenities-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .preview-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-actions {
+          padding: 18px 20px;
+
+          flex-direction: column-reverse;
+
+          align-items: stretch;
+        }
+
+        .cancel-btn,
+        .publish-btn {
+          width: 100%;
+
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_site_header.html" %}
+
+    <!-- =========================================================
+         MAIN
+    ========================================================= -->
+
+    <main class="page">
+      <div class="page-heading">
+        <h1>Add a Property</h1>
+
+        <p>
+          Create a clear and accurate listing so people can find the right place
+          to live.
+        </p>
+      </div>
+
+      <!-- =====================================================
+           FLASH MESSAGES
+      ===================================================== -->
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+
+      <div class="flash-container">
+        {% for category, message in messages %}
+
+        <div class="flash {{ category }}">{{ message }}</div>
+
+        {% endfor %}
+      </div>
+
+      {% endif %} {% endwith %}
+
+      <!-- =====================================================
+           FORM
+      ===================================================== -->
+
+      <form
+        method="POST"
+        action="{{ url_for('add_property') }}"
+        enctype="multipart/form-data"
+        id="propertyForm"
+      >
+        <div class="form-card">
+          <!-- =================================================
+               PROPERTY INFORMATION
+          ================================================= -->
+
+          <section class="form-section">
+            <div class="section-heading">
+              <h2>Property Information</h2>
+
+              <p>Tell people what type of accommodation you are offering.</p>
+            </div>
+
+            <div class="form-grid">
+              <!-- TITLE -->
+
+              <div class="form-group full">
+                <label for="title"> Property Title <span>*</span> </label>
+
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  placeholder="e.g. Modern 2 Bedroom Apartment"
+                  maxlength="200"
+                  required
+                />
+              </div>
+
+              <!-- PROPERTY TYPE -->
+
+              <div class="form-group">
+                <label for="property_type">
+                  Property Type <span>*</span>
+                </label>
+
+                <select id="property_type" name="property_type" required>
+                  <option value="">Select property type</option>
+
+                  <option value="hostel">Hostel</option>
+
+                  <option value="single_room">Single Room</option>
+
+                  <option value="bedsitter">Bedsitter</option>
+
+                  <option value="apartment">Apartment</option>
+
+                  <option value="house">House</option>
+
+                  <option value="student_residence">Student Residence</option>
+
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- LOCATION -->
+
+              <div class="form-group">
+                <label for="location"> Location (Town) <span>*</span> </label>
+
+                <select id="location" name="location" required>
+                  <option value="" disabled selected>-- Select Town --</option>
+                  {% for town in towns %}
+                  <option value="{{ town }}">{{ town }}</option>
+                  {% endfor %}
+                </select>
+                <div class="input-help">
+                  Select the primary town for clean search results.
+                </div>
+              </div>
+
+              <!-- CAMPUS -->
+
+              <div class="form-group">
+                <label for="campus"> Nearby Campus / Institution </label>
+
+                <input
+                  type="text"
+                  id="campus"
+                  name="campus"
+                  placeholder="e.g. Kibabii University"
+                  maxlength="200"
+                />
+              </div>
+
+              <!-- DISTANCE -->
+
+              <div class="form-group">
+                <label for="distance_from_campus">
+                  Distance from Campus (km)
+                </label>
+
+                <input
+                  type="number"
+                  id="distance_from_campus"
+                  name="distance_from_campus"
+                  placeholder="e.g. 1.5"
+                  min="0"
+                  step="0.01"
+                />
+
+                <div class="input-help">Leave blank if not applicable.</div>
+              </div>
+
+              <!-- DESCRIPTION -->
+
+              <div class="form-group full">
+                <label for="description"> Description <span>*</span> </label>
+
+                <textarea
+                  id="description"
+                  name="description"
+                  placeholder="Describe the property, rooms, surroundings, access, security and anything else people should know..."
+                  required
+                ></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+               PRICING & AVAILABILITY
+          ================================================= -->
+
+          <section class="form-section">
+            <div class="section-heading">
+              <h2>Pricing & Availability</h2>
+
+              <p>
+                Set the rent and tell people how many units are currently
+                available.
+              </p>
+            </div>
+
+            <!-- PRICING -->
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="price"> Monthly Rent (KSh) <span>*</span> </label>
+
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  placeholder="e.g. 8500"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="deposit"> Deposit (KSh) </label>
+
+                <input
+                  type="number"
+                  id="deposit"
+                  name="deposit"
+                  placeholder="e.g. 8500"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <!-- =================================================
+                 UNIT AVAILABILITY
+            ================================================= -->
+
+            <div class="availability-section">
+              <div class="availability-intro">
+                <div class="availability-icon">🏠</div>
+
+                <div>
+                  <h3>Unit Availability</h3>
+
+                  <p>
+                    Enter the total number of units in this property and how
+                    many are currently vacant. Occupied units are calculated
+                    automatically.
+                  </p>
+                </div>
+              </div>
+
+              <div class="availability-grid">
+                <!-- TOTAL -->
+
+                <div class="availability-field">
+                  <label for="total_units"> Total Units <span>*</span> </label>
+
+                  <input
+                    type="number"
+                    id="total_units"
+                    name="total_units"
+                    min="1"
+                    value="1"
+                    required
+                  />
+
+                  <div class="input-help">
+                    Example: 20 rooms = 20 total units.
+                  </div>
+                </div>
+
+                <!-- VACANT -->
+
+                <div class="availability-field">
+                  <label for="vacant_units">
+                    Vacant Units <span>*</span>
+                  </label>
+
+                  <input
+                    type="number"
+                    id="vacant_units"
+                    name="vacant_units"
+                    min="0"
+                    value="1"
+                    required
+                  />
+
+                  <div class="input-help">
+                    Number of units currently available.
+                  </div>
+                </div>
+
+                <!-- OCCUPIED -->
+
+                <div class="availability-field">
+                  <label for="occupied_units"> Occupied Units </label>
+
+                  <input
+                    type="number"
+                    id="occupied_units"
+                    name="occupied_units"
+                    value="0"
+                    readonly
+                  />
+
+                  <div class="input-help">Automatically calculated.</div>
+                </div>
+              </div>
+
+              <!-- AVAILABILITY MESSAGE -->
+
+              <div id="availabilityPreview" class="availability-preview">
+                ✓ 1 of 1 unit is currently available.
+              </div>
+
+              <div id="availabilityError" class="availability-error"></div>
+            </div>
+
+            <!-- FURNISHED -->
+
+            <div class="check-row">
+              <input type="checkbox" id="furnished" name="furnished" />
+
+              <label for="furnished"> This property is furnished. </label>
+            </div>
+          </section>
+
+          <!-- =================================================
+               AMENITIES
+          ================================================= -->
+
+          <section class="form-section">
+            <div class="section-heading">
+              <h2>Amenities</h2>
+
+              <p>Select everything that is available at the property.</p>
+            </div>
+
+            <div class="amenities-grid">
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="wifi"
+                  name="amenities"
+                  value="Wi-Fi"
+                />
+
+                <label for="wifi"> Wi-Fi </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="water"
+                  name="amenities"
+                  value="Water"
+                />
+
+                <label for="water"> Water </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="electricity"
+                  name="amenities"
+                  value="Electricity"
+                />
+
+                <label for="electricity"> Electricity </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="security"
+                  name="amenities"
+                  value="Security"
+                />
+
+                <label for="security"> Security </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="parking"
+                  name="amenities"
+                  value="Parking"
+                />
+
+                <label for="parking"> Parking </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="laundry"
+                  name="amenities"
+                  value="Laundry"
+                />
+
+                <label for="laundry"> Laundry </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="kitchen"
+                  name="amenities"
+                  value="Kitchen"
+                />
+
+                <label for="kitchen"> Kitchen </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="shower"
+                  name="amenities"
+                  value="Hot Shower"
+                />
+
+                <label for="shower"> Hot Shower </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="study"
+                  name="amenities"
+                  value="Study Area"
+                />
+
+                <label for="study"> Study Area </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="generator"
+                  name="amenities"
+                  value="Backup Generator"
+                />
+
+                <label for="generator"> Backup Generator </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="cctv"
+                  name="amenities"
+                  value="CCTV"
+                />
+
+                <label for="cctv"> CCTV </label>
+              </div>
+
+              <div class="amenity">
+                <input
+                  type="checkbox"
+                  id="furnishedAmenity"
+                  name="amenities"
+                  value="Furnished"
+                />
+
+                <label for="furnishedAmenity"> Furnished </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+               PHOTOS
+          ================================================= -->
+
+          <section class="form-section">
+            <div class="section-heading">
+              <h2>Property Photos</h2>
+
+              <p>
+                Good photos help people understand the property before
+                contacting you.
+              </p>
+            </div>
+
+            <label for="photos" class="upload-area">
+              <div class="upload-icon">📷</div>
+
+              <h3>Add property photos</h3>
+
+              <p>Select multiple photos from your phone or computer.</p>
+
+              <span class="upload-button"> Choose Photos </span>
+            </label>
+
+            <input
+              type="file"
+              id="photos"
+              name="photos"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+            />
+
+            <div id="previewGrid" class="preview-grid"></div>
+          </section>
+
+          <!-- =================================================
+               ACTIONS
+          ================================================= -->
+
+          <div class="form-actions">
+            <a href="{{ url_for('landlord_dashboard') }}" class="cancel-btn">
+              Cancel
+            </a>
+
+            <button type="submit" class="publish-btn" id="publishButton">
+              Publish Property
+            </button>
+          </div>
+        </div>
+      </form>
+    </main>
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================= -->
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          © 2026 <span>Civic Nest</span>. Find your place. Find your people.
+        </div>
+        <span class="footer-credit">Developed by Mabel Technologies</span>
+      </div>
+    </footer>
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================= -->
+
+    <script>
+      /* =========================================================
+         AVAILABILITY CALCULATOR
+      ========================================================= */
+
+      const totalUnitsInput = document.getElementById("total_units");
+
+      const vacantUnitsInput = document.getElementById("vacant_units");
+
+      const occupiedUnitsInput = document.getElementById("occupied_units");
+
+      const availabilityPreview = document.getElementById(
+        "availabilityPreview",
+      );
+
+      const availabilityError = document.getElementById("availabilityError");
+
+      const publishButton = document.getElementById("publishButton");
+
+      function updateAvailability() {
+        let total = parseInt(totalUnitsInput.value) || 0;
+
+        let vacant = parseInt(vacantUnitsInput.value) || 0;
+
+        availabilityError.style.display = "none";
+
+        availabilityError.textContent = "";
+
+        publishButton.disabled = false;
+
+        /* -----------------------------------------
+           TOTAL VALIDATION
+        ----------------------------------------- */
+
+        if (total < 1) {
+          occupiedUnitsInput.value = 0;
+
+          availabilityError.textContent = "Total units must be at least 1.";
+
+          availabilityError.style.display = "block";
+
+          publishButton.disabled = true;
+
+          availabilityPreview.classList.add("full");
+
+          availabilityPreview.textContent =
+            "Please enter a valid total number of units.";
+
+          return;
+        }
+
+        /* -----------------------------------------
+           VACANT VALIDATION
+        ----------------------------------------- */
+
+        if (vacant < 0) {
+          vacant = 0;
+
+          vacantUnitsInput.value = 0;
+        }
+
+        if (vacant > total) {
+          availabilityError.textContent =
+            "Vacant units cannot be greater than total units.";
+
+          availabilityError.style.display = "block";
+
+          publishButton.disabled = true;
+
+          occupiedUnitsInput.value = 0;
+
+          availabilityPreview.classList.add("full");
+
+          availabilityPreview.textContent =
+            "Please reduce the number of vacant units.";
+
+          return;
+        }
+
+        /* -----------------------------------------
+           CALCULATE OCCUPIED
+        ----------------------------------------- */
+
+        const occupied = total - vacant;
+
+        occupiedUnitsInput.value = occupied;
+
+        /* -----------------------------------------
+           PUBLIC AVAILABILITY MESSAGE
+        ----------------------------------------- */
+
+        availabilityPreview.classList.remove("full");
+
+        if (vacant === 0) {
+          availabilityPreview.classList.add("full");
+
+          availabilityPreview.textContent =
+            "Currently fully occupied. No units are available.";
+        } else if (vacant === 1) {
+          availabilityPreview.textContent =
+            "✓ 1 of " + total + " unit is currently available.";
+        } else {
+          availabilityPreview.textContent =
+            "✓ " + vacant + " of " + total + " units are currently available.";
+        }
+      }
+
+      totalUnitsInput.addEventListener("input", updateAvailability);
+
+      vacantUnitsInput.addEventListener("input", updateAvailability);
+
+      /* Initial calculation */
+
+      updateAvailability();
+
+      /* =========================================================
+         FORM VALIDATION
+      ========================================================= */
+
+      const propertyForm = document.getElementById("propertyForm");
+
+      propertyForm.addEventListener("submit", function (event) {
+        const total = parseInt(totalUnitsInput.value) || 0;
+
+        const vacant = parseInt(vacantUnitsInput.value) || 0;
+
+        if (total < 1) {
+          event.preventDefault();
+
+          alert("Total units must be at least 1.");
+
+          totalUnitsInput.focus();
+
+          return;
+        }
+
+        if (vacant < 0 || vacant > total) {
+          event.preventDefault();
+
+          alert(
+            "Vacant units must be between 0 and the total number of units.",
+          );
+
+          vacantUnitsInput.focus();
+
+          return;
+        }
+
+        /*
+         * Occupied is always calculated here as well.
+         * The Flask backend will also recalculate it
+         * for security and data integrity.
+         */
+
+        occupiedUnitsInput.value = total - vacant;
+      });
+
+      /* =========================================================
+         PHOTO PREVIEW
+      ========================================================= */
+
+      const photoInput = document.getElementById("photos");
+
+      const previewGrid = document.getElementById("previewGrid");
+
+      photoInput.addEventListener("change", function () {
+        previewGrid.innerHTML = "";
+
+        const files = Array.from(this.files);
+
+        files.forEach((file, index) => {
+          if (!file.type.startsWith("image/")) {
+            return;
+          }
+
+          const reader = new FileReader();
+
+          reader.onload = function (event) {
+            const item = document.createElement("div");
+
+            item.className = "preview-item";
+
+            const image = document.createElement("img");
+
+            image.src = event.target.result;
+
+            image.alt = "Property photo " + (index + 1);
+
+            item.appendChild(image);
+
+            /*
+             * First selected photo becomes
+             * the cover photo.
+             */
+
+            if (index === 0) {
+              const cover = document.createElement("div");
+
+              cover.className = "cover-label";
+
+              cover.textContent = "Cover Photo";
+
+              item.appendChild(cover);
+            }
+
+            previewGrid.appendChild(item);
+          };
+
+          reader.readAsDataURL(file);
+        });
+      });
+    </script>
+  </body>
+</html>
