@@ -846,7 +846,6 @@
 
           <div class="label">Neighborhood insights</div>
           <div class="grid">
-            <!-- Point these at real routes once the finders exist, e.g. url_for('schools_page') -->
             <a class="tile" href="{{ url_for('schools_page') }}">
               <span class="ico">
                 <svg class="i">
@@ -886,6 +885,11 @@
                 {% if property.cover_image %}
                 <img
                   src="{{ url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  onerror="
+                    this.onerror = null;
+                    this.src =
+                      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                  "
                   alt="{{ property.title }}"
                   loading="lazy"
                 />
@@ -961,7 +965,6 @@
       <a class="tab on" href="/" aria-current="page"
         ><svg class="i"><use href="#i-house" /></svg>Home</a
       >
-      <!-- Saved and Chats need their own pages; swap the # for url_for(...) when ready -->
       <a class="tab" href="#properties"
         ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
           >0</em
