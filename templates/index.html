@@ -884,7 +884,7 @@
               <div class="photo">
                 {% if property.cover_image %}
                 <img
-                  src="{{ url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  src="{{ property.cover_image if property.cover_image.startswith('http') else url_for('static', filename='uploads/properties/' + property.cover_image) }}"
                   onerror="
                     this.onerror = null;
                     this.src =

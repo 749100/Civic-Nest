@@ -32,6 +32,10 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+from supabase import create_client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") # Use Service Role Key or Anon Key with storage insert permissions
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 from werkzeug.utils import secure_filename
 
@@ -108,7 +112,7 @@ def upload_too_large(error):
 
 
 def save_photo(file):
-    """Check it is a real image, shrink it, strip hidden data, save as WebP."""
+    """Check it is a real image, shrink it, strip hidden data, save as WebP to Supabase."""
     data = file.read(MAX_IMAGE_BYTES + 1)
     if len(data) > MAX_IMAGE_BYTES:
         raise ValueError("Each photo must be under 12 MB.")
@@ -131,12 +135,26 @@ def save_photo(file):
         img = img.convert("RGB")
         
     name = f"{uuid.uuid4().hex}.webp"
-    img.save(os.path.join(UPLOAD_FOLDER, name), "WEBP", quality=80)
-    return name
+    
+    # Save processed image to an in-memory buffer as WebP
+    buffer = io.BytesIO()
+    img.save(buffer, "WEBP", quality=80)
+    buffer.seek(0)
+    
+    # Upload directly to Supabase storage bucket
+    supabase.storage.from_("property-images").upload(
+        path=name,
+        file=buffer.read(),
+        file_options={"content-type": "image/webp"}
+    )
+    
+    # Return the permanent public Supabase URL
+    public_url = supabase.storage.from_("property-images").get_public_url(name)
+    return public_url
 
 
 def save_proof(file):
-    """Ownership proof goes in a private folder that is not publicly served."""
+    """Ownership proof uploaded directly to Supabase storage."""
     original = secure_filename(file.filename or "")
     ext = original.rsplit(".", 1)[-1].lower() if "." in original else ""
     if ext not in PROOF_EXTENSIONS:
@@ -149,23 +167,37 @@ def save_proof(file):
     if ext == "pdf" and not data.startswith(b"%PDF"):
         raise ValueError("That file is not a valid PDF.")
         
-    name = f"{uuid.uuid4().hex}.{ext}"
-    with open(os.path.join(PRIVATE_FOLDER, name), "wb") as out:
-        out.write(data)
-    return name
+    name = f"proofs/{uuid.uuid4().hex}.{ext}"
+    content_type = "application/pdf" if ext == "pdf" else f"image/{ext}"
+    
+    supabase.storage.from_("property-images").upload(
+        path=name,
+        file=data,
+        file_options={"content-type": content_type}
+    )
+    
+    return supabase.storage.from_("property-images").get_public_url(name)
 
 
-def remove_uploads(photo_names, proof_name=None):
-    for n in photo_names:
+def remove_uploads(photo_urls, proof_url=None):
+    """Cleans up files from Supabase if database insertion fails."""
+    files_to_remove = []
+    
+    for url in photo_urls:
+        filename = url.split("/")[-1]
+        files_to_remove.append(filename)
+        
+    if proof_url:
+        # Extracts 'proofs/uuid.ext' from the public URL path
+        parts = proof_url.split("/")
+        if len(parts) >= 2:
+            files_to_remove.append(f"{parts[-2]}/{parts[-1]}")
+            
+    if files_to_remove:
         try:
-            os.remove(os.path.join(UPLOAD_FOLDER, n))
-        except OSError:
-            pass
-    if proof_name:
-        try:
-            os.remove(os.path.join(PRIVATE_FOLDER, proof_name))
-        except OSError:
-            pass
+            supabase.storage.from_("property-images").remove(files_to_remove)
+        except Exception as err:
+            print("SUPABASE CLEANUP ERROR:", err)
 
 # =========================================================
 # FLASK-LOGIN
