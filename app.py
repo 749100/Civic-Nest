@@ -104,6 +104,61 @@ RENT_TYPES = {"house", "bedsitter", "single_room", "apartment", "hostel"}
 SALE_TYPES = {"house", "plot"}
 Image.MAX_IMAGE_PIXELS = 60_000_000
 
+from flask import make_response, send_from_directory, url_for
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(app.static_folder, "robots.txt")
+
+@app.route("/sitemap.xml", methods=["GET"])
+def sitemap():
+    """Generates an dynamic XML sitemap for search engines."""
+    pages = [
+        {"loc": url_for("home", _external=True), "changefreq": "daily", "priority": "1.0"},
+        {"loc": url_for("rent_page", _external=True), "changefreq": "daily", "priority": "0.8"},
+        {"loc": url_for("buy_page", _external=True), "changefreq": "daily", "priority": "0.8"},
+        {"loc": url_for("sell_page", _external=True), "changefreq": "weekly", "priority": "0.7"},
+        {"loc": url_for("schools_page", _external=True), "changefreq": "weekly", "priority": "0.7"},
+        {"loc": url_for("hospitals_page", _external=True), "changefreq": "weekly", "priority": "0.7"},
+    ]
+
+    # Dynamically fetch active property listings for indexing
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT id, updated_at FROM properties WHERE status = 'active'")
+        rows = cursor.fetchall()
+        for pid, updated_at in rows:
+            pages.append({
+                "loc": url_for("property_details", property_id=pid, _external=True),
+                "lastmod": updated_at.strftime("%Y-%m-%d") if updated_at else None,
+                "changefreq": "weekly",
+                "priority": "0.9"
+            })
+    except Exception as e:
+        print("SITEMAP DB ERROR:", e)
+    finally:
+        if cursor: cursor.close()
+        if connection: connection.close()
+
+    xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml_content += '<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">\n'
+    for p in pages:
+        xml_content += '  <url>\n'
+        xml_content += f'    <loc>{p["loc"]}</loc>\n'
+        if p.get("lastmod"):
+            xml_content += f'    <lastmod>{p["lastmod"]}</lastmod>\n'
+        xml_content += f'    <changefreq>{p["changefreq"]}</changefreq>\n'
+        xml_content += f'    <priority>{p["priority"]}</priority>\n'
+        xml_content += '  </url>\n'
+    xml_content += '</urlset>'
+
+    response = make_response(xml_content)
+    response.headers["Content-Type"] = "application/xml"
+    return response
+
 
 @app.errorhandler(413)
 def upload_too_large(error):

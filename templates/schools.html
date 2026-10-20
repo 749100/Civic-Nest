@@ -1,10 +1,70 @@
-{% extends "base.html" %} {% block title %}Schools finder{% endblock %} {% block
-page_title %}Find a school.{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}Schools & Colleges Directory |
+CivicNest Africa{% endblock %} {% block page_title %}Find a school.{% endblock
+%} {% block page_sub %}
 <p class="page-sub">
   Search schools, colleges and universities by name, town or level, and see how
   to reach them.
 </p>
 {% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="Schools, Colleges & Universities Directory in Kenya - CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="Search primary schools, high schools, TVET colleges, and universities across Kenya. Find contact details, locations, and direct website links on CivicNest Africa."
+/>
+<meta
+  name="keywords"
+  content="schools in kenya, high schools, universities kenya, kibabii university, tvet colleges, educore registry, civicnest education"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('schools_page') }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('schools_page') }}"
+/>
+<meta
+  property="og:title"
+  content="Schools, Colleges & Universities Directory in Kenya - CivicNest Africa"
+/>
+<meta
+  property="og:description"
+  content="Discover verified educational institutions across Kenya with contact information and website links."
+/>
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('schools_page') }}"
+/>
+<meta
+  property="twitter:title"
+  content="Schools, Colleges & Universities Directory in Kenya - CivicNest Africa"
+/>
+<meta
+  property="twitter:description"
+  content="Discover verified educational institutions across Kenya with contact information and website links."
+/>
+<meta
+  property="twitter:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
 <style>
   .sc-grid {
     display: grid;

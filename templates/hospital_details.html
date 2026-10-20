@@ -1,10 +1,67 @@
-{% extends "base.html" %} {% block title %}{{ hospital.name }}{% endblock %} {%
-block stage_class %}compact{% endblock %} {% block page_title %}{{ hospital.name
-}}{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}{{ hospital.name }} - {{
+hospital.town }} | CivicNest Africa{% endblock %} {% block stage_class
+%}compact{% endblock %} {% block page_title %}{{ hospital.name }}{% endblock %}
+{% block page_sub %}
 <p class="page-sub">
   {{ hospital.town }}{% if hospital.location %} · {{ hospital.location }}{%
   endif %}
 </p>
+{% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="{{ hospital.name }} - {{ hospital.town }} | Healthcare Services - CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="{{ hospital.description|truncate(150) if hospital.description else 'View location, contact information, emergency numbers, services, and opening hours for ' ~ hospital.name ~ ' in ' ~ hospital.town ~ '.' }}"
+/>
+<meta
+  name="keywords"
+  content="{{ hospital.name }}, {{ hospital.town }}, hospital in {{ hospital.town }}, healthcare kenya, emergency care, civicnest"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Dynamic Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('hospital_details', hospital_id=hospital.id) }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp Preview -->
+<meta property="og:type" content="article" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('hospital_details', hospital_id=hospital.id) }}"
+/>
+<meta property="og:title" content="{{ hospital.name }} - {{ hospital.town }}" />
+<meta
+  property="og:description"
+  content="{{ hospital.description|truncate(150) if hospital.description else 'Find contact details, emergency lines, and directions for ' ~ hospital.name ~ ' in ' ~ hospital.town ~ '.' }}"
+/>
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
+<!-- Twitter Card -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('hospital_details', hospital_id=hospital.id) }}"
+/>
+<meta
+  property="twitter:title"
+  content="{{ hospital.name }} - {{ hospital.town }}"
+/>
+<meta
+  property="twitter:description"
+  content="{{ hospital.description|truncate(150) if hospital.description else 'Find contact details, emergency lines, and directions for ' ~ hospital.name ~ ' in ' ~ hospital.town ~ '.' }}"
+/>
+<meta
+  property="twitter:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
 {% endblock %} {% block content %} {% if not hospital.is_published %}
 <div class="flash warning" role="status">
   This facility is hidden. Only admins can see this page.

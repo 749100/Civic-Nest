@@ -6,7 +6,69 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Rent | CivicNest Africa</title>
+
+    <!-- Primary SEO Meta Tags -->
+    <title>
+      Rent Houses, Student Hostels & Apartments in Kenya - CivicNest Africa
+    </title>
+    <meta
+      name="title"
+      content="Rent Houses, Student Hostels & Apartments in Kenya - CivicNest Africa"
+    />
+    <meta
+      name="description"
+      content="Find verified rental houses, bedsitters, student hostels, and apartments near campuses and towns across Kenya. Search and filter rentals easily on CivicNest Africa."
+    />
+    <meta
+      name="keywords"
+      content="houses for rent kenya, student hostels near kibabii, bedsitters for rent, apartments nairobi, rental property kenya"
+    />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
+    />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
+    />
+    <meta
+      property="og:title"
+      content="Rent Houses, Student Hostels & Apartments in Kenya"
+    />
+    <meta
+      property="og:description"
+      content="Browse verified rental properties, rooms, and student hostels across Kenya."
+    />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
+    />
+    <meta
+      property="twitter:title"
+      content="Rent Houses, Student Hostels & Apartments in Kenya"
+    />
+    <meta
+      property="twitter:description"
+      content="Browse verified rental properties, rooms, and student hostels across Kenya."
+    />
+    <meta
+      property="twitter:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
+
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
@@ -878,7 +940,12 @@
               <div class="photo">
                 {% if property.cover_image %}
                 <img
-                  src="{{ url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  src="{{ property.cover_image if property.cover_image.startswith('http') else url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  onerror="
+                    this.onerror = null;
+                    this.src =
+                      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                  "
                   alt="{{ property.title }}"
                   loading="lazy"
                 />

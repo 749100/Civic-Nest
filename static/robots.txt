@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /rent
+Allow: /buy
+Allow: /sell
+Allow: /schools
+Allow: /hospitals
+Allow: /property/*
+
+# Disallow private/authenticated user routes
+Disallow: /landlord/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+
+Sitemap: https://civic-nest.onrender.com/sitemap.xml

@@ -1,10 +1,72 @@
-{% extends "base.html" %} {% block title %}{{ property.title }}{% endblock %} {%
-block stage_class %}compact{% endblock %} {% block page_title %}{{
-property.title }}{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}{{ property.title }} | CivicNest
+Africa{% endblock %} {% block stage_class %}compact{% endblock %} {% block
+page_title %}{{ property.title }}{% endblock %} {% block page_sub %}
 <p class="page-sub">
   {{ property.location }}{% if property.campus %} · near {{ property.campus }}{%
   endif %}
 </p>
+{% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }} | CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="{{ property.description|truncate(150) if property.description else 'View details, photos, price, and contact information for ' ~ property.title ~ ' in ' ~ property.location ~ ' on CivicNest Africa.' }}"
+/>
+<meta
+  name="keywords"
+  content="{{ property.title }}, {{ property.location }}, {{ property.property_type }}, civicnest property"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Dynamic Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp Preview -->
+<meta property="og:type" content="article" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+/>
+<meta
+  property="og:title"
+  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
+/>
+<meta
+  property="og:description"
+  content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
+/>
+{% if images %}
+<meta
+  property="og:image"
+  content="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename='uploads/properties/' + images[0].filename, _external=True) }}"
+/>
+{% else %}
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+{% endif %}
+
+<!-- Twitter Card -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+/>
+<meta
+  property="twitter:title"
+  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
+/>
+<meta
+  property="twitter:description"
+  content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
+/>
 {% endblock %} {% block content %} {% macro fact(label, value) %}{% if value is
 defined and value is not none and value != '' %}
 <div class="fact"><span>{{ label }}</span><strong>{{ value }}</strong></div>
@@ -24,7 +86,12 @@ defined and value is not none and value != '' %}
         {% if images %}
         <img
           id="mainPhoto"
-          src="{{ url_for('static', filename=photo_dir + images[0].filename) }}"
+          src="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename=photo_dir + images[0].filename) }}"
+          onerror="
+            this.onerror = null;
+            this.src =
+              'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+          "
           alt="{{ property.title }}"
         />
         {% else %}
@@ -35,15 +102,22 @@ defined and value is not none and value != '' %}
       </div>
       {% if images|length > 1 %}
       <div class="thumbs">
-        {% for img in images %}
+        {% for img in images %} {% set img_src = img.filename if
+        img.filename.startswith('http') else url_for('static',
+        filename=photo_dir + img.filename) %}
         <button
           type="button"
           class="thumb {{ 'on' if loop.first else '' }}"
-          data-src="{{ url_for('static', filename=photo_dir + img.filename) }}"
+          data-src="{{ img_src }}"
           aria-label="Show photo {{ loop.index }}"
         >
           <img
-            src="{{ url_for('static', filename=photo_dir + img.filename) }}"
+            src="{{ img_src }}"
+            onerror="
+              this.onerror = null;
+              this.src =
+                'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+            "
             alt=""
           />
         </button>
@@ -107,10 +181,16 @@ defined and value is not none and value != '' %}
     <div class="card">
       <div class="who">
         <span class="avatar">
-          {% if property.landlord_image %}<img
-            src="{{ url_for('static', filename='uploads/profiles/' + property.landlord_image) }}"
+          {% if property.landlord_image %}
+          <img
+            src="{{ property.landlord_image if property.landlord_image.startswith('http') else url_for('static', filename='uploads/profiles/' + property.landlord_image) }}"
+            onerror="
+              this.onerror = null;
+              this.style.display = 'none';
+            "
             alt=""
-          />{% else %}{{ property.landlord_name[:1]|upper }}{% endif %}
+          />
+          {% else %} {{ property.landlord_name[:1]|upper }} {% endif %}
         </span>
         <div>
           <strong>{{ property.landlord_name }}</strong>

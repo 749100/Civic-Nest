@@ -1,10 +1,70 @@
-{% extends "base.html" %} {% block title %}Hospital finder{% endblock %} {%
-block page_title %}Find a hospital.{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}Hospital & Clinic Finder | CivicNest
+Africa{% endblock %} {% block page_title %}Find a hospital.{% endblock %} {%
+block page_sub %}
 <p class="page-sub">
   Search hospitals, clinics, dispensaries and pharmacies, with phone numbers and
   directions.
 </p>
 {% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="Hospital & Clinic Finder in Kenya - CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="Search verified hospitals, clinics, dispensaries, and pharmacies across Kenya. Find emergency contacts, opening hours, and map directions on CivicNest Africa."
+/>
+<meta
+  name="keywords"
+  content="hospitals in kenya, clinics near me, pharmacies, emergency medical care, dispensary kenya, civicnest healthcare"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('hospitals_page') }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('hospitals_page') }}"
+/>
+<meta
+  property="og:title"
+  content="Hospital & Clinic Finder in Kenya - CivicNest Africa"
+/>
+<meta
+  property="og:description"
+  content="Locate hospitals, clinics, and emergency medical services with phone numbers and directions."
+/>
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('hospitals_page') }}"
+/>
+<meta
+  property="twitter:title"
+  content="Hospital & Clinic Finder in Kenya - CivicNest Africa"
+/>
+<meta
+  property="twitter:description"
+  content="Locate hospitals, clinics, and emergency medical services with phone numbers and directions."
+/>
+<meta
+  property="twitter:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
 <style>
   .hf-grid {
     display: grid;

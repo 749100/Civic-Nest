@@ -1,9 +1,65 @@
-{% extends "base.html" %} {% block title %}{{ school.name }}{% endblock %} {%
-block stage_class %}compact{% endblock %} {% block page_title %}{{ school.name
-}}{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}{{ school.name }} - {{ school.town }}
+| CivicNest Africa{% endblock %} {% block stage_class %}compact{% endblock %} {%
+block page_title %}{{ school.name }}{% endblock %} {% block page_sub %}
 <p class="page-sub">
   {{ school.town }}{% if school.location %} · {{ school.location }}{% endif %}
 </p>
+{% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="{{ school.name }} - {{ school.town }} | Schools Directory - CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="{{ school.description|truncate(150) if school.description else 'View location, contact details, admissions, and website information for ' ~ school.name ~ ' in ' ~ school.town ~ '.' }}"
+/>
+<meta
+  name="keywords"
+  content="{{ school.name }}, {{ school.town }}, school in {{ school.town }}, education kenya, educore registry, civicnest"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Dynamic Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('school_details', school_id=school.id) }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp Preview -->
+<meta property="og:type" content="article" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('school_details', school_id=school.id) }}"
+/>
+<meta property="og:title" content="{{ school.name }} - {{ school.town }}" />
+<meta
+  property="og:description"
+  content="{{ school.description|truncate(150) if school.description else 'Find contact info, location, and details for ' ~ school.name ~ ' in ' ~ school.town ~ '.' }}"
+/>
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
+<!-- Twitter Card -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('school_details', school_id=school.id) }}"
+/>
+<meta
+  property="twitter:title"
+  content="{{ school.name }} - {{ school.town }}"
+/>
+<meta
+  property="twitter:description"
+  content="{{ school.description|truncate(150) if school.description else 'Find contact info, location, and details for ' ~ school.name ~ ' in ' ~ school.town ~ '.' }}"
+/>
+<meta
+  property="twitter:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
 {% endblock %} {% block content %} {% if not school.is_published %}
 <div class="flash warning" role="status">
   This school is hidden. Only admins can see this page.

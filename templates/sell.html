@@ -1,11 +1,70 @@
-{% extends "base.html" %} {% block title %}List a property{% endblock %} {%
-block stage_class %}compact{% endblock %} {% block page_title %}List your
-property.{% endblock %} {% block page_sub %}
+{% extends "base.html" %} {% block title %}List a Property | CivicNest Africa{%
+endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
+%}List your property.{% endblock %} {% block page_sub %}
 <p class="page-sub">
   Choose how you want to list it, fill in the details, and send it for review.
   Every listing is checked before it goes live.
 </p>
 {% endblock %} {% block head %}
+<!-- Primary SEO Meta Tags -->
+<meta
+  name="title"
+  content="List Your Property | Rent or Sell Homes & Hostels - CivicNest Africa"
+/>
+<meta
+  name="description"
+  content="List your property for rent or sale in Kenya. Reach thousands of verified tenants, students, and home buyers easily on CivicNest Africa."
+/>
+<meta
+  name="keywords"
+  content="list property kenya, landlord registration, rent out house, sell land kenya, post student hostel, civicnest landlord"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Canonical URL -->
+<link
+  rel="canonical"
+  href="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+/>
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website" />
+<meta
+  property="og:url"
+  content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+/>
+<meta
+  property="og:title"
+  content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
+/>
+<meta
+  property="og:description"
+  content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
+/>
+<meta
+  property="og:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta
+  property="twitter:url"
+  content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+/>
+<meta
+  property="twitter:title"
+  content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
+/>
+<meta
+  property="twitter:description"
+  content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
+/>
+<meta
+  property="twitter:image"
+  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+/>
+
 <style>
   .opt-label {
     display: flex;

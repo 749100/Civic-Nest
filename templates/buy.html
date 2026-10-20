@@ -6,7 +6,70 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Buy | CivicNest Africa</title>
+
+    <!-- Primary SEO Meta Tags -->
+    <title>
+      Buy Properties in Kenya | Houses, Apartments & Land for Sale - CivicNest
+      Africa
+    </title>
+    <meta
+      name="title"
+      content="Buy Properties in Kenya | Houses, Apartments & Land for Sale - CivicNest Africa"
+    />
+    <meta
+      name="description"
+      content="Browse verified houses, apartments, commercial spaces, and plots of land for sale in Kenya. Use our mortgage estimator to find your next home on CivicNest Africa."
+    />
+    <meta
+      name="keywords"
+      content="houses for sale in kenya, apartments for sale nairobi, land for sale, property for sale kenya, buy home civicnest"
+    />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('buy_page') }}"
+    />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://civic-nest.onrender.com{{ url_for('buy_page') }}"
+    />
+    <meta
+      property="og:title"
+      content="Buy Properties in Kenya | Houses, Apartments & Land for Sale"
+    />
+    <meta
+      property="og:description"
+      content="Explore verified family homes, apartments, and land for sale across Kenya."
+    />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://civic-nest.onrender.com{{ url_for('buy_page') }}"
+    />
+    <meta
+      property="twitter:title"
+      content="Buy Properties in Kenya | Houses, Apartments & Land for Sale"
+    />
+    <meta
+      property="twitter:description"
+      content="Explore verified family homes, apartments, and land for sale across Kenya."
+    />
+    <meta
+      property="twitter:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
+
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
@@ -975,7 +1038,12 @@
               <div class="photo">
                 {% if property.cover_image %}
                 <img
-                  src="{{ url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  src="{{ property.cover_image if property.cover_image.startswith('http') else url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  onerror="
+                    this.onerror = null;
+                    this.src =
+                      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                  "
                   alt="{{ property.title }}"
                   loading="lazy"
                 />
