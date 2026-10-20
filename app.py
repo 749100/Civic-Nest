@@ -159,6 +159,10 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
     return response
 
+@app.route("/robots.txt")
+def serve_robots_txt():
+    return send_from_directory(app.static_folder, "robots.txt")    
+
 
 @app.errorhandler(413)
 def upload_too_large(error):
