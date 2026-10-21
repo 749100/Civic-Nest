@@ -35,7 +35,13 @@ from werkzeug.security import (
 )
 
 
+
+import os
+import logging
 from supabase import create_client, Client
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
@@ -43,17 +49,18 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 supabase: Client | None = None
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    app.logger.error(
+    logger.error(
         "Supabase configuration missing. "
-        "Check SUPABASE_URL and SUPABASE_KEY in Render."
+        "Check SUPABASE_URL and SUPABASE_KEY in your environment."
     )
 else:
     try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        app.logger.info("Supabase client initialized successfully.")
+        logger.info("Supabase client initialized successfully.")
     except Exception:
-        app.logger.exception("Supabase client initialization failed.")
+        logger.exception("Supabase client initialization failed.")
         raise
+
 
 
 
