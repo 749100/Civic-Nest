@@ -46,6 +46,12 @@ logger = logging.getLogger(__name__)
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
+logger.info(
+    "Supabase environment check: URL present=%s, KEY present=%s",
+    bool(SUPABASE_URL),
+    bool(SUPABASE_KEY),
+)
+
 supabase: Client | None = None
 
 if not SUPABASE_URL or not SUPABASE_KEY:
