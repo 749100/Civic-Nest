@@ -33,14 +33,27 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+
 from supabase import create_client, Client
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
-supabase: Client = None
-if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client | None = None
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    app.logger.error(
+        "Supabase configuration missing. "
+        "Check SUPABASE_URL and SUPABASE_KEY in Render."
+    )
+else:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        app.logger.info("Supabase client initialized successfully.")
+    except Exception:
+        app.logger.exception("Supabase client initialization failed.")
+        raise
+)
 
 from werkzeug.utils import secure_filename
 import mysql.connector
@@ -250,99 +263,176 @@ def sitemap():
     )
 
 
+
+# =========================================================
+# UPLOAD ERROR HANDLING AND SUPABASE STORAGE
+# =========================================================
+
 @app.errorhandler(413)
 def upload_too_large(error):
-    flash("Those files are too large. Use smaller photos and try again.", "error")
+    flash(
+        "Those files are too large. Use smaller photos and try again.",
+        "error"
+    )
     return redirect(request.referrer or url_for("home"))
 
 
+def require_supabase():
+    """Return the configured Supabase client or raise a clear error."""
+    if supabase is None:
+        app.logger.error(
+            "Supabase Storage is unavailable. Check SUPABASE_URL "
+            "and SUPABASE_KEY in the deployment environment."
+        )
+        raise RuntimeError(
+            "Photo storage is temporarily unavailable. "
+            "Please try again later."
+        )
+
+    return supabase
+
+
 def save_photo(file):
-    """Check it is a real image, shrink it, strip hidden data, save as WebP to Supabase."""
+    """Validate, optimize, and upload a property photo as WebP."""
+    if not file or not file.filename:
+        raise ValueError("Please select a photo to upload.")
+
     data = file.read(MAX_IMAGE_BYTES + 1)
+
+    if not data:
+        raise ValueError("The selected photo is empty.")
+
     if len(data) > MAX_IMAGE_BYTES:
         raise ValueError("Each photo must be under 12 MB.")
-    
+
     try:
-        # Verify image integrity using an isolated BytesIO stream
+        # Verify the image before processing.
         test_img = Image.open(io.BytesIO(data))
         test_img.verify()
-        
-        # Re-open stream for actual processing
-        img = Image.open(io.BytesIO(data))
-        if img.format not in {"JPEG", "PNG", "WEBP"}:
-            raise ValueError
-    except Exception:
-        raise ValueError("One of the photos is not a valid JPG, PNG or WEBP image.")
 
-    img = ImageOps.exif_transpose(img)
-    img.thumbnail((1600, 1600))
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-        
+        # Reopen the image because verify() consumes its image state.
+        img = Image.open(io.BytesIO(data))
+
+        if img.format not in {"JPEG", "PNG", "WEBP"}:
+            raise ValueError(
+                "One of the photos is not a valid JPG, PNG or WEBP image."
+            )
+
+        img = ImageOps.exif_transpose(img)
+        img.thumbnail((1600, 1600))
+
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        buffer = io.BytesIO()
+        img.save(buffer, format="WEBP", quality=80)
+        buffer.seek(0)
+
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise ValueError(
+            "One of the photos is not a valid JPG, PNG or WEBP image."
+        ) from exc
+
     name = f"{uuid.uuid4().hex}.webp"
-    
-    # Save processed image to an in-memory buffer as WebP
-    buffer = io.BytesIO()
-    img.save(buffer, "WEBP", quality=80)
-    buffer.seek(0)
-    
-    # Upload directly to Supabase storage bucket
-    supabase.storage.from_("property-images").upload(
+    client = require_supabase()
+    storage = client.storage.from_("property-images")
+
+    storage.upload(
         path=name,
-        file=buffer.read(),
+        file=buffer.getvalue(),
         file_options={"content-type": "image/webp"}
     )
-    
-    # Return the permanent public Supabase URL
-    public_url = supabase.storage.from_("property-images").get_public_url(name)
-    return public_url
+
+    return storage.get_public_url(name)
 
 
 def save_proof(file):
-    """Ownership proof uploaded directly to Supabase storage."""
-    original = secure_filename(file.filename or "")
+    """Upload an ownership document to Supabase Storage."""
+    if not file or not file.filename:
+        raise ValueError("Please select a proof-of-ownership document.")
+
+    original = secure_filename(file.filename)
     ext = original.rsplit(".", 1)[-1].lower() if "." in original else ""
+
     if ext not in PROOF_EXTENSIONS:
-        raise ValueError("Proof of ownership must be a PDF, JPG or PNG file.")
-        
+        raise ValueError(
+            "Proof of ownership must be a PDF, JPG or PNG file."
+        )
+
     data = file.read(MAX_PROOF_BYTES + 1)
+
+    if not data:
+        raise ValueError("The proof document is empty.")
+
     if len(data) > MAX_PROOF_BYTES:
         raise ValueError("The proof document must be under 5 MB.")
-        
+
     if ext == "pdf" and not data.startswith(b"%PDF"):
         raise ValueError("That file is not a valid PDF.")
-        
+
+    if ext in {"jpg", "jpeg", "png"}:
+        try:
+            image = Image.open(io.BytesIO(data))
+            image.verify()
+        except Exception as exc:
+            raise ValueError(
+                "The proof image is not a valid JPG or PNG."
+            ) from exc
+
     name = f"proofs/{uuid.uuid4().hex}.{ext}"
-    content_type = "application/pdf" if ext == "pdf" else f"image/{ext}"
-    
-    supabase.storage.from_("property-images").upload(
+
+    if ext == "pdf":
+        content_type = "application/pdf"
+    elif ext in {"jpg", "jpeg"}:
+        content_type = "image/jpeg"
+    else:
+        content_type = "image/png"
+
+    client = require_supabase()
+    storage = client.storage.from_("property-images")
+
+    storage.upload(
         path=name,
         file=data,
         file_options={"content-type": content_type}
     )
-    
-    return supabase.storage.from_("property-images").get_public_url(name)
+
+    return storage.get_public_url(name)
 
 
 def remove_uploads(photo_urls, proof_url=None):
-    """Cleans up files from Supabase if database insertion fails."""
+    """Attempt to remove uploaded files if database insertion fails."""
+    client = require_supabase()
     files_to_remove = []
-    
-    for url in photo_urls:
-        filename = url.split("/")[-1]
-        files_to_remove.append(filename)
-        
+
+    for url in photo_urls or []:
+        if not url:
+            continue
+
+        filename = url.split("?", 1)[0].rstrip("/").split("/")[-1]
+
+        if filename:
+            files_to_remove.append(filename)
+
     if proof_url:
-        # Extracts 'proofs/uuid.ext' from the public URL path
-        parts = proof_url.split("/")
+        path = proof_url.split("?", 1)[0].rstrip("/")
+        parts = path.split("/")
+
         if len(parts) >= 2:
             files_to_remove.append(f"{parts[-2]}/{parts[-1]}")
-            
+
     if files_to_remove:
         try:
-            supabase.storage.from_("property-images").remove(files_to_remove)
-        except Exception as err:
-            print("SUPABASE CLEANUP ERROR:", err)
+            client.storage.from_("property-images").remove(
+                files_to_remove
+            )
+        except Exception:
+            app.logger.exception(
+                "Supabase upload cleanup failed."
+            )
+
 
 # =========================================================
 # FLASK-LOGIN
@@ -2236,11 +2326,15 @@ def render_listing_form(status=200):
     return render_template("sell.html", amenities=amenities, saved=saved, towns=SUPPORTED_TOWNS), status
 
 
+
 @app.route("/landlord/add-property", methods=["GET", "POST"])
 @login_required
 def add_property():
     if current_user.role not in ("landlord", "admin"):
-        flash("Listing is for landlords. Register or sign in with a landlord account.", "error")
+        flash(
+            "Listing is for landlords. Register or sign in with a landlord account.",
+            "error"
+        )
         return redirect(url_for("home"))
 
     if request.method == "GET":
@@ -2250,81 +2344,134 @@ def add_property():
         flash(message, "error")
         return render_listing_form(400)
 
+    def cleanup_uploads(photo_urls, proof_url=None):
+        """Never let a cleanup failure hide the original error."""
+        try:
+            remove_uploads(photo_urls, proof_url)
+        except Exception:
+            app.logger.exception(
+                "Could not clean up uploaded property files."
+            )
+
     form = request.form
-    listing_type = form.get("listing_type", "")
-    property_type = form.get("property_type", "")
+    listing_type = form.get("listing_type", "").strip()
+    property_type = form.get("property_type", "").strip()
     title = form.get("title", "").strip()
     description = form.get("description", "").strip()
     location = form.get("location", "").strip()
-    ownership_role = form.get("ownership_role", "")
+    ownership_role = form.get("ownership_role", "").strip()
+
+    # ---------------- Validate listing ----------------
 
     if listing_type not in {"rent", "sale"}:
         return fail("Choose whether you are renting out or selling.")
+
     is_rent = listing_type == "rent"
     is_plot = property_type == "plot"
-    if property_type not in (RENT_TYPES if is_rent else SALE_TYPES):
+
+    allowed_types = RENT_TYPES if is_rent else SALE_TYPES
+    if property_type not in allowed_types:
         return fail("Choose a valid property type.")
+
     if not title or len(title) > 120:
         return fail("Enter a listing title of up to 120 characters.")
+
     if len(description) < 30:
         return fail("Write a description of at least 30 characters.")
-    
-    # Standardized town dropdown validation
-    if not location or location not in SUPPORTED_TOWNS:
+
+    if location not in SUPPORTED_TOWNS:
         return fail("Please select a valid town from the list.")
-        
+
     if ownership_role not in {"owner", "agent"}:
-        return fail("Say whether you are the owner or an authorized agent.")
+        return fail(
+            "Say whether you are the owner or an authorized agent."
+        )
 
     try:
         price = Decimal(form.get("price", "").strip())
-        if not price.is_finite() or price <= 0 or price > Decimal("9999999999"):
+        if (
+            not price.is_finite()
+            or price <= 0
+            or price > Decimal("9999999999")
+        ):
             raise InvalidOperation
-    except InvalidOperation:
+    except (InvalidOperation, ValueError):
         return fail("Enter a valid price.")
+
+    # ---------------- Optional numeric fields ----------------
 
     def optional_number(name, cast, label, maximum):
         raw = form.get(name, "").strip()
+
         if not raw:
             return None, None
+
         try:
             value = cast(raw)
-            if value < 0 or value > maximum:
+
+            if not value >= 0 or value > maximum:
                 raise ValueError
+
             return value, None
-        except (ValueError, InvalidOperation):
+
+        except (ValueError, InvalidOperation, TypeError):
             return None, f"Enter a valid {label}."
 
-    campus = deposit = distance = bedrooms = bathrooms = size_sqm = None
+    campus = deposit = distance = None
+    bedrooms = bathrooms = size_sqm = None
     total_units = vacant_units = 1
     furnished = False
 
     if is_rent:
         campus = form.get("campus", "").strip()[:200] or None
-        deposit, error = optional_number("deposit", Decimal, "deposit", 9999999999)
+
+        deposit, error = optional_number(
+            "deposit", Decimal, "deposit", 9999999999
+        )
         if error:
             return fail(error)
-        distance, error = optional_number("distance_from_campus", float, "campus distance", 1000)
+
+        distance, error = optional_number(
+            "distance_from_campus", float, "campus distance", 1000
+        )
         if error:
             return fail(error)
+
         try:
             total_units = int(form.get("total_units", "1"))
             vacant_units = int(form.get("vacant_units", "1"))
-        except ValueError:
+        except (ValueError, TypeError):
             return fail("Unit counts must be whole numbers.")
-        if total_units < 1 or vacant_units < 0 or vacant_units > total_units:
-            return fail("Check the unit counts: vacant units cannot be more than total units.")
+
+        if (
+            total_units < 1
+            or vacant_units < 0
+            or vacant_units > total_units
+        ):
+            return fail(
+                "Check the unit counts: vacant units cannot be more "
+                "than total units."
+            )
+
         furnished = form.get("furnished") == "on"
+
     else:
-        size_sqm, error = optional_number("size_sqm", Decimal, "size", 100000000)
+        size_sqm, error = optional_number(
+            "size_sqm", Decimal, "size", 100000000
+        )
         if error:
             return fail(error)
 
     if not is_plot:
-        bedrooms, error = optional_number("bedrooms", int, "number of bedrooms", 50)
+        bedrooms, error = optional_number(
+            "bedrooms", int, "number of bedrooms", 50
+        )
         if error:
             return fail(error)
-        bathrooms, error = optional_number("bathrooms", int, "number of bathrooms", 50)
+
+        bathrooms, error = optional_number(
+            "bathrooms", int, "number of bathrooms", 50
+        )
         if error:
             return fail(error)
 
@@ -2332,33 +2479,67 @@ def add_property():
     occupied_units = total_units - vacant_units
     available = vacant_units > 0
 
-    photos = [f for f in request.files.getlist("photos") if f and f.filename]
+    # ---------------- Validate uploaded files ----------------
+
+    photos = [
+        f for f in request.files.getlist("photos")
+        if f and f.filename
+    ]
+
     if not photos:
         return fail("Add at least one photo.")
+
     if len(photos) > MAX_PHOTOS:
         return fail(f"You can add up to {MAX_PHOTOS} photos.")
+
     if not all(allowed_file(f.filename) for f in photos):
         return fail("Only JPG, PNG and WEBP photos are allowed.")
 
     proof_file = request.files.get("proof_doc")
     has_proof = bool(proof_file and proof_file.filename)
-    if not is_rent and not has_proof:
-        return fail("Upload proof of ownership for a property you are selling.")
 
-    saved_photos, saved_proof = [], None
+    if not is_rent and not has_proof:
+        return fail(
+            "Upload proof of ownership for a property you are selling."
+        )
+
+    # ---------------- Upload photos and proof ----------------
+
+    saved_photos = []
+    saved_proof = None
+
     try:
-        for f in photos:
-            saved_photos.append(save_photo(f))
+        for photo in photos:
+            saved_photos.append(save_photo(photo))
+
         if has_proof:
             saved_proof = save_proof(proof_file)
-    except ValueError as e:
-        remove_uploads(saved_photos, saved_proof)
-        return fail(str(e))
 
-    review_status = "active" if current_user.role == "admin" else "pending"
+    except ValueError as exc:
+        cleanup_uploads(saved_photos, saved_proof)
+        return fail(str(exc))
+
+    except Exception:
+        app.logger.exception(
+            "Supabase upload failed while adding a property."
+        )
+        cleanup_uploads(saved_photos, saved_proof)
+
+        return fail(
+            "We could not upload your photos or documents. "
+            "Please try again later. If the problem continues, "
+            "contact support."
+        )
+
+    # ---------------- Save property to database ----------------
+
+    review_status = (
+        "active" if current_user.role == "admin" else "pending"
+    )
 
     connection = None
     cursor = None
+
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
@@ -2380,66 +2561,116 @@ def add_property():
             RETURNING id
             """,
             (
-                current_user.id, title, property_type, description, location,
-                campus, price, deposit, distance,
-                total_units, vacant_units, occupied_units,
-                furnished, available, review_status,
-                listing_type, bedrooms, bathrooms, size_sqm,
-                ownership_role, saved_proof,
+                current_user.id,
+                title,
+                property_type,
+                description,
+                location,
+                campus,
+                price,
+                deposit,
+                distance,
+                total_units,
+                vacant_units,
+                occupied_units,
+                furnished,
+                available,
+                review_status,
+                listing_type,
+                bedrooms,
+                bathrooms,
+                size_sqm,
+                ownership_role,
+                saved_proof,
             )
         )
+
         property_id = cursor.fetchone()[0]
 
+        # Save selected amenities.
         for name in amenity_names:
-            cursor.execute("SELECT id FROM amenities WHERE name = %s", (name,))
+            cursor.execute(
+                "SELECT id FROM amenities WHERE name = %s",
+                (name,)
+            )
             row = cursor.fetchone()
+
             if row:
                 cursor.execute(
-                    "INSERT INTO property_amenities (property_id, amenity_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                    """
+                    INSERT INTO property_amenities
+                        (property_id, amenity_id)
+                    VALUES (%s, %s)
+                    ON CONFLICT DO NOTHING
+                    """,
                     (property_id, row[0])
                 )
 
-        for index, filename in enumerate(saved_photos):
+        # Save photo URLs in the property_images table.
+        for index, photo_url in enumerate(saved_photos):
             cursor.execute(
                 """
-                INSERT INTO property_images (property_id, filename, is_cover, uploaded_at)
+                INSERT INTO property_images
+                    (property_id, filename, is_cover, uploaded_at)
                 VALUES (%s, %s, %s, NOW())
                 """,
-                (property_id, filename, index == 0)
+                (property_id, photo_url, index == 0)
             )
 
+        # Commit before sending notifications.
         connection.commit()
 
-        if review_status == "pending":
-            try:
-                notify_admin_listing(
-                    property_title=title,
-                    landlord_name=current_user.full_name,
-                    location=location
-                )
-            except Exception as tg_err:
-                print("TELEGRAM NOTIFICATION ERROR:", tg_err)
-
-        if review_status == "active":
-            flash("Your listing is now live.", "success")
-        else:
-            flash(
-                "Your listing was submitted. It will go live once it has been reviewed.",
-                "success"
-            )
-        return redirect(url_for("landlord_dashboard"))
-
-    except Exception as e:
+    except Exception:
         if connection:
-            connection.rollback()
-        remove_uploads(saved_photos, saved_proof)
-        print("ADD PROPERTY ERROR:", e)
-        return fail("Something went wrong while saving the listing. Please try again.")
+            try:
+                connection.rollback()
+            except Exception:
+                app.logger.exception(
+                    "Database rollback failed after listing error."
+                )
+
+        app.logger.exception(
+            "Failed to save property listing to the database."
+        )
+        cleanup_uploads(saved_photos, saved_proof)
+
+        return fail(
+            "Something went wrong while saving the listing. "
+            "Please try again."
+        )
+
     finally:
         if cursor:
             cursor.close()
+
         if connection:
             connection.close()
+
+    # ---------------- Notify admin after successful save ----------------
+
+    if review_status == "pending":
+        try:
+            notify_admin_listing(
+                property_title=title,
+                landlord_name=current_user.full_name,
+                location=location
+            )
+        except Exception:
+            app.logger.exception(
+                "Telegram notification failed for property %s.",
+                property_id
+            )
+
+    if review_status == "active":
+        flash("Your listing is now live.", "success")
+    else:
+        flash(
+            "Your listing was submitted. It will go live once it has been reviewed.",
+            "success"
+        )
+
+    return redirect(url_for("landlord_dashboard"))
+
 
 
 # =========================================================
