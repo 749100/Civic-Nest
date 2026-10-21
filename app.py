@@ -6,7 +6,7 @@ import io
 from PIL import Image, ImageOps
 from dotenv import load_dotenv
 
-load_dotenv(override=True)  # Ensure .env is loaded and overrides any existing environment variables
+load_dotenv()  # Ensure .env is loaded and overrides any existing environment variables
 
 import os
 import re
