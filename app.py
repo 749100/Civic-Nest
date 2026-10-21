@@ -34,6 +34,7 @@ from werkzeug.security import (
     check_password_hash
 )
 
+
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
@@ -53,7 +54,8 @@ else:
     except Exception:
         app.logger.exception("Supabase client initialization failed.")
         raise
-)
+
+
 
 from werkzeug.utils import secure_filename
 import mysql.connector
