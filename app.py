@@ -3332,10 +3332,14 @@ def admin_dashboard():
             """
             SELECT
                 p.id, p.title, p.listing_type, p.property_type, p.ownership_role,
-                p.proof_doc, p.location, p.price, p.status, p.available,
+                p.proof_doc,
+                CASE WHEN p.location = 'Other'
+                     THEN COALESCE(NULLIF(p.location_other, ''), 'Other')
+                     ELSE p.location END AS location,
+                p.price, p.status, p.available,
                 p.is_verified, p.created_at, u.full_name AS landlord_name
             FROM properties p
-            JOIN users u ON u.id = p.landlord_id
+            JOIN users u ON u.id::text = p.landlord_id::text
             ORDER BY p.created_at DESC
             LIMIT 100
             """
@@ -3365,8 +3369,8 @@ def admin_dashboard():
             properties=properties,
             reports=reports,
         )
-    except Exception as e:
-        print("ADMIN DASHBOARD ERROR:", e)
+    except Exception:
+        app.logger.exception("ADMIN DASHBOARD ERROR")
         flash("Unable to load the admin console right now.", "error")
         return render_template(
             "admin_dashboard.html",
@@ -3720,6 +3724,7 @@ def admin_delete_user(user_id):
     cursor = None
     photo_files = []
     proof_files = []
+    uid = str(user_id)
     try:
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
@@ -3734,23 +3739,30 @@ def admin_delete_user(user_id):
             SELECT pi.filename
             FROM property_images pi
             JOIN properties p ON p.id = pi.property_id
-            WHERE p.landlord_id = %s
+            WHERE p.landlord_id::text = %s
             """,
-            (user_id,)
+            (uid,)
         )
         photo_files = [r["filename"] for r in cursor.fetchall()]
+
         cursor.execute(
-            "SELECT proof_doc FROM properties WHERE landlord_id = %s AND proof_doc IS NOT NULL",
-            (user_id,)
+            """
+            SELECT proof_doc FROM properties
+            WHERE landlord_id::text = %s AND proof_doc IS NOT NULL
+            """,
+            (uid,)
         )
         proof_files = [r["proof_doc"] for r in cursor.fetchall()]
 
         cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
         connection.commit()
-    except Exception as e:
+    except Exception:
         if connection:
-            connection.rollback()
-        print("ADMIN DELETE USER ERROR:", e)
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        app.logger.exception("ADMIN DELETE USER ERROR")
         flash("Unable to delete that account right now.", "error")
         return redirect(url_for("admin_users"))
     finally:
@@ -3759,9 +3771,13 @@ def admin_delete_user(user_id):
         if connection:
             connection.close()
 
-    remove_uploads(photo_files)
-    for proof in proof_files:
-        remove_uploads([], proof)
+    try:
+        remove_uploads(photo_files)
+        for proof in proof_files:
+            remove_uploads([], proof)
+    except Exception:
+        app.logger.exception("Storage cleanup failed after deleting user")
+
     flash("Account deleted, together with its listings and photos.", "success")
     return redirect(url_for("admin_users"))
 
