@@ -6,7 +6,7 @@ endblock %} {% block page_sub %}
 </p>
 {% endblock %} {% block hero_extra %}
 <a class="btn light" href="{{ url_for('add_property') }}">List a property</a>
-{% endblock %} {% block content %} {% set photo_dir = 'uploads/properties/' %}
+{% endblock %} {% block content %}
 
 <div class="stats">
   <div class="stat">
@@ -36,7 +36,7 @@ endblock %} {% block page_sub %}
     <div class="row-photo">
       {% if p.cover_image %}
       <img
-        src="{{ url_for('static', filename=photo_dir + p.cover_image) }}"
+        src="{{ p.cover_image|photo_url }}"
         alt="{{ p.title }}"
         loading="lazy"
       />
@@ -50,7 +50,8 @@ endblock %} {% block page_sub %}
           <h3>{{ p.title }}</h3>
           <p class="muted">
             {{ p.property_type|replace('_', ' ')|title }} · KSh {{
-            "{:,.0f}".format(p.price) }} · {{ p.location }}
+            "{:,.0f}".format(p.price) }}{% if p.listing_type == 'rent' %} /
+            month{% endif %} · {{ p.location }}
           </p>
         </div>
         <div>

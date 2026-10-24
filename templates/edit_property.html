@@ -1,2095 +1,653 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='civicnest-header.css') }}">
-
-    <title>Edit Property | Civic Nest</title>
-
-    <style>
-        :root {
-            --white: #ffffff;
-            --background: #f7f9fc;
-            --soft-blue: #eef5fa;
-            --light-blue: #dcecf6;
-            --blue: #155b86;
-            --blue-bright: #1677b8;
-            --navy: #092f49;
-            --deep-navy: #06263d;
-            --gold: #b79a68;
-            --text: #183b53;
-            --muted: #71889a;
-            --border: #dce6ed;
-            --success: #155b86;
-            --warning: #d99400;
-            --danger: #c0392b;
-            --shadow: 0 10px 35px rgba(9, 47, 73, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        button,
-        input,
-        textarea,
-        select {
-            font-family: inherit;
-        }
-
-        /* ================================
-           TOPBAR
-        ================================= */
-
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            height: 76px;
-
-            background: rgba(255,255,255,.96);
-            backdrop-filter: blur(12px);
-
-            border-bottom: 1px solid var(--border);
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 0 5%;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            text-decoration: none;
-            color: var(--navy);
-        }
-
-        .brand-mark {
-            width: 44px;
-            height: 44px;
-
-            border-radius: 12px;
-
-            background: var(--navy);
-            color: white;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-family: Georgia, serif;
-            font-size: 18px;
-            font-weight: bold;
-
-            position: relative;
-        }
-
-        .brand-mark::after {
-            content: "";
-
-            position: absolute;
-
-            width: 7px;
-            height: 7px;
-
-            border-radius: 50%;
-
-            background: var(--gold);
-
-            right: 7px;
-            top: 7px;
-        }
-
-        .brand-text strong {
-            display: block;
-
-            font-family: Georgia, serif;
-
-            font-size: 18px;
-
-            letter-spacing: 1.2px;
-        }
-
-        .brand-text span {
-            display: block;
-
-            font-size: 10px;
-
-            letter-spacing: 3px;
-
-            color: var(--gold);
-
-            margin-top: -2px;
-        }
-
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .top-btn {
-            text-decoration: none;
-
-            padding: 10px 17px;
-
-            border-radius: 10px;
-
-            font-size: 14px;
-            font-weight: 600;
-
-            transition: .2s ease;
-        }
-
-        .back-btn {
-            color: var(--blue);
-            background: var(--soft-blue);
-        }
-
-        .back-btn:hover {
-            background: var(--light-blue);
-        }
-
-        .website-btn {
-            color: white;
-            background: var(--blue);
-        }
-
-        .website-btn:hover {
-            background: var(--navy);
-        }
-
-        /* ================================
-           PAGE
-        ================================= */
-
-        .page {
-            max-width: 1100px;
-
-            margin: 0 auto;
-
-            padding: 45px 24px 80px;
-        }
-
-        .page-header {
-            margin-bottom: 30px;
-        }
-
-        .eyebrow {
-            color: var(--blue-bright);
-
-            font-size: 12px;
-
-            font-weight: 700;
-
-            text-transform: uppercase;
-
-            letter-spacing: 2px;
-
-            margin-bottom: 7px;
-        }
-
-        .page-header h1 {
-            font-family: Georgia, serif;
-
-            color: var(--navy);
-
-            font-size: 36px;
-
-            margin-bottom: 8px;
-        }
-
-        .page-header p {
-            color: var(--muted);
-
-            max-width: 700px;
-        }
-
-        /* ================================
-           FLASH
-        ================================= */
-
-        .flash-container {
-            margin-bottom: 25px;
-        }
-
-        .flash {
-            padding: 14px 18px;
-
-            border-radius: 10px;
-
-            margin-bottom: 10px;
-
-            font-size: 14px;
-
-            border: 1px solid transparent;
-        }
-
-        .flash.success {
-            background: #edf8f2;
-
-            color: var(--success);
-
-            border-color: #ccebd9;
-        }
-
-        .flash.danger,
-        .flash.error {
-            background: #fff1ef;
-
-            color: var(--danger);
-
-            border-color: #f2cbc6;
-        }
-
-        .flash.info {
-            background: var(--soft-blue);
-
-            color: var(--blue);
-
-            border-color: var(--light-blue);
-        }
-
-        .flash.warning {
-            background: #fff7e8;
-
-            color: var(--warning);
-
-            border-color: #f1dfb6;
-        }
-
-        /* ================================
-           FORM
-        ================================= */
-
-        .edit-form {
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 25px;
-        }
-
-        .card {
-            background: var(--white);
-
-            border: 1px solid var(--border);
-
-            border-radius: 18px;
-
-            padding: 28px;
-
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            margin-bottom: 24px;
-        }
-
-        .card-header h2 {
-            font-family: Georgia, serif;
-
-            color: var(--navy);
-
-            font-size: 22px;
-
-            margin-bottom: 5px;
-        }
-
-        .card-header p {
-            color: var(--muted);
-
-            font-size: 14px;
-        }
-
-        .form-grid {
-            display: grid;
-
-            grid-template-columns: repeat(2, 1fr);
-
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 7px;
-        }
-
-        .form-group.full {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            font-size: 13px;
-
-            font-weight: 700;
-
-            color: var(--text);
-        }
-
-        label span {
-            color: var(--danger);
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-
-            border: 1px solid var(--border);
-
-            background: #fbfdff;
-
-            color: var(--text);
-
-            border-radius: 10px;
-
-            padding: 12px 14px;
-
-            font-size: 14px;
-
-            outline: none;
-
-            transition: .2s ease;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            border-color: var(--blue-bright);
-
-            background: white;
-
-            box-shadow:
-                0 0 0 3px rgba(22,119,184,.08);
-        }
-
-        textarea {
-            min-height: 150px;
-
-            resize: vertical;
-        }
-
-        .help-text {
-            color: var(--muted);
-
-            font-size: 12px;
-        }
-
-        /* ================================
-           AVAILABILITY
-        ================================= */
-
-        .availability-section {
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--soft-blue),
-                    #ffffff
-                );
-
-            border: 1px solid var(--light-blue);
-
-            border-radius: 14px;
-
-            padding: 22px;
-        }
-
-        .availability-intro {
-            display: flex;
-
-            align-items: flex-start;
-
-            gap: 14px;
-
-            margin-bottom: 22px;
-        }
-
-        .availability-icon {
-            width: 45px;
-            height: 45px;
-
-            flex-shrink: 0;
-
-            border-radius: 12px;
-
-            background: white;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            font-size: 21px;
-
-            box-shadow:
-                0 5px 15px rgba(9,47,73,.06);
-        }
-
-        .availability-intro h3 {
-            color: var(--navy);
-
-            font-family: Georgia, serif;
-
-            font-size: 18px;
-
-            margin-bottom: 3px;
-        }
-
-        .availability-intro p {
-            color: var(--muted);
-
-            font-size: 13px;
-        }
-
-        .availability-grid {
-            display: grid;
-
-            grid-template-columns: repeat(3, 1fr);
-
-            gap: 15px;
-        }
-
-        .availability-field {
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 7px;
-        }
-
-        .availability-field input {
-            background: white;
-        }
-
-        .availability-field input[readonly] {
-            background: #f0f4f7;
-
-            color: var(--blue);
-
-            font-weight: 700;
-        }
-
-        .input-help {
-            color: var(--muted);
-
-            font-size: 11px;
-        }
-
-        .availability-preview {
-            margin-top: 18px;
-
-            padding: 12px 15px;
-
-            background: #edf8f2;
-
-            color: var(--success);
-
-            border: 1px solid #ccebd9;
-
-            border-radius: 9px;
-
-            font-size: 13px;
-
-            font-weight: 600;
-        }
-
-        .availability-preview.full {
-            background: #fff7e8;
-
-            color: var(--warning);
-
-            border-color: #f1dfb6;
-        }
-
-        .availability-error {
-            display: none;
-
-            margin-top: 12px;
-
-            background: #fff1ef;
-
-            color: var(--danger);
-
-            border: 1px solid #f2cbc6;
-
-            border-radius: 9px;
-
-            padding: 11px 14px;
-
-            font-size: 13px;
-        }
-
-        /* ================================
-           FURNISHED
-        ================================= */
-
-        .check-box {
-            display: flex;
-
-            align-items: center;
-
-            gap: 11px;
-
-            padding: 15px;
-
-            background: var(--soft-blue);
-
-            border: 1px solid var(--light-blue);
-
-            border-radius: 10px;
-        }
-
-        .check-box input {
-            width: 18px;
-            height: 18px;
-
-            accent-color: var(--blue);
-        }
-
-        .check-box label {
-            cursor: pointer;
-        }
-
-        /* ================================
-           AMENITIES
-        ================================= */
-
-        .amenities-grid {
-            display: grid;
-
-            grid-template-columns: repeat(3, 1fr);
-
-            gap: 12px;
-        }
-
-        .amenity-item {
-            display: flex;
-
-            align-items: center;
-
-            gap: 9px;
-
-            padding: 12px;
-
-            border: 1px solid var(--border);
-
-            border-radius: 10px;
-
-            background: #fbfdff;
-
-            transition: .2s ease;
-        }
-
-        .amenity-item:hover {
-            border-color: var(--light-blue);
-
-            background: var(--soft-blue);
-        }
-
-        .amenity-item input {
-            width: 17px;
-            height: 17px;
-
-            accent-color: var(--blue);
-        }
-
-        .amenity-item label {
-            font-size: 13px;
-
-            cursor: pointer;
-
-            font-weight: 600;
-        }
-
-        /* ================================
-           PHOTOS
-        ================================= */
-
-        .photo-grid {
-            display: grid;
-
-            grid-template-columns: repeat(4, 1fr);
-
-            gap: 16px;
-        }
-
-        .photo-card {
-            position: relative;
-
-            overflow: hidden;
-
-            border-radius: 13px;
-
-            border: 1px solid var(--border);
-
-            background: white;
-        }
-
-        .photo-card img {
-            width: 100%;
-
-            height: 155px;
-
-            object-fit: cover;
-
-            display: block;
-        }
-
-        .photo-info {
-            padding: 10px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 8px;
-        }
-
-        .cover-badge {
-            display: inline-flex;
-
-            align-items: center;
-
-            padding: 5px 8px;
-
-            border-radius: 6px;
-
-            background: var(--soft-blue);
-
-            color: var(--blue);
-
-            font-size: 10px;
-
-            font-weight: 700;
-        }
-
-        .photo-actions {
-            display: flex;
-
-            gap: 6px;
-
-            flex-wrap: wrap;
-        }
-
-        .photo-btn {
-            border: none;
-
-            padding: 6px 9px;
-
-            border-radius: 6px;
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            cursor: pointer;
-
-            transition: .2s ease;
-        }
-
-        .cover-btn {
-            background: var(--soft-blue);
-
-            color: var(--blue);
-        }
-
-        .cover-btn:hover {
-            background: var(--light-blue);
-        }
-
-        .delete-photo-btn {
-            background: #fff1ef;
-
-            color: var(--danger);
-        }
-
-        .delete-photo-btn:hover {
-            background: #fbded9;
-        }
-
-        .no-photos {
-            padding: 25px;
-
-            text-align: center;
-
-            border: 1px dashed var(--border);
-
-            border-radius: 12px;
-
-            color: var(--muted);
-
-            font-size: 14px;
-        }
-
-        /* ================================
-           UPLOAD
-        ================================= */
-
-        .upload-box {
-            margin-top: 22px;
-
-            border: 2px dashed var(--light-blue);
-
-            border-radius: 14px;
-
-            padding: 28px;
-
-            text-align: center;
-
-            background: #fbfdff;
-
-            transition: .2s ease;
-        }
-
-        .upload-box:hover {
-            border-color: var(--blue-bright);
-
-            background: var(--soft-blue);
-        }
-
-        .upload-icon {
-            font-size: 30px;
-
-            margin-bottom: 8px;
-        }
-
-        .upload-box h3 {
-            color: var(--navy);
-
-            font-family: Georgia, serif;
-
-            font-size: 18px;
-
-            margin-bottom: 4px;
-        }
-
-        .upload-box p {
-            color: var(--muted);
-
-            font-size: 13px;
-
-            margin-bottom: 15px;
-        }
-
-        .file-input {
-            display: inline-block;
-
-            max-width: 100%;
-        }
-
-        /* ================================
-           NEW PHOTO PREVIEW
-        ================================= */
-
-        #newPhotoPreview {
-            display: grid;
-
-            grid-template-columns: repeat(5, 1fr);
-
-            gap: 10px;
-
-            margin-top: 18px;
-        }
-
-        .preview-item {
-            border-radius: 9px;
-
-            overflow: hidden;
-
-            border: 1px solid var(--border);
-        }
-
-        .preview-item img {
-            width: 100%;
-
-            height: 100px;
-
-            object-fit: cover;
-
-            display: block;
-        }
-
-        /* ================================
-           ACTIONS
-        ================================= */
-
-        .form-actions {
-            display: flex;
-
-            align-items: center;
-
-            justify-content: flex-end;
-
-            gap: 12px;
-
-            padding-top: 5px;
-        }
-
-        .action-btn {
-            border: none;
-
-            border-radius: 10px;
-
-            padding: 13px 21px;
-
-            font-size: 14px;
-
-            font-weight: 700;
-
-            cursor: pointer;
-
-            text-decoration: none;
-
-            transition: .2s ease;
-        }
-
-        .cancel-btn {
-            background: #edf1f4;
-
-            color: var(--text);
-        }
-
-        .cancel-btn:hover {
-            background: #e0e7eb;
-        }
-
-        .save-btn {
-            background: var(--blue);
-
-            color: white;
-        }
-
-        .save-btn:hover {
-            background: var(--navy);
-        }
-
-        .save-btn:disabled {
-            opacity: .5;
-
-            cursor: not-allowed;
-        }
-
-        /* ================================
-           RESPONSIVE
-        ================================= */
-
-        @media(max-width:900px) {
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group.full {
-                grid-column: auto;
-            }
-
-            .availability-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .amenities-grid {
-                grid-template-columns: repeat(2,1fr);
-            }
-
-            .photo-grid {
-                grid-template-columns: repeat(3,1fr);
-            }
-
-            #newPhotoPreview {
-                grid-template-columns: repeat(4,1fr);
-            }
-        }
-
-        @media(max-width:650px) {
-
-            .topbar {
-                padding: 0 18px;
-            }
-
-            .brand-text {
-                display: none;
-            }
-
-            .website-btn {
-                display: none;
-            }
-
-            .page {
-                padding: 30px 15px 60px;
-            }
-
-            .page-header h1 {
-                font-size: 29px;
-            }
-
-            .card {
-                padding: 20px;
-
-                border-radius: 14px;
-            }
-
-            .amenities-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .photo-grid {
-                grid-template-columns: repeat(2,1fr);
-            }
-
-            #newPhotoPreview {
-                grid-template-columns: repeat(3,1fr);
-            }
-
-            .form-actions {
-                flex-direction: column-reverse;
-
-                align-items: stretch;
-            }
-
-            .action-btn {
-                width: 100%;
-
-                text-align: center;
-            }
-        }
-
-        @media(max-width:420px) {
-
-            .photo-grid {
-                grid-template-columns: repeat(2,1fr);
-
-                gap: 10px;
-            }
-
-            .photo-card img {
-                height: 125px;
-            }
-
-            .photo-info {
-                flex-direction: column;
-
-                align-items: stretch;
-            }
-
-            .photo-actions {
-                flex-direction: column;
-            }
-
-            .photo-btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<!-- =========================================================
-     TOP BAR
-========================================================= -->
-
-{% include "_site_header.html" %}
-
-
-<!-- =========================================================
-     PAGE
-========================================================= -->
-
-<main class="page">
-
-    <div class="page-header">
-
-        <div class="eyebrow">
-            Property Management
-        </div>
-
-        <h1>
-            Edit Property
-        </h1>
-
-        <p>
-            Update the information, availability, amenities and photos for
-            <strong>{{ property.title }}</strong>.
-        </p>
-
-    </div>
-
-
-    <!-- =====================================================
-         FLASH MESSAGES
-    ====================================================== -->
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-
-        {% if messages %}
-
-            <div class="flash-container">
-
-                {% for category, message in messages %}
-
-                    <div class="flash {{ category }}">
-                        {{ message }}
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
+{% extends "base.html" %} {% block title %}Edit {{ property.title }} | CivicNest
+Africa{% endblock %} {% block stage_class %}compact{% endblock %} {% block
+page_title %}Edit property{% endblock %} {% block page_sub %}
+<p class="page-sub">Update the details and photos for {{ property.title }}.</p>
+{% endblock %} {% block hero_extra %}
+<a class="btn light" href="{{ url_for('landlord_dashboard') }}"
+  >Back to dashboard</a
+>
+{% endblock %} {% block head %}
+<style>
+  .edit-page .f {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink, #14213d);
+  }
+  .edit-page .f small {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted, #55627a);
+  }
+  .edit-page .f input[type="text"],
+  .edit-page .f input[type="number"],
+  .edit-page .f select,
+  .edit-page .f textarea {
+    width: 100%;
+    border: 1px solid var(--line, #d9e3f3);
+    background: #fff;
+    color: var(--ink, #14213d);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .edit-page .f input:focus,
+  .edit-page .f select:focus,
+  .edit-page .f textarea:focus {
+    outline: none;
+    border-color: var(--blue2, #2d63c8);
+    box-shadow: 0 0 0 3px rgba(45, 99, 200, 0.18);
+  }
+  .edit-page .f input[readonly] {
+    background: var(--tint, #e1ebfa);
+    font-weight: 600;
+  }
+  .edit-page .f textarea {
+    min-height: 160px;
+    resize: vertical;
+  }
+
+  .eform-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .eform-grid .full {
+    grid-column: 1 / -1;
+  }
+  .eform-units {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .eform-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .eform-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--blue, #1e4fa3);
+  }
+
+  .eform-amenities {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    border: 1px solid var(--line, #d9e3f3);
+    border-radius: 14px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .chip:hover {
+    background: var(--tint, #e1ebfa);
+  }
+  .chip input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--blue, #1e4fa3);
+  }
+
+  .eform-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+  }
+  .eform-photo {
+    overflow: hidden;
+    border: 1px solid var(--line, #d9e3f3);
+    border-radius: 18px;
+    background: #fff;
+  }
+  .eform-photo img {
+    display: block;
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+  .eform-photo-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+  .eform-photo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .eform-photo-actions .btn {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .eform-upload {
+    margin-top: 18px;
+    padding: 22px;
+    border: 2px dashed var(--line, #d9e3f3);
+    border-radius: 18px;
+    background: #fbfdff;
+    text-align: center;
+  }
+  .eform-upload strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .eform-upload p {
+    margin-bottom: 12px;
+  }
+  #newPhotoPreview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  #newPhotoPreview img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--line, #d9e3f3);
+  }
+
+  @media (max-width: 700px) {
+    .eform-grid,
+    .eform-units {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% set is_sale = (property.listing_type ==
+'sale') %} {% set is_plot = (property.property_type == 'plot') %} {% set
+is_furnished = (property.furnished == true) %}
+
+<div class="edit-page">
+  <form
+    id="editPropertyForm"
+    class="stack"
+    method="post"
+    action="{{ url_for('edit_property', property_id=property.id) }}"
+    enctype="multipart/form-data"
+  >
+    {% if current_user.role != 'admin' %}
+    <p class="note">
+      After you save, this listing goes back for review before it is live again.
+    </p>
+    {% endif %}
+
+    <!-- PROPERTY INFORMATION -->
+    <section class="card">
+      <h2 class="sec-title" style="margin-top: 0">Property information</h2>
+
+      <div class="eform-grid">
+        <label class="f full">
+          <span>Title</span>
+          <input
+            type="text"
+            name="title"
+            value="{{ property.title }}"
+            maxlength="120"
+            required
+          />
+        </label>
+
+        <label class="f">
+          <span>Property type</span>
+          <select name="property_type" required>
+            {% if is_sale %} {% set type_options = [('house', 'House'), ('plot',
+            'Plot / Land')] %} {% else %} {% set type_options = [('hostel',
+            'Hostel'), ('single_room', 'Single room'), ('bedsitter',
+            'Bedsitter'), ('apartment', 'Apartment'), ('house', 'House')] %} {%
+            endif %} {% for value, label in type_options %} {% set type_selected
+            = (property.property_type == value) %}
+            <option
+              value="{{ value }}"
+              {%
+              if
+              type_selected
+              %}selected{%
+              endif
+              %}
+            >
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="f">
+          <span>Town</span>
+          <select name="location" required>
+            <option value="">Select town</option>
+            {% for town in towns %} {% set town_selected = (property.location ==
+            town) %}
+            <option
+              value="{{ town }}"
+              {%
+              if
+              town_selected
+              %}selected{%
+              endif
+              %}
+            >
+              {{ town }}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="f full" id="otherTownBox" style="display: none">
+          <span
+            >Town and country <small>(for places outside Kenya)</small></span
+          >
+          <input
+            type="text"
+            name="location_other"
+            value="{{ property.location_other or '' }}"
+            maxlength="120"
+            placeholder="e.g. Kampala, Uganda"
+          />
+        </label>
+
+        {% if not is_sale %}
+        <label class="f">
+          <span>Nearby campus <small>(optional)</small></span>
+          <input
+            type="text"
+            name="campus"
+            value="{{ property.campus or '' }}"
+            maxlength="200"
+          />
+        </label>
+
+        <label class="f">
+          <span>Distance from campus (km)</span>
+          <input
+            type="number"
+            name="distance_from_campus"
+            min="0"
+            step="0.01"
+            value="{% if property.distance_from_campus is not none %}{{ property.distance_from_campus }}{% endif %}"
+          />
+        </label>
+        {% else %}
+        <label class="f">
+          <span>Size (sqm)</span>
+          <input
+            type="number"
+            name="size_sqm"
+            min="0"
+            step="0.01"
+            value="{% if property.size_sqm is not none %}{{ property.size_sqm }}{% endif %}"
+          />
+        </label>
+
+        {% if not is_plot %}
+        <label class="f">
+          <span>Bedrooms</span>
+          <input
+            type="number"
+            name="bedrooms"
+            min="0"
+            max="50"
+            value="{% if property.bedrooms is not none %}{{ property.bedrooms }}{% endif %}"
+          />
+        </label>
+
+        <label class="f">
+          <span>Bathrooms</span>
+          <input
+            type="number"
+            name="bathrooms"
+            min="0"
+            max="50"
+            value="{% if property.bathrooms is not none %}{{ property.bathrooms }}{% endif %}"
+          />
+        </label>
+        {% endif %} {% endif %}
+
+        <label class="f full">
+          <span>Description <small>(at least 30 characters)</small></span>
+          <textarea name="description" minlength="30" maxlength="5000" required>
+{{ property.description }}</textarea
+          >
+        </label>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="card">
+      <h2 class="sec-title" style="margin-top: 0">Pricing</h2>
+
+      <div class="eform-grid">
+        <label class="f">
+          <span
+            >{% if is_sale %}Selling price (KSh){% else %}Monthly rent (KSh){%
+            endif %}</span
+          >
+          <input
+            type="number"
+            name="price"
+            value="{{ property.price }}"
+            min="0"
+            step="0.01"
+            required
+          />
+        </label>
+
+        {% if not is_sale %}
+        <label class="f">
+          <span>Deposit (KSh) <small>(optional)</small></span>
+          <input
+            type="number"
+            name="deposit"
+            min="0"
+            step="0.01"
+            value="{% if property.deposit is not none %}{{ property.deposit }}{% endif %}"
+          />
+        </label>
         {% endif %}
-
-    {% endwith %}
-
-
-    <!-- =====================================================
-         EDIT FORM
-    ====================================================== -->
-
-    <form
-        id="editPropertyForm"
-        class="edit-form"
-        method="POST"
-        action="{{ url_for('edit_property', property_id=property.id) }}"
-        enctype="multipart/form-data"
-    >
-
-        <!-- =================================================
-             PROPERTY INFORMATION
-        ================================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <h2>
-                    Property Information
-                </h2>
-
-                <p>
-                    Update the basic information people will see when they
-                    view this property.
-                </p>
-
-            </div>
-
-
-            <div class="form-grid">
-
-                <!-- TITLE -->
-
-                <div class="form-group full">
-
-                    <label for="title">
-                        Property Title <span>*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value="{{ property.title }}"
-                        maxlength="200"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- PROPERTY TYPE -->
-
-                <div class="form-group">
-
-                    <label for="property_type">
-                        Property Type <span>*</span>
-                    </label>
-
-                    <select
-                        id="property_type"
-                        name="property_type"
-                        required
-                    >
-
-                        <option value="">
-                            Select property type
-                        </option>
-
-                        <option
-                            value="hostel"
-                            {% if property.property_type == "hostel" %}
-                                selected
-                            {% endif %}
-                        >
-                            Hostel
-                        </option>
-
-                        <option
-                            value="single_room"
-                            {% if property.property_type == "single_room" %}
-                                selected
-                            {% endif %}
-                        >
-                            Single Room
-                        </option>
-
-                        <option
-                            value="bedsitter"
-                            {% if property.property_type == "bedsitter" %}
-                                selected
-                            {% endif %}
-                        >
-                            Bedsitter
-                        </option>
-
-                        <option
-                            value="apartment"
-                            {% if property.property_type == "apartment" %}
-                                selected
-                            {% endif %}
-                        >
-                            Apartment
-                        </option>
-
-                        <option
-                            value="house"
-                            {% if property.property_type == "house" %}
-                                selected
-                            {% endif %}
-                        >
-                            House
-                        </option>
-
-                        <option
-                            value="student_residence"
-                            {% if property.property_type == "student_residence" %}
-                                selected
-                            {% endif %}
-                        >
-                            Student Residence
-                        </option>
-
-                        <option
-                            value="other"
-                            {% if property.property_type == "other" %}
-                                selected
-                            {% endif %}
-                        >
-                            Other
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- LOCATION -->
-
-                <div class="form-group">
-
-                    <label for="location">
-                        Location <span>*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        value="{{ property.location }}"
-                        maxlength="255"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- CAMPUS -->
-
-                <div class="form-group">
-
-                    <label for="campus">
-                        Nearby Campus
-                    </label>
-
-                    <input
-                        type="text"
-                        id="campus"
-                        name="campus"
-                        value="{{ property.campus or '' }}"
-                        maxlength="200"
-                    >
-
-                    <div class="help-text">
-                        Optional.
-                    </div>
-
-                </div>
-
-
-                <!-- DISTANCE -->
-
-                <div class="form-group">
-
-                    <label for="distance_from_campus">
-                        Distance From Campus (km)
-                    </label>
-
-                    <input
-                        type="number"
-                        id="distance_from_campus"
-                        name="distance_from_campus"
-                        value="{% if property.distance_from_campus is not none %}{{ property.distance_from_campus }}{% endif %}"
-                        min="0"
-                        step="0.01"
-                    >
-
-                </div>
-
-
-                <!-- DESCRIPTION -->
-
-                <div class="form-group full">
-
-                    <label for="description">
-                        Description <span>*</span>
-                    </label>
-
-                    <textarea
-                        id="description"
-                        name="description"
-                        maxlength="5000"
-                        required
-                    >{{ property.description }}</textarea>
-
-                    <div class="help-text">
-                        Give seekers enough information to understand the
-                        property.
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             PRICING
-        ================================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <h2>
-                    Pricing
-                </h2>
-
-                <p>
-                    Keep your rental and deposit information up to date.
-                </p>
-
-            </div>
-
-
-            <div class="form-grid">
-
-                <div class="form-group">
-
-                    <label for="price">
-                        Monthly Rent (KES) <span>*</span>
-                    </label>
-
-                    <input
-                        type="number"
-                        id="price"
-                        name="price"
-                        value="{{ property.price }}"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="deposit">
-                        Deposit (KES)
-                    </label>
-
-                    <input
-                        type="number"
-                        id="deposit"
-                        name="deposit"
-                        value="{% if property.deposit is not none %}{{ property.deposit }}{% endif %}"
-                        min="0"
-                        step="0.01"
-                    >
-
-                    <div class="help-text">
-                        Optional.
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             AVAILABILITY
-        ================================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <h2>
-                    Availability
-                </h2>
-
-                <p>
-                    Manage how many units are currently occupied or available.
-                </p>
-
-            </div>
-
-
-            <div class="availability-section">
-
-                <div class="availability-intro">
-
-                    <div class="availability-icon">
-                        🏠
-                    </div>
-
-                    <div>
-
-                        <h3>
-                            Unit Availability
-                        </h3>
-
-                        <p>
-                            Enter the total number of units and the number
-                            currently vacant. Occupied units are calculated
-                            automatically.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="availability-grid">
-
-                    <div class="availability-field">
-
-                        <label for="total_units">
-                            Total Units <span>*</span>
-                        </label>
-
-                        <input
-                            type="number"
-                            id="total_units"
-                            name="total_units"
-                            min="1"
-                            value="{{ property.total_units }}"
-                            required
-                        >
-
-                        <div class="input-help">
-                            Example: a building with 20 rooms = 20 units.
-                        </div>
-
-                    </div>
-
-
-                    <div class="availability-field">
-
-                        <label for="vacant_units">
-                            Vacant Units <span>*</span>
-                        </label>
-
-                        <input
-                            type="number"
-                            id="vacant_units"
-                            name="vacant_units"
-                            min="0"
-                            value="{{ property.vacant_units }}"
-                            required
-                        >
-
-                        <div class="input-help">
-                            Units currently available for occupancy.
-                        </div>
-
-                    </div>
-
-
-                    <div class="availability-field">
-
-                        <label for="occupied_units">
-                            Occupied Units
-                        </label>
-
-                        <input
-                            type="number"
-                            id="occupied_units"
-                            name="occupied_units"
-                            value="{{ property.occupied_units }}"
-                            readonly
-                        >
-
-                        <div class="input-help">
-                            Automatically calculated.
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="availabilityPreview"
-                    class="availability-preview"
-                ></div>
-
-
-                <div
-                    id="availabilityError"
-                    class="availability-error"
-                ></div>
-
-            </div>
-
-
-            <!-- FURNISHED -->
-
-            <div
-                class="check-box"
-                style="margin-top:18px;"
-            >
-
-                <input
-                    type="checkbox"
-                    id="furnished"
-                    name="furnished"
-                    {% if property.furnished %}
-                        checked
-                    {% endif %}
-                >
-
-                <label for="furnished">
-                    This property is furnished.
-                </label>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             AMENITIES
-        ================================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <h2>
-                    Amenities
-                </h2>
-
-                <p>
-                    Select the facilities and features available at this
-                    property.
-                </p>
-
-            </div>
-
-
-            {% if amenities %}
-
-                <div class="amenities-grid">
-
-                    {% for amenity in amenities %}
-
-                        <div class="amenity-item">
-
-                            <input
-                                type="checkbox"
-                                id="amenity_{{ amenity.id }}"
-                                name="amenities"
-                                value="{{ amenity.id }}"
-                                {% if amenity.id in selected_amenity_ids %}
-                                    checked
-                                {% endif %}
-                            >
-
-                            <label for="amenity_{{ amenity.id }}">
-                                {{ amenity.name }}
-                            </label>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="no-photos">
-                    No amenities have been configured yet.
-                </div>
-
+      </div>
+    </section>
+
+    <!-- AVAILABILITY (rentals only) -->
+    {% if not is_sale %}
+    <section class="card">
+      <h2 class="sec-title" style="margin-top: 0">Availability</h2>
+      <p class="muted" style="margin-bottom: 14px">
+        Enter the total units and how many are vacant. Occupied units are worked
+        out for you.
+      </p>
+
+      <div class="eform-units">
+        <label class="f">
+          <span>Total units</span>
+          <input
+            type="number"
+            id="total_units"
+            name="total_units"
+            min="1"
+            value="{{ property.total_units }}"
+            required
+          />
+        </label>
+        <label class="f">
+          <span>Vacant units</span>
+          <input
+            type="number"
+            id="vacant_units"
+            name="vacant_units"
+            min="0"
+            value="{{ property.vacant_units }}"
+            required
+          />
+        </label>
+        <label class="f">
+          <span>Occupied units</span>
+          <input
+            type="number"
+            id="occupied_units"
+            value="{{ property.occupied_units }}"
+            readonly
+          />
+        </label>
+      </div>
+
+      <p class="note" id="availabilityPreview" style="margin-top: 14px"></p>
+      <p
+        class="note bad"
+        id="availabilityError"
+        style="margin-top: 14px"
+        hidden
+      ></p>
+
+      <label class="eform-check">
+        <input
+          type="checkbox"
+          name="furnished"
+          {%
+          if
+          is_furnished
+          %}checked{%
+          endif
+          %}
+        />
+        This property is furnished
+      </label>
+    </section>
+    {% endif %}
+
+    <!-- AMENITIES (not for plots) -->
+    {% if not is_plot %}
+    <section class="card">
+      <h2 class="sec-title" style="margin-top: 0">Amenities</h2>
+
+      {% if amenities %}
+      <div class="eform-amenities">
+        {% for amenity in amenities %} {% set amenity_checked = (amenity.id in
+        selected_amenity_ids) %}
+        <label class="chip">
+          <input
+            type="checkbox"
+            name="amenities"
+            value="{{ amenity.id }}"
+            {%
+            if
+            amenity_checked
+            %}checked{%
+            endif
+            %}
+          />
+          {{ amenity.name }}
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted">No amenities have been set up yet.</p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <!-- PHOTOS -->
+    <section class="card">
+      <h2 class="sec-title" style="margin-top: 0">Photos</h2>
+      <p class="muted" style="margin-bottom: 14px">
+        A listing can have up to 10 photos. The cover photo is the one shown on
+        listing cards.
+      </p>
+
+      {% if images %}
+      <div class="eform-photos">
+        {% for image in images %}
+        <div class="eform-photo">
+          <img
+            src="{{ image.filename|photo_url }}"
+            onerror="
+              this.onerror = null;
+              this.src =
+                'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+            "
+            alt="{{ property.title }}"
+          />
+          <div class="eform-photo-body">
+            {% if image.is_cover %}
+            <span class="pill ok">Cover photo</span>
             {% endif %}
-
-        </section>
-
-
-        <!-- =================================================
-             EXISTING PHOTOS
-        ================================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <h2>
-                    Property Photos
-                </h2>
-
-                <p>
-                    Manage your existing photos or add additional property
-                    images.
-                </p>
-
+            <div class="eform-photo-actions">
+              {% if not image.is_cover %}
+              <button
+                type="button"
+                class="btn ghost"
+                data-url="{{ url_for('set_property_cover', property_id=property.id, photo_id=image.id) }}"
+                onclick="setCoverPhoto(this.dataset.url)"
+              >
+                Set cover
+              </button>
+              {% endif %}
+              <button
+                type="button"
+                class="btn ghost"
+                data-url="{{ url_for('delete_property_photo', property_id=property.id, photo_id=image.id) }}"
+                onclick="deletePhoto(this.dataset.url)"
+              >
+                Delete
+              </button>
             </div>
-
-
-            {% if images %}
-
-                <div class="photo-grid">
-
-                    {% for image in images %}
-
-                        <div class="photo-card">
-
-                            <img
-                                src="{{ url_for(
-                                    'static',
-                                    filename='uploads/properties/' ~ image.filename
-                                ) }}"
-                                alt="{{ property.title }}"
-                            >
-
-
-                            <div class="photo-info">
-
-                                {% if image.is_cover %}
-
-                                    <span class="cover-badge">
-                                        Cover Photo
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="cover-badge">
-                                        Property Photo
-                                    </span>
-
-                                {% endif %}
-
-
-                                <div class="photo-actions">
-
-                                    {% if not image.is_cover %}
-
-                                        <button
-                                            type="button"
-                                            class="photo-btn cover-btn"
-                                            onclick="setCoverPhoto(
-                                                '{{ url_for(
-                                                    "set_property_cover",
-                                                    property_id=property.id,
-                                                    photo_id=image.id
-                                                ) }}'
-                                            )"
-                                        >
-                                            Set Cover
-                                        </button>
-
-                                    {% endif %}
-
-
-                                    <button
-                                        type="button"
-                                        class="photo-btn delete-photo-btn"
-                                        onclick="deletePhoto(
-                                            '{{ url_for(
-                                                "delete_property_photo",
-                                                property_id=property.id,
-                                                photo_id=image.id
-                                            ) }}'
-                                        )"
-                                    >
-                                        Delete
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="no-photos">
-                    This property currently has no photos.
-                </div>
-
-            {% endif %}
-
-
-            <!-- UPLOAD -->
-
-            <div class="upload-box">
-
-                <div class="upload-icon">
-                    📷
-                </div>
-
-                <h3>
-                    Add More Photos
-                </h3>
-
-                <p>
-                    Upload additional JPG, JPEG, PNG or WEBP images.
-                </p>
-
-                <input
-                    type="file"
-                    id="photos"
-                    name="photos"
-                    class="file-input"
-                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    multiple
-                >
-
-            </div>
-
-
-            <div id="newPhotoPreview"></div>
-
-        </section>
-
-
-        <!-- =================================================
-             ACTIONS
-        ================================================== -->
-
-        <div class="form-actions">
-
-            <a
-                href="{{ url_for('landlord_dashboard') }}"
-                class="action-btn cancel-btn"
-            >
-                Cancel
-            </a>
-
-
-            <button
-                type="submit"
-                id="saveButton"
-                class="action-btn save-btn"
-            >
-                Save Changes
-            </button>
-
+          </div>
         </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty">This property has no photos yet.</div>
+      {% endif %}
 
-    </form>
+      <div class="eform-upload">
+        <strong>Add more photos</strong>
+        <p class="muted">JPG, PNG or WEBP.</p>
+        <input
+          type="file"
+          id="photos"
+          name="photos"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          multiple
+        />
+        <div id="newPhotoPreview"></div>
+      </div>
+    </section>
 
-</main>
-
-
+    <!-- ACTIONS -->
+    <div class="links">
+      <button type="submit" id="saveButton" class="btn">Save changes</button>
+      <a class="btn ghost" href="{{ url_for('landlord_dashboard') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %} {% block scripts %} {% set is_sale = (property.listing_type ==
+'sale') %}
 <script>
+  const editPropertyForm = document.getElementById("editPropertyForm");
+  const saveButton = document.getElementById("saveButton");
 
-    /* =========================================================
-       AVAILABILITY
-    ========================================================= */
+  // Show the "town and country" box only when "Other" is chosen
+  (function () {
+    const select = document.querySelector('select[name="location"]');
+    const box = document.getElementById("otherTownBox");
+    const input = box.querySelector("input");
 
-    const totalUnitsInput =
-        document.getElementById("total_units");
-
-    const vacantUnitsInput =
-        document.getElementById("vacant_units");
-
-    const occupiedUnitsInput =
-        document.getElementById("occupied_units");
-
-    const availabilityPreview =
-        document.getElementById("availabilityPreview");
-
-    const availabilityError =
-        document.getElementById("availabilityError");
-
-    const saveButton =
-        document.getElementById("saveButton");
-
-
-    function updateAvailability() {
-
-        const total =
-            parseInt(totalUnitsInput.value) || 0;
-
-        const vacant =
-            parseInt(vacantUnitsInput.value) || 0;
-
-
-        availabilityError.style.display = "none";
-
-        availabilityError.textContent = "";
-
-        saveButton.disabled = false;
-
-
-        if (total < 1) {
-
-            occupiedUnitsInput.value = 0;
-
-            availabilityError.textContent =
-                "Total units must be at least 1.";
-
-            availabilityError.style.display = "block";
-
-            saveButton.disabled = true;
-
-            availabilityPreview.classList.add("full");
-
-            availabilityPreview.textContent =
-                "Please enter a valid total number of units.";
-
-            return;
-        }
-
-
-        if (vacant < 0) {
-
-            availabilityError.textContent =
-                "Vacant units cannot be negative.";
-
-            availabilityError.style.display = "block";
-
-            saveButton.disabled = true;
-
-            return;
-        }
-
-
-        if (vacant > total) {
-
-            occupiedUnitsInput.value = 0;
-
-            availabilityError.textContent =
-                "Vacant units cannot be greater than total units.";
-
-            availabilityError.style.display = "block";
-
-            saveButton.disabled = true;
-
-            availabilityPreview.classList.add("full");
-
-            availabilityPreview.textContent =
-                "Please reduce the number of vacant units.";
-
-            return;
-        }
-
-
-        const occupied =
-            total - vacant;
-
-
-        occupiedUnitsInput.value =
-            occupied;
-
-
-        availabilityPreview.classList.remove("full");
-
-
-        if (vacant === 0) {
-
-            availabilityPreview.classList.add("full");
-
-            availabilityPreview.textContent =
-                "Currently fully occupied. No units are available.";
-
-        }
-
-        else if (vacant === 1) {
-
-            availabilityPreview.textContent =
-                "✓ 1 of " +
-                total +
-                " unit is currently available.";
-
-        }
-
-        else {
-
-            availabilityPreview.textContent =
-                "✓ " +
-                vacant +
-                " of " +
-                total +
-                " units are currently available.";
-
-        }
-
+    function sync() {
+      const isOther = select.value === "Other";
+      box.style.display = isOther ? "" : "none";
+      input.required = isOther;
+      if (!isOther) input.value = "";
     }
 
-
-    totalUnitsInput.addEventListener(
-        "input",
-        updateAvailability
-    );
-
-
-    vacantUnitsInput.addEventListener(
-        "input",
-        updateAvailability
-    );
-
-
-    updateAvailability();
-
-
-    /* =========================================================
-       FORM SUBMISSION
-    ========================================================= */
-
-    const editPropertyForm =
-        document.getElementById("editPropertyForm");
-
-
-    editPropertyForm.addEventListener(
-        "submit",
-        function(event) {
-
-            const total =
-                parseInt(totalUnitsInput.value) || 0;
-
-            const vacant =
-                parseInt(vacantUnitsInput.value) || 0;
-
-
-            if (total < 1) {
-
-                event.preventDefault();
-
-                alert(
-                    "Total units must be at least 1."
-                );
-
-                totalUnitsInput.focus();
-
-                return;
-            }
-
-
-            if (vacant < 0 || vacant > total) {
-
-                event.preventDefault();
-
-                alert(
-                    "Vacant units must be between 0 and the total number of units."
-                );
-
-                vacantUnitsInput.focus();
-
-                return;
-            }
-
-
-            occupiedUnitsInput.value =
-                total - vacant;
-
-
-            saveButton.disabled = true;
-
-            saveButton.textContent =
-                "Saving Changes...";
-
-        }
-    );
-
-
-    /* =========================================================
-       PHOTO PREVIEW
-    ========================================================= */
-
-    const photoInput =
-        document.getElementById("photos");
-
-    const newPhotoPreview =
-        document.getElementById("newPhotoPreview");
-
-
-    photoInput.addEventListener(
-        "change",
-        function() {
-
-            newPhotoPreview.innerHTML = "";
-
-            const files =
-                Array.from(photoInput.files);
-
-
-            files.forEach(function(file) {
-
-                if (!file.type.startsWith("image/")) {
-                    return;
-                }
-
-
-                const reader =
-                    new FileReader();
-
-
-                reader.onload =
-                    function(event) {
-
-                        const previewItem =
-                            document.createElement("div");
-
-                        previewItem.className =
-                            "preview-item";
-
-
-                        const image =
-                            document.createElement("img");
-
-                        image.src =
-                            event.target.result;
-
-                        image.alt =
-                            "New property photo";
-
-
-                        previewItem.appendChild(
-                            image
-                        );
-
-
-                        newPhotoPreview.appendChild(
-                            previewItem
-                        );
-
-                    };
-
-
-                reader.readAsDataURL(file);
-
-            });
-
-        }
-    );
-
-
-    /* =========================================================
-       DELETE PHOTO
-    ========================================================= */
-
-    function deletePhoto(deleteUrl) {
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to delete this photo?"
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        const form =
-            document.createElement("form");
-
-        form.method =
-            "POST";
-
-        form.action =
-            deleteUrl;
-
-
-        document.body.appendChild(form);
-
-        form.submit();
-
+    select.addEventListener("change", sync);
+    sync();
+  })();
+
+  {% if not is_sale %}
+  const totalInput = document.getElementById("total_units");
+  const vacantInput = document.getElementById("vacant_units");
+  const occupiedInput = document.getElementById("occupied_units");
+  const preview = document.getElementById("availabilityPreview");
+  const errorBox = document.getElementById("availabilityError");
+
+  function updateAvailability() {
+    const total = parseInt(totalInput.value) || 0;
+    const vacant = parseInt(vacantInput.value) || 0;
+    let error = "";
+
+    if (total < 1) {
+      error = "Total units must be at least 1.";
+    } else if (vacant < 0) {
+      error = "Vacant units cannot be negative.";
+    } else if (vacant > total) {
+      error = "Vacant units cannot be greater than total units.";
     }
 
+    errorBox.hidden = !error;
+    errorBox.textContent = error;
+    preview.hidden = !!error;
+    saveButton.disabled = !!error;
 
-    /* =========================================================
-       SET COVER PHOTO
-    ========================================================= */
-
-    function setCoverPhoto(coverUrl) {
-
-        const confirmed =
-            confirm(
-                "Set this image as the cover photo?"
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        const form =
-            document.createElement("form");
-
-        form.method =
-            "POST";
-
-        form.action =
-            coverUrl;
-
-
-        document.body.appendChild(form);
-
-        form.submit();
-
+    if (error) {
+      occupiedInput.value = 0;
+      return;
     }
 
+    occupiedInput.value = total - vacant;
+
+    if (vacant === 0) {
+      preview.textContent = "Fully occupied. No units are available.";
+    } else {
+      preview.textContent =
+        vacant + " of " + total + (total === 1 ? " unit is" : " units are") + " currently available.";
+    }
+  }
+
+  totalInput.addEventListener("input", updateAvailability);
+  vacantInput.addEventListener("input", updateAvailability);
+  updateAvailability();
+  {% endif %}
+
+  editPropertyForm.addEventListener("submit", function () {
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+  });
+
+  // New photo preview
+  const photoInput = document.getElementById("photos");
+  const newPhotoPreview = document.getElementById("newPhotoPreview");
+
+  photoInput.addEventListener("change", function () {
+    newPhotoPreview.innerHTML = "";
+    Array.from(photoInput.files).forEach(function (file) {
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = document.createElement("img");
+        img.src = event.target.result;
+        img.alt = "New photo";
+        newPhotoPreview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Delete photo / set cover (POST via a temporary form)
+  function postTo(url) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = url;
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function deletePhoto(url) {
+    if (confirm("Are you sure you want to delete this photo?")) postTo(url);
+  }
+
+  function setCoverPhoto(url) {
+    if (confirm("Set this image as the cover photo?")) postTo(url);
+  }
 </script>
-
-</body>
-</html>
+{% endblock %}

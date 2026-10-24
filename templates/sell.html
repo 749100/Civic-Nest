@@ -320,7 +320,7 @@ endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
       </div>
       <div class="row two">
         <label class="f"
-          ><span>Town or neighborhood</span>
+          ><span>Town or county</span>
           <select name="location" id="location" required>
             <option value="" disabled selected>-- Select a town --</option>
             {% for town in towns %}
@@ -334,6 +334,21 @@ endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
             type="text"
             name="campus"
             placeholder="e.g. Kibabii University"
+          />
+        </label>
+      </div>
+      <div class="row" id="otherTownRow" hidden>
+        <label class="f"
+          ><span
+            >Town and country
+            <small class="hint">(for places outside Kenya)</small></span
+          >
+          <input
+            type="text"
+            name="location_other"
+            id="locationOther"
+            maxlength="120"
+            placeholder="e.g. Kampala, Uganda"
           />
         </label>
       </div>
@@ -552,6 +567,19 @@ endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
   var typeSelect = document.getElementById("propertyType");
   var whereLink = document.getElementById("whereLink");
 
+  // "Other" town: show the "town and country" box only when needed
+  var townSelect = document.getElementById("location");
+  var otherRow = document.getElementById("otherTownRow");
+  var otherInput = document.getElementById("locationOther");
+
+  function syncOther() {
+    var isOther = townSelect.value === "Other";
+    otherRow.hidden = !isOther;
+    otherInput.required = isOther;
+    if (!isOther) otherInput.value = "";
+  }
+  townSelect.addEventListener("change", syncOther);
+
   function refresh() {
     var ctx = [hiddenType.value, typeSelect.value === "plot" ? "plot" : "built"];
     document.querySelectorAll("[data-only]").forEach(function (el) {
@@ -603,6 +631,9 @@ endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
       else el.value = vals[0];
     });
   });
+
+  // After restoring any saved values, show the "Other" box if it applies
+  syncOther();
 
   // Shrink photos in the browser before upload (saves mobile data)
   var photos = document.getElementById("photos");

@@ -970,8 +970,9 @@
               </div>
               <div class="info">
                 <div class="price">
-                  KSh {{ "{:,.0f}".format(property.price) }}
-                  <span>/ month</span>
+                  KSh {{ "{:,.0f}".format(property.price) }} {% if
+                  property.listing_type == 'rent' %}<span>/ month</span>{% endif
+                  %}
                 </div>
                 <h3>{{ property.title }}</h3>
                 <div class="loc">

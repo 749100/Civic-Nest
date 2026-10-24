@@ -5,6 +5,7 @@ from flask import (
 import io
 from PIL import Image, ImageOps
 from dotenv import load_dotenv
+import html
 
 load_dotenv()  # Ensure .env is loaded and overrides any existing environment variables
 
@@ -17,7 +18,7 @@ import uuid
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, quote
 import xml.etree.ElementTree as ET
 
 from flask_login import (
@@ -78,6 +79,19 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+@app.template_filter("photo_url")
+def photo_url(filename):
+    """Return a usable image URL for both Supabase URLs and old local files."""
+    if not filename:
+        return ""
+    if filename.startswith(("http://", "https://")):
+        return filename
+    return url_for("static", filename="uploads/properties/" + filename)
+
+@app.context_processor
+def inject_year():
+    return {"current_year": date.today().year}    
+
 # =========================================================
 # FILE UPLOAD CONFIGURATION
 # =========================================================
@@ -96,20 +110,27 @@ ALLOWED_EXTENSIONS = {
     "webp"
 }
 
-SUPPORTED_TOWNS = {
-    "Nairobi",
-    "Mombasa",
-    "Kisumu",
-    "Nakuru",
-    "Eldoret",
-    "Thika",
-    "Naivasha",
-    "Kisii",
-    "Machakos",
-    "Meru", 
-    "Bungoma",
-    "Kakamega"
+_KENYA_COUNTIES = {
+    "Baringo", "Bomet", "Bungoma", "Busia", "Elgeyo-Marakwet", "Embu",
+    "Garissa", "Homa Bay", "Isiolo", "Kajiado", "Kakamega", "Kericho",
+    "Kiambu", "Kilifi", "Kirinyaga", "Kisii", "Kisumu", "Kitui", "Kwale",
+    "Laikipia", "Lamu", "Machakos", "Makueni", "Mandera", "Marsabit",
+    "Meru", "Migori", "Mombasa", "Murang'a", "Nairobi", "Nakuru", "Nandi",
+    "Narok", "Nyamira", "Nyandarua", "Nyeri", "Samburu", "Siaya",
+    "Taita-Taveta", "Tana River", "Tharaka-Nithi", "Trans Nzoia", "Turkana",
+    "Uasin Gishu", "Vihiga", "Wajir", "West Pokot",
 }
+
+_MAJOR_TOWNS = {
+    "Athi River", "Diani", "Eldoret", "Gilgil", "Juja", "Kapsabet",
+    "Kikuyu", "Kitale", "Kitengela", "Limuru", "Lodwar", "Malindi",
+    "Molo", "Mtwapa", "Mumias", "Naivasha", "Nanyuki", "Ngong",
+    "Nyahururu", "Karatina", "Ongata Rongai", "Ruiru", "Thika", "Voi",
+    "Webuye", "Kimilili", "Kericho", "Kakamega", "Chuka", "Maua",
+}
+
+# Alphabetical, with "Other" always last (for places outside Kenya)
+SUPPORTED_TOWNS = sorted(_KENYA_COUNTIES | _MAJOR_TOWNS) + ["Other"]
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -130,8 +151,6 @@ Image.MAX_IMAGE_PIXELS = 60_000_000
 
 # =========================================================
 # SEO: ROBOTS.TXT AND XML SITEMAP
-# =========================================================
-
 @app.route("/robots.txt")
 def serve_robots_txt():
     """Serve robots.txt from the static directory."""
@@ -526,30 +545,40 @@ def notify_admin_listing(property_title, landlord_name, location):
 
 import requests
 
-def notify_tenant_lead(property_title, landlord_name, contact_method, tenant_phone=None):
+def notify_tenant_lead(property_title, landlord_name, contact_method,
+                       tenant_phone=None, tenant_info=None, message_text=None):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
         return
-        
-    message = (
-        f"🚨 **NEW TENANT LEAD!**\n\n"
-        f"🏠 **Property:** {property_title}\n"
-        f"👤 **Landlord:** {landlord_name}\n"
-        f"📞 **Method:** {contact_method}\n"
-        f"{f'📱 **Tenant Contact:** {tenant_phone}' if tenant_phone else ''}"
-    )
-    
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
+
+    esc = lambda v: html.escape(str(v or ""))
+    lines = [
+        "🚨 <b>NEW TENANT LEAD!</b>",
+        "",
+        f"🏠 <b>Property:</b> {esc(property_title)}",
+        f"👤 <b>Landlord:</b> {esc(landlord_name)}",
+        f"📞 <b>Method:</b> {esc(contact_method)}",
+    ]
+    if tenant_info:
+        lines.append(f"🙋 <b>Tenant:</b> {esc(tenant_info)}")
+    if tenant_phone:
+        lines.append(f"📱 <b>Tenant Contact:</b> {esc(tenant_phone)}")
+    if message_text:
+        lines.append(f"💬 <b>Message:</b> {esc(message_text[:500])}")
+
     try:
-        requests.post(url, json=payload, timeout=5)
-    except Exception as e:
-        print("TELEGRAM LEAD ERROR:", e)             
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={
+                "chat_id": chat_id,
+                "text": "\n".join(lines),
+                "parse_mode": "HTML",
+            },
+            timeout=5,
+        )
+    except Exception:
+        app.logger.exception("TELEGRAM LEAD ERROR")        
 
 
 def allowed_file(filename):
@@ -770,7 +799,10 @@ def get_active_properties(limit, category=None, listing_type="rent"):
         cursor = connection.cursor(dictionary=True)
         query = """
             SELECT
-                p.id, p.title, p.property_type, p.description, p.location,
+                p.id, p.title, p.property_type, p.description,
+                CASE WHEN p.location = 'Other'
+                     THEN COALESCE(NULLIF(p.location_other, ''), 'Other')
+                     ELSE p.location END AS location,
                 p.campus, p.price, p.deposit, p.distance_from_campus,
                 p.total_units, p.vacant_units, p.occupied_units,
                 p.furnished, p.available, p.is_verified, p.status,
@@ -809,29 +841,14 @@ def get_active_properties(limit, category=None, listing_type="rent"):
         if connection:
             connection.close()
 
-
-
 @app.route("/")
 def home():
-
     try:
         properties = get_active_properties(12, listing_type=None)
-        return render_template(
-            "index.html",
-            properties=properties
-        )
-
-    except Exception as e:
-
-        print(
-            "HOME PAGE ERROR:",
-            e
-        )
-
-        return render_template(
-            "index.html",
-            properties=[]
-        )
+        return render_template("index.html", properties=properties)
+    except Exception:
+        app.logger.exception("HOME PAGE ERROR")
+        return render_template("index.html", properties=[])            
 
 
 @app.route("/rent")
@@ -1437,46 +1454,50 @@ def login():
 
 @app.route("/property/<int:property_id>/track-contact/<method>")
 def track_contact(property_id, method):
-    connection = get_db_connection()
+    if method not in {"call", "whatsapp"}:
+        abort(404)
+
+    connection = None
+    cursor = None
     try:
+        connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        # Fetch property and landlord details
         cursor.execute(
             """
-            SELECT p.title, u.full_name as landlord_name, u.phone as landlord_phone
+            SELECT p.title, u.full_name AS landlord_name, u.phone AS landlord_phone
             FROM properties p
-            JOIN users u ON p.landlord_id = u.id
+            JOIN users u ON p.landlord_id::text = u.id::text
             WHERE p.id = %s
             """,
             (property_id,)
         )
         prop = cursor.fetchone()
-        cursor.close()
-        
+
         if prop:
-            # Send Telegram notification
             notify_tenant_lead(
                 property_title=prop["title"],
                 landlord_name=prop["landlord_name"],
                 contact_method=method.upper()
             )
-            
-            # Redirect user to the actual destination
-            if method == "whatsapp":
-                # Example WhatsApp redirect (replace with landlord's actual phone if stored)
-                phone = prop.get("landlord_phone", "254700000000")
-                return redirect(f"https://wa.me/{phone}?text=Hello,%20I%20found%20your%20property%20'{prop['title']}'%20on%20CivicNest.")
-            elif method == "call":
-                phone = prop.get("landlord_phone", "")
-                return redirect(f"tel:{phone}")
-                
-    except Exception as e:
-        print("TRACK CONTACT ERROR:", e)
+
+            phone = normalize_whatsapp_number(prop.get("landlord_phone"))
+            if method == "whatsapp" and phone:
+                text = quote(
+                    f"Hello, I found your property '{prop['title']}' on CivicNest."
+                )
+                return redirect(f"https://wa.me/{phone}?text={text}")
+            if method == "call" and prop.get("landlord_phone"):
+                return redirect(f"tel:{prop['landlord_phone']}")
+
+    except Exception:
+        app.logger.exception("TRACK CONTACT ERROR")
     finally:
+        if cursor:
+            cursor.close()
         if connection:
             connection.close()
-            
-    return redirect(url_for("home"))
+
+    return redirect(url_for("property_details", property_id=property_id))
 
 # =========================================================
 # DASHBOARD ROUTER
@@ -1526,7 +1547,6 @@ def landlord_dashboard():
 
         user_id_str = str(current_user.id)
 
-        
         cursor.execute(
             """
             SELECT COUNT(*) AS total_properties
@@ -1537,9 +1557,6 @@ def landlord_dashboard():
         )
         total_properties = cursor.fetchone()["total_properties"]
 
-        # =================================================
-        # ACTIVE LISTINGS
-        # =================================================
         cursor.execute(
             """
             SELECT COUNT(*) AS active_listings
@@ -1551,9 +1568,6 @@ def landlord_dashboard():
         )
         active_listings = cursor.fetchone()["active_listings"]
 
-        # =================================================
-        # NEW INQUIRIES
-        # =================================================
         cursor.execute(
             """
             SELECT COUNT(*) AS new_inquiries
@@ -1567,9 +1581,6 @@ def landlord_dashboard():
         )
         new_inquiries = cursor.fetchone()["new_inquiries"]
 
-        # =================================================
-        # LANDLORD PROPERTIES
-        # =================================================
         cursor.execute(
             """
             SELECT
@@ -1577,7 +1588,9 @@ def landlord_dashboard():
                 p.title,
                 p.property_type,
                 p.description,
-                p.location,
+                CASE WHEN p.location = 'Other'
+                     THEN COALESCE(NULLIF(p.location_other, ''), 'Other')
+                     ELSE p.location END AS location,
                 p.campus,
                 p.price,
                 p.deposit,
@@ -1605,9 +1618,6 @@ def landlord_dashboard():
         )
         properties = cursor.fetchall()
 
-        # =================================================
-        # TOTAL INQUIRIES
-        # =================================================
         cursor.execute(
             """
             SELECT COUNT(*) AS total_inquiries
@@ -1620,9 +1630,6 @@ def landlord_dashboard():
         )
         total_inquiries = cursor.fetchone()["total_inquiries"]
 
-        # =================================================
-        # RECENT INQUIRIES
-        # =================================================
         cursor.execute(
             """
             SELECT
@@ -1648,9 +1655,6 @@ def landlord_dashboard():
         )
         inquiries = cursor.fetchall()
 
-        # =================================================
-        # OVERALL UNIT COUNTS
-        # =================================================
         cursor.execute(
             """
             SELECT
@@ -1682,9 +1686,8 @@ def landlord_dashboard():
             occupied_units=occupied_units
         )
 
-    except Exception as e:
+    except Exception:
         app.logger.exception("LANDLORD DASHBOARD ERROR")
-        print("LANDLORD DASHBOARD ERROR:", e)
         flash("Unable to load your dashboard right now.", "error")
         return render_template(
             "landlord_dashboard.html",
@@ -1897,9 +1900,299 @@ def update_property_availability(property_id):
 # PROPERTY DETAILS
 # =========================================================
 
-@app.route(
-    "/property/<int:property_id>"
-)
+@app.route("/landlord/property/<int:property_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_property(property_id):
+    if current_user.role not in ("landlord", "admin"):
+        flash("Only landlords can edit properties.", "error")
+        return redirect(url_for("dashboard"))
+
+    uploaded_urls = []
+    connection = None
+    cursor = None
+    owner_id = str(current_user.id)
+    is_admin = current_user.role == "admin"
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(
+            """
+            SELECT id, landlord_id, title, property_type, description, location,
+                   location_other, campus, price, deposit, distance_from_campus,
+                   furnished, total_units, vacant_units, occupied_units,
+                   available, is_verified, status, listing_type, bedrooms,
+                   bathrooms, size_sqm
+            FROM properties
+            WHERE id = %s AND (landlord_id::text = %s OR %s)
+            """,
+            (property_id, owner_id, is_admin)
+        )
+        property_data = cursor.fetchone()
+
+        if not property_data:
+            flash("Property not found or you do not have permission to edit it.", "error")
+            return redirect(url_for("landlord_dashboard"))
+
+        cursor.execute("SELECT id, name FROM amenities ORDER BY name ASC")
+        amenities = cursor.fetchall()
+
+        cursor.execute(
+            "SELECT amenity_id FROM property_amenities WHERE property_id = %s",
+            (property_id,)
+        )
+        selected_amenity_ids = {row["amenity_id"] for row in cursor.fetchall()}
+
+        cursor.execute(
+            """
+            SELECT id, property_id, filename, is_cover, uploaded_at
+            FROM property_images
+            WHERE property_id = %s
+            ORDER BY is_cover DESC, id ASC
+            """,
+            (property_id,)
+        )
+        images = cursor.fetchall()
+
+        if request.method == "GET":
+            return render_template(
+                "edit_property.html",
+                property=property_data,
+                amenities=amenities,
+                selected_amenity_ids=selected_amenity_ids,
+                images=images,
+                towns=SUPPORTED_TOWNS
+            )
+
+        # ---------------- POST: validate ----------------
+        form = request.form
+        is_rent = property_data["listing_type"] == "rent"
+        title = form.get("title", "").strip()
+        property_type = form.get("property_type", "").strip()
+        description = form.get("description", "").strip()
+        location = form.get("location", "").strip()
+
+        def back(message):
+            flash(message, "error")
+            return redirect(url_for("edit_property", property_id=property_id))
+
+        def num(name, label, cast=Decimal, maximum=9999999999,
+                required=False, keep=None):
+            """Parse an optional number. If the field is not in the form,
+            keep the value already stored."""
+            if name not in form:
+                return keep
+            raw = form.get(name, "").strip()
+            if not raw:
+                if required:
+                    raise ValueError(f"Please enter a valid {label}.")
+                return None
+            try:
+                value = cast(raw)
+                if value < 0 or value > maximum:
+                    raise ValueError
+            except (ValueError, InvalidOperation, TypeError):
+                raise ValueError(f"Please enter a valid {label}.")
+            return value
+
+        if not title or len(title) > 120:
+            return back("Enter a title of up to 120 characters.")
+        allowed_types = RENT_TYPES if is_rent else SALE_TYPES
+        if property_type not in allowed_types:
+            return back("Please select a valid property type.")
+        if len(description) < 30:
+            return back("Write a description of at least 30 characters.")
+        if location not in SUPPORTED_TOWNS:
+            return back("Please select a valid town from the list.")
+
+        location_other = form.get("location_other", "").strip()[:120]
+        if location == "Other":
+            if len(location_other) < 3:
+                return back("Enter the town and country for this property.")
+        else:
+            location_other = None
+
+        try:
+            price_value = num("price", "property price", required=True)
+            if price_value is None or price_value <= 0:
+                raise ValueError("Please enter a valid property price.")
+
+            if is_rent:
+                campus = form.get("campus", "").strip()[:200] or None
+                deposit_value = num(
+                    "deposit", "deposit amount",
+                    keep=property_data["deposit"]
+                )
+                distance_value = num(
+                    "distance_from_campus", "distance from campus",
+                    cast=float, maximum=1000,
+                    keep=property_data["distance_from_campus"]
+                )
+                try:
+                    total_units_value = int(form.get("total_units", "").strip())
+                    vacant_units_value = int(form.get("vacant_units", "").strip())
+                except ValueError:
+                    raise ValueError("Total units and vacant units must be whole numbers.")
+                furnished = bool(form.get("furnished"))
+                bedrooms = property_data["bedrooms"]
+                bathrooms = property_data["bathrooms"]
+                size_sqm = property_data["size_sqm"]
+            else:
+                campus = deposit_value = distance_value = None
+                total_units_value = property_data["total_units"] or 1
+                vacant_units_value = property_data["vacant_units"] or 0
+                furnished = bool(property_data["furnished"])
+                size_sqm = num(
+                    "size_sqm", "size", maximum=100000000,
+                    keep=property_data["size_sqm"]
+                )
+                if property_type == "plot":
+                    bedrooms = bathrooms = None
+                else:
+                    bedrooms = num(
+                        "bedrooms", "number of bedrooms", cast=int,
+                        maximum=50, keep=property_data["bedrooms"]
+                    )
+                    bathrooms = num(
+                        "bathrooms", "number of bathrooms", cast=int,
+                        maximum=50, keep=property_data["bathrooms"]
+                    )
+        except ValueError as e:
+            return back(str(e))
+
+        if total_units_value < 1:
+            return back("Total units must be at least 1.")
+        if vacant_units_value < 0:
+            return back("Vacant units cannot be negative.")
+        if vacant_units_value > total_units_value:
+            return back("Vacant units cannot be greater than total units.")
+
+        occupied_units_value = total_units_value - vacant_units_value
+        available_value = vacant_units_value > 0
+
+        selected_amenities = form.getlist("amenities")
+        new_files = [f for f in request.files.getlist("photos") if f and f.filename]
+
+        if not all(allowed_file(f.filename) for f in new_files):
+            return back("One or more uploaded photos have an unsupported format.")
+
+        review_status = "active" if is_admin else "pending"
+        verified_value = bool(property_data["is_verified"]) if is_admin else False
+
+        # ---------------- UPDATE ----------------
+        cursor.execute(
+            """
+            UPDATE properties
+            SET title = %s, property_type = %s, description = %s,
+                location = %s, location_other = %s, campus = %s,
+                price = %s, deposit = %s,
+                distance_from_campus = %s, furnished = %s,
+                total_units = %s, vacant_units = %s, occupied_units = %s,
+                available = %s, status = %s, is_verified = %s,
+                bedrooms = %s, bathrooms = %s, size_sqm = %s,
+                updated_at = NOW()
+            WHERE id = %s
+            """,
+            (
+                title, property_type, description, location, location_other,
+                campus, price_value, deposit_value, distance_value,
+                furnished, total_units_value, vacant_units_value,
+                occupied_units_value, available_value, review_status,
+                verified_value, bedrooms, bathrooms, size_sqm,
+                property_id
+            )
+        )
+
+        # Amenities (amenity checkboxes submit ids)
+        cursor.execute(
+            "DELETE FROM property_amenities WHERE property_id = %s",
+            (property_id,)
+        )
+        for amenity_id in selected_amenities:
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO property_amenities (property_id, amenity_id)
+                    VALUES (%s, %s) ON CONFLICT DO NOTHING
+                    """,
+                    (property_id, int(amenity_id))
+                )
+            except (ValueError, TypeError):
+                continue
+
+        # Photos
+        cursor.execute(
+            "SELECT COUNT(*) AS image_count FROM property_images WHERE property_id = %s",
+            (property_id,)
+        )
+        image_count = cursor.fetchone()["image_count"]
+
+        if image_count + len(new_files) > MAX_PHOTOS:
+            connection.rollback()
+            return back(f"A listing can have at most {MAX_PHOTOS} photos. Delete some first.")
+
+        for file in new_files:
+            try:
+                photo_url = save_photo(file)
+            except ValueError as photo_error:
+                connection.rollback()
+                try:
+                    remove_uploads(uploaded_urls)
+                except Exception:
+                    app.logger.exception("Cleanup failed")
+                return back(str(photo_error))
+
+            uploaded_urls.append(photo_url)
+            cursor.execute(
+                """
+                INSERT INTO property_images (property_id, filename, is_cover, uploaded_at)
+                VALUES (%s, %s, %s, NOW())
+                """,
+                (property_id, photo_url, image_count == 0)
+            )
+            image_count += 1
+
+        connection.commit()
+
+        if not is_admin:
+            try:
+                notify_admin_listing(
+                    property_title=title,
+                    landlord_name=current_user.full_name,
+                    location=location_other if location == "Other" else location
+                )
+            except Exception:
+                app.logger.exception("Telegram notify failed after edit")
+
+        flash("Property updated successfully.", "success")
+        return redirect(url_for("edit_property", property_id=property_id))
+
+    except Exception:
+        if connection:
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        try:
+            remove_uploads(uploaded_urls)
+        except Exception:
+            app.logger.exception("Cleanup failed")
+        app.logger.exception("EDIT PROPERTY ERROR")
+        flash("An error occurred while updating the property.", "error")
+        return redirect(url_for("landlord_dashboard"))
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+# =========================================================
+# PROPERTY DETAILS
+# =========================================================
+
+@app.route("/property/<int:property_id>")
 def property_details(property_id):
     connection = None
     cursor = None
@@ -1917,7 +2210,9 @@ def property_details(property_id):
                 p.title,
                 p.property_type,
                 p.description,
-                p.location,
+                CASE WHEN p.location = 'Other'
+                     THEN COALESCE(NULLIF(p.location_other, ''), 'Other')
+                     ELSE p.location END AS location,
                 p.campus,
                 p.price,
                 p.deposit,
@@ -1959,56 +2254,31 @@ def property_details(property_id):
         property_data = cursor.fetchone()
 
         if not property_data:
-            flash(
-                "Property not found or is no longer available.",
-                "error"
-            )
-            return redirect(
-                url_for("home")
-            )
+            flash("Property not found or is no longer available.", "error")
+            return redirect(url_for("home"))
 
-        # -------------------------------------------------
-        # PROPERTY PHOTOS
-        # -------------------------------------------------
         cursor.execute(
             """
-            SELECT
-                id,
-                filename,
-                is_cover
-
+            SELECT id, filename, is_cover
             FROM property_images
-
             WHERE property_id = %s
-
             ORDER BY is_cover DESC, id ASC
             """,
             (property_id,)
         )
-
         images = cursor.fetchall()
 
-        # -------------------------------------------------
-        # AMENITIES
-        # -------------------------------------------------
         cursor.execute(
             """
-            SELECT
-                a.id,
-                a.name
-
+            SELECT a.id, a.name
             FROM amenities a
-
             INNER JOIN property_amenities pa
                 ON a.id = pa.amenity_id
-
             WHERE pa.property_id = %s
-
             ORDER BY a.name ASC
             """,
             (property_id,)
         )
-
         amenities = cursor.fetchall()
 
         return render_template(
@@ -2018,305 +2288,135 @@ def property_details(property_id):
             amenities=amenities
         )
 
-    except Exception as e:
-        print(
-            "PROPERTY DETAILS ERROR:",
-            e
-        )
-        flash(
-            "Unable to load this property right now.",
-            "error"
-        )
-        return redirect(
-            url_for("home")
-        )
+    except Exception:
+        app.logger.exception("PROPERTY DETAILS ERROR")
+        flash("Unable to load this property right now.", "error")
+        return redirect(url_for("home"))
 
     finally:
         if cursor:
             cursor.close()
         if connection:
-            connection.close()
+            connection.close()            
 
 
 # =========================================================
 # SEND PROPERTY INQUIRY
 # =========================================================
 
-@app.route(
-    "/property/<int:property_id>/inquire",
-    methods=["POST"]
-)
+@app.route("/property/<int:property_id>/inquire", methods=["POST"])
 @login_required
 def send_inquiry(property_id):
+    details_url = url_for("property_details", property_id=property_id)
 
     if current_user.role == "landlord":
+        flash("Landlords cannot send property inquiries.", "error")
+        return redirect(details_url)
 
-        flash(
-            "Landlords cannot send property inquiries.",
-            "error"
-        )
-
-        return redirect(
-            url_for(
-                "property_details",
-                property_id=property_id
-            )
-        )
-
-    message = request.form.get(
-        "message",
-        ""
-    ).strip()
+    message = request.form.get("message", "").strip()
 
     if not message:
-
-        flash(
-            "Please enter a message before sending your inquiry.",
-            "error"
-        )
-
-        return redirect(
-            url_for(
-                "property_details",
-                property_id=property_id
-            )
-        )
+        flash("Please enter a message before sending your inquiry.", "error")
+        return redirect(details_url)
 
     if len(message) > 2000:
-
         flash(
             "Your message is too long. Please keep it below 2,000 characters.",
             "error"
         )
-
-        return redirect(
-            url_for(
-                "property_details",
-                property_id=property_id
-            )
-        )
+        return redirect(details_url)
 
     connection = None
     cursor = None
 
     try:
-
         connection = get_db_connection()
-
-        cursor = connection.cursor(
-            dictionary=True
-        )
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(
             """
             SELECT
-                p.id,
-                p.landlord_id,
-                p.title,
-                p.available,
-                p.status,
-                p.total_units,
-                p.vacant_units,
-                p.occupied_units,
+                p.id, p.landlord_id, p.title, p.available, p.status,
+                p.total_units, p.vacant_units, p.occupied_units,
                 u.full_name AS landlord_name
-
             FROM properties p
-
-            LEFT JOIN users u
-                ON p.landlord_id = u.id
-
+            LEFT JOIN users u ON p.landlord_id::text = u.id::text
             WHERE p.id = %s
-
             LIMIT 1
             """,
             (property_id,)
         )
-
         property_data = cursor.fetchone()
 
         if not property_data:
+            flash("Property not found.", "error")
+            return redirect(url_for("home"))
 
-            flash(
-                "Property not found.",
-                "error"
-            )
+        if property_data["status"] != "active" or not property_data["available"]:
+            flash("This property is currently unavailable.", "error")
+            return redirect(details_url)
 
-            return redirect(
-                url_for("home")
-            )
+        if (property_data["vacant_units"] or 0) <= 0:
+            flash("This property currently has no vacant units.", "error")
+            return redirect(details_url)
 
-        vacant_units = property_data[
-            "vacant_units"
-        ]
-
-        if vacant_units <= 0:
-
-            flash(
-                "This property currently has no vacant units.",
-                "error"
-            )
-
-            return redirect(
-                url_for(
-                    "property_details",
-                    property_id=property_id
-                )
-            )
-
-        if (
-            property_data["status"] != "active"
-            or not property_data["available"]
-        ):
-
-            flash(
-                "This property is currently unavailable.",
-                "error"
-            )
-
-            return redirect(
-                url_for(
-                    "property_details",
-                    property_id=property_id
-                )
-            )
-
-        if (
-            property_data["landlord_id"]
-            == current_user.id
-        ):
-
-            flash(
-                "You cannot send an inquiry about your own property.",
-                "error"
-            )
-
-            return redirect(
-                url_for(
-                    "property_details",
-                    property_id=property_id
-                )
-            )
+        if str(property_data["landlord_id"]) == str(current_user.id):
+            flash("You cannot send an inquiry about your own property.", "error")
+            return redirect(details_url)
 
         cursor.execute(
             """
             SELECT id
-
             FROM inquiries
-
             WHERE student_id = %s
-
-            AND property_id = %s
-
-            AND status IN (
-                'new',
-                'read'
-            )
-
+              AND property_id = %s
+              AND status IN ('new', 'read')
             LIMIT 1
             """,
-            (
-                current_user.id,
-                property_id
-            )
+            (current_user.id, property_id)
         )
-
-        existing_inquiry = cursor.fetchone()
-
-        if existing_inquiry:
-
-            flash(
-                "You already have an active inquiry for this property.",
-                "info"
-            )
-
-            return redirect(
-                url_for(
-                    "property_details",
-                    property_id=property_id
-                )
-            )
+        if cursor.fetchone():
+            flash("You already have an active inquiry for this property.", "info")
+            return redirect(details_url)
 
         cursor.execute(
             """
-            INSERT INTO inquiries (
-                student_id,
-                property_id,
-                message,
-                status,
-                created_at
-            )
-
-            VALUES (
-                %s,
-                %s,
-                %s,
-                'new',
-                NOW()
-            )
+            INSERT INTO inquiries (student_id, property_id, message, status, created_at)
+            VALUES (%s, %s, %s, 'new', NOW())
             """,
-            (
-                current_user.id,
-                property_id,
-                message
-            )
+            (current_user.id, property_id, message)
         )
-
         connection.commit()
 
-        # Trigger real-time Telegram lead alert
+        # Telegram lead alert (never blocks the inquiry)
         try:
-            tenant_info = (
-                f"{getattr(current_user, 'full_name', 'Student')} ({current_user.email})"
-            )
             notify_tenant_lead(
                 property_title=property_data["title"],
                 landlord_name=property_data.get("landlord_name") or "Landlord",
                 contact_method="IN-APP INQUIRY FORM",
-                tenant_info=tenant_info,
+                tenant_info=f"{current_user.full_name} ({current_user.email})",
+                tenant_phone=current_user.phone,
                 message_text=message
             )
-        except Exception as tg_err:
-            print("TELEGRAM INQUIRY NOTIFICATION ERROR:", tg_err)
+        except Exception:
+            app.logger.exception("TELEGRAM INQUIRY NOTIFICATION ERROR")
 
-        flash(
-            "Your inquiry has been sent to the landlord.",
-            "success"
-        )
+        flash("Your inquiry has been sent to the landlord.", "success")
+        return redirect(details_url)
 
-        return redirect(
-            url_for(
-                "property_details",
-                property_id=property_id
-            )
-        )
-
-    except Exception as e:
-
+    except Exception:
         if connection:
-            connection.rollback()
-
-        print(
-            "SEND INQUIRY ERROR:",
-            e
-        )
-
-        flash(
-            "Unable to send your inquiry right now.",
-            "error"
-        )
-
-        return redirect(
-            url_for(
-                "property_details",
-                property_id=property_id
-            )
-        )
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        app.logger.exception("SEND INQUIRY ERROR")
+        flash("Unable to send your inquiry right now.", "error")
+        return redirect(details_url)
 
     finally:
-
         if cursor:
             cursor.close()
-
         if connection:
             connection.close()
 
@@ -2396,6 +2496,13 @@ def add_property():
 
     if location not in SUPPORTED_TOWNS:
         return fail("Please select a valid town from the list.")
+
+    location_other = form.get("location_other", "").strip()[:120]
+    if location == "Other":
+        if len(location_other) < 3:
+            return fail("Enter the town and country for this property.")
+    else:
+        location_other = None
 
     if ownership_role not in {"owner", "agent"}:
         return fail(
@@ -2563,7 +2670,7 @@ def add_property():
             """
             INSERT INTO properties (
                 landlord_id, title, property_type, description, location,
-                campus, price, deposit, distance_from_campus,
+                location_other, campus, price, deposit, distance_from_campus,
                 total_units, vacant_units, occupied_units,
                 furnished, available, status,
                 listing_type, bedrooms, bathrooms, size_sqm,
@@ -2571,7 +2678,7 @@ def add_property():
             )
             VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW()
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW()
             )
             RETURNING id
             """,
@@ -2581,6 +2688,7 @@ def add_property():
                 property_type,
                 description,
                 location,
+                location_other,
                 campus,
                 price,
                 deposit,
@@ -2668,7 +2776,7 @@ def add_property():
             notify_admin_listing(
                 property_title=title,
                 landlord_name=current_user.full_name,
-                location=location
+                location=location_other if location == "Other" else location
             )
         except Exception:
             app.logger.exception(
@@ -2686,22 +2794,23 @@ def add_property():
 
     return redirect(url_for("landlord_dashboard"))
 
-
-
 # =========================================================
-# EDIT PROPERTY
+# SET COVER PHOTO
 # =========================================================
 
-@app.route("/landlord/property/<int:property_id>/edit", methods=["GET", "POST"])
+@app.route(
+    "/landlord/property/<int:property_id>/photo/<int:photo_id>/cover",
+    methods=["POST"]
+)
 @login_required
-def edit_property(property_id):
+def set_property_cover(property_id, photo_id):
     if current_user.role not in ("landlord", "admin"):
-        flash("Only landlords can edit properties.", "danger")
+        flash("Only landlords can change the cover photo.", "error")
         return redirect(url_for("dashboard"))
 
-    uploaded_filenames = []
     connection = None
     cursor = None
+    back = redirect(url_for("edit_property", property_id=property_id))
 
     try:
         connection = get_db_connection()
@@ -2709,195 +2818,42 @@ def edit_property(property_id):
 
         cursor.execute(
             """
-            SELECT id, landlord_id, title, property_type, description, location,
-                   campus, price, deposit, distance_from_campus, furnished,
-                   total_units, vacant_units, occupied_units, available,
-                   is_verified, status
-            FROM properties
-            WHERE id = %s AND landlord_id = %s
+            SELECT pi.id
+            FROM property_images pi
+            INNER JOIN properties p ON pi.property_id = p.id
+            WHERE pi.id = %s
+              AND pi.property_id = %s
+              AND (p.landlord_id::text = %s OR %s)
+            LIMIT 1
             """,
-            (property_id, current_user.id)
+            (photo_id, property_id, str(current_user.id),
+             current_user.role == "admin")
         )
-        property_data = cursor.fetchone()
-
-        if not property_data:
-            flash("Property not found or you do not have permission to edit it.", "danger")
-            return redirect(url_for("landlord_dashboard"))
-
-        cursor.execute("SELECT id, name FROM amenities ORDER BY name ASC")
-        amenities = cursor.fetchall()
+        if not cursor.fetchone():
+            flash("Photo not found or you do not have permission to change it.", "error")
+            return back
 
         cursor.execute(
-            "SELECT amenity_id FROM property_amenities WHERE property_id = %s",
+            "UPDATE property_images SET is_cover = FALSE WHERE property_id = %s",
             (property_id,)
         )
-        selected_amenity_ids = {row["amenity_id"] for row in cursor.fetchall()}
-
         cursor.execute(
-            """
-            SELECT id, property_id, filename, is_cover, uploaded_at
-            FROM property_images
-            WHERE property_id = %s
-            ORDER BY is_cover DESC, id ASC
-            """,
-            (property_id,)
+            "UPDATE property_images SET is_cover = TRUE WHERE id = %s AND property_id = %s",
+            (photo_id, property_id)
         )
-        images = cursor.fetchall()
-
-        if request.method == "GET":
-            return render_template(
-                "edit_property.html",
-                property=property_data,
-                amenities=amenities,
-                selected_amenity_ids=selected_amenity_ids,
-                images=images,
-                towns=SUPPORTED_TOWNS
-            )
-
-        # ---------------- POST: validate ----------------
-        form = request.form
-        title = form.get("title", "").strip()
-        property_type = form.get("property_type", "").strip()
-        description = form.get("description", "").strip()
-        location = form.get("location", "").strip()
-        campus = form.get("campus", "").strip()
-        furnished = bool(form.get("furnished"))
-
-        def back(message):
-            flash(message, "danger")
-            return redirect(url_for("edit_property", property_id=property_id))
-
-        def number(raw, label, required=False):
-            raw = (raw or "").strip()
-            if not raw:
-                if required:
-                    raise ValueError(f"Please enter a valid {label}.")
-                return None
-            try:
-                value = float(raw)
-            except ValueError:
-                raise ValueError(f"Please enter a valid {label}.")
-            if value < 0:
-                raise ValueError(f"The {label} cannot be negative.")
-            return value
-
-        if not title:
-            return back("Property title is required.")
-        if not property_type:
-            return back("Please select a property type.")
-        if not description:
-            return back("Property description is required.")
-            
-        # Standardized town dropdown validation
-        if not location or location not in SUPPORTED_TOWNS:
-            return back("Please select a valid town from the list.")
-
-        try:
-            price_value = number(form.get("price"), "property price", required=True)
-            deposit_value = number(form.get("deposit"), "deposit amount")
-            distance_value = number(form.get("distance_from_campus"), "distance from campus")
-            total_units_value = int(form.get("total_units", "").strip())
-            vacant_units_value = int(form.get("vacant_units", "").strip())
-        except ValueError as e:
-            message = str(e)
-            if message.startswith("invalid literal"):
-                message = "Total units and vacant units must be valid numbers."
-            return back(message)
-
-        if total_units_value < 1:
-            return back("Total units must be at least 1.")
-        if vacant_units_value < 0:
-            return back("Vacant units cannot be negative.")
-        if vacant_units_value > total_units_value:
-            return back("Vacant units cannot be greater than total units.")
-
-        occupied_units_value = total_units_value - vacant_units_value
-        available_value = vacant_units_value > 0
-
-        selected_amenities = form.getlist("amenities")
-        new_files = [f for f in request.files.getlist("photos") if f and f.filename]
-
-        if not all(allowed_file(f.filename) for f in new_files):
-            return back("One or more uploaded photos have an unsupported format.")
-
-        review_status = "active" if current_user.role == "admin" else "pending"
-
-        # ---------------- UPDATE ----------------
-        cursor.execute(
-            """
-            UPDATE properties
-            SET title = %s, property_type = %s, description = %s,
-                location = %s, campus = %s, price = %s, deposit = %s,
-                distance_from_campus = %s, furnished = %s,
-                total_units = %s, vacant_units = %s, occupied_units = %s,
-                available = %s, status = %s, is_verified = FALSE,
-                updated_at = NOW()
-            WHERE id = %s AND landlord_id = %s
-            """,
-            (
-                title, property_type, description, location,
-                campus or None, price_value, deposit_value, distance_value,
-                furnished, total_units_value, vacant_units_value,
-                occupied_units_value, available_value, review_status,
-                property_id, current_user.id
-            )
-        )
-
-        cursor.execute(
-            "DELETE FROM property_amenities WHERE property_id = %s",
-            (property_id,)
-        )
-        for amenity_id in selected_amenities:
-            try:
-                cursor.execute(
-                    """
-                    INSERT INTO property_amenities (property_id, amenity_id)
-                    VALUES (%s, %s) ON CONFLICT DO NOTHING
-                    """,
-                    (property_id, int(amenity_id))
-                )
-            except (ValueError, TypeError):
-                continue
-
-        cursor.execute(
-            "SELECT COUNT(*) AS image_count FROM property_images WHERE property_id = %s",
-            (property_id,)
-        )
-        image_count = cursor.fetchone()["image_count"]
-
-        if image_count + len(new_files) > MAX_PHOTOS:
-            connection.rollback()
-            return back(f"A listing can have at most {MAX_PHOTOS} photos. Delete some first.")
-
-        for file in new_files:
-            try:
-                unique_filename = save_photo(file)
-            except ValueError as photo_error:
-                connection.rollback()
-                remove_uploads(uploaded_filenames)
-                return back(str(photo_error))
-
-            uploaded_filenames.append(unique_filename)
-            cursor.execute(
-                """
-                INSERT INTO property_images (property_id, filename, is_cover, uploaded_at)
-                VALUES (%s, %s, %s, NOW())
-                """,
-                (property_id, unique_filename, image_count == 0)
-            )
-            image_count += 1
-
         connection.commit()
-        flash("Property updated successfully.", "success")
-        return redirect(url_for("edit_property", property_id=property_id))
+        flash("Cover photo updated.", "success")
+        return back
 
-    except Exception as e:
+    except Exception:
         if connection:
-            connection.rollback()
-        remove_uploads(uploaded_filenames)
-        print("EDIT PROPERTY ERROR:", e)
-        flash("An error occurred while updating the property.", "danger")
-        return redirect(url_for("landlord_dashboard"))
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        app.logger.exception("SET PROPERTY COVER ERROR")
+        flash("Unable to change the cover photo.", "error")
+        return back
 
     finally:
         if cursor:
@@ -2914,243 +2870,98 @@ def edit_property(property_id):
     methods=["POST"]
 )
 @login_required
-def delete_property_photo(
-    property_id,
-    photo_id
-):
-
-    # =====================================================
-    # LANDLORD CHECK
-    # =====================================================
-
+def delete_property_photo(property_id, photo_id):
     if current_user.role not in ("landlord", "admin"):
-
-        flash(
-            "Only landlords can delete property photos.",
-            "error"
-        )
-
-        return redirect(
-            url_for("dashboard")
-        )
+        flash("Only landlords can delete property photos.", "error")
+        return redirect(url_for("dashboard"))
 
     connection = None
     cursor = None
+    is_admin = current_user.role == "admin"
+    owner_id = str(current_user.id)
+    back = redirect(url_for("edit_property", property_id=property_id))
 
     try:
-
         connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
 
-        cursor = connection.cursor(
-            dictionary=True
-        )
-
-        # =================================================
-        # VERIFY PHOTO + PROPERTY OWNERSHIP
-        # =====================================================
+        # Verify the photo belongs to this property and the user may edit it
         cursor.execute(
             """
-            SELECT
-
-                pi.id,
-                pi.filename,
-                pi.is_cover,
-
-                p.id AS property_id,
-                p.landlord_id,
-                p.title
-
+            SELECT pi.id, pi.filename, pi.is_cover
             FROM property_images pi
-
-            INNER JOIN properties p
-                ON pi.property_id = p.id
-
+            INNER JOIN properties p ON pi.property_id = p.id
             WHERE pi.id = %s
-            AND pi.property_id = %s
-            AND p.landlord_id = %s
-
+              AND pi.property_id = %s
+              AND (p.landlord_id::text = %s OR %s)
             LIMIT 1
             """,
-            (
-                photo_id,
-                property_id,
-                current_user.id
-            )
+            (photo_id, property_id, owner_id, is_admin)
         )
-
         photo = cursor.fetchone()
 
         if not photo:
-
             flash(
                 "Photo not found or you do not have permission to delete it.",
                 "error"
             )
-
-            return redirect(
-                url_for(
-                    "edit_property",
-                    property_id=property_id
-                )
-            )
-
-        # =================================================
-        # COUNT EXISTING PHOTOS
-        # =================================================
+            return back
 
         cursor.execute(
-            """
-            SELECT COUNT(*) AS photo_count
-
-            FROM property_images
-
-            WHERE property_id = %s
-            """,
+            "SELECT COUNT(*) AS photo_count FROM property_images WHERE property_id = %s",
             (property_id,)
         )
-
-        photo_count = cursor.fetchone()[
-            "photo_count"
-        ]
-
-        # =================================================
-        # PREVENT LAST PHOTO DELETION
-        # =================================================
-
-        if photo_count <= 1:
-
-            flash(
-                "A property must keep at least one photo.",
-                "error"
-            )
-
-            return redirect(
-                url_for(
-                    "edit_property",
-                    property_id=property_id
-                )
-            )
-
-        # =================================================
-        # DELETE DATABASE RECORD
-        # =================================================
+        if cursor.fetchone()["photo_count"] <= 1:
+            flash("A property must keep at least one photo.", "error")
+            return back
 
         cursor.execute(
-            """
-            DELETE FROM property_images
-
-            WHERE id = %s
-            AND property_id = %s
-            """,
-            (
-                photo_id,
-                property_id
-            )
+            "DELETE FROM property_images WHERE id = %s AND property_id = %s",
+            (photo_id, property_id)
         )
 
-        # =================================================
-        # IF COVER WAS DELETED, SELECT NEW COVER
-        # =================================================
-
+        # If the cover was deleted, promote the oldest remaining photo
         if photo["is_cover"]:
-
             cursor.execute(
                 """
-                SELECT id
-
-                FROM property_images
-
+                SELECT id FROM property_images
                 WHERE property_id = %s
-
                 ORDER BY id ASC
-
                 LIMIT 1
                 """,
                 (property_id,)
             )
-
             new_cover = cursor.fetchone()
-
             if new_cover:
-
                 cursor.execute(
-                    """
-                    UPDATE property_images
-
-                    SET is_cover = TRUE
-
-                    WHERE id = %s
-                    """,
+                    "UPDATE property_images SET is_cover = TRUE WHERE id = %s",
                     (new_cover["id"],)
                 )
 
         connection.commit()
 
-        # =================================================
-        # DELETE FILE
-        # =================================================
-
-        file_path = os.path.join(
-            UPLOAD_FOLDER,
-            photo["filename"]
-        )
-
+        # Remove the file from Supabase Storage (failure here is not fatal)
         try:
+            remove_uploads([photo["filename"]])
+        except Exception:
+            app.logger.exception("Photo storage delete failed")
 
-            if os.path.exists(
-                file_path
-            ):
+        flash("Property photo deleted successfully.", "success")
+        return back
 
-                os.remove(
-                    file_path
-                )
-
-        except Exception as file_error:
-
-            print(
-                "PHOTO FILE DELETE ERROR:",
-                file_error
-            )
-
-        flash(
-            "Property photo deleted successfully.",
-            "success"
-        )
-
-        return redirect(
-            url_for(
-                "edit_property",
-                property_id=property_id
-            )
-        )
-
-    except Exception as e:
-
+    except Exception:
         if connection:
-            connection.rollback()
-
-        print(
-            "DELETE PROPERTY PHOTO ERROR:",
-            e
-        )
-
-        flash(
-            "Unable to delete the property photo.",
-            "error"
-        )
-
-        return redirect(
-            url_for(
-                "edit_property",
-                property_id=property_id
-            )
-        )
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        app.logger.exception("DELETE PROPERTY PHOTO ERROR")
+        flash("Unable to delete the property photo.", "error")
+        return back
 
     finally:
-
         if cursor:
             cursor.close()
-
         if connection:
             connection.close()
 
@@ -3612,17 +3423,33 @@ def admin_update_user_role(user_id):
 @app.route("/admin/properties/<int:property_id>/proof")
 @admin_required
 def admin_property_proof(property_id):
-    connection = get_db_connection()
+    connection = None
+    cursor = None
     try:
-        cur = connection.cursor(dictionary=True)
-        cur.execute("SELECT proof_doc FROM properties WHERE id = %s", (property_id,))
-        row = cur.fetchone()
-        cur.close()
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT proof_doc FROM properties WHERE id = %s",
+            (property_id,)
+        )
+        row = cursor.fetchone()
     finally:
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
     if not row or not row["proof_doc"]:
         abort(404)
-    return send_from_directory(PRIVATE_FOLDER, row["proof_doc"])
+
+    proof = row["proof_doc"]
+
+    # New uploads are stored in Supabase Storage as full URLs
+    if proof.startswith(("http://", "https://")):
+        return redirect(proof)
+
+    # Legacy proofs saved on the server's disk
+    return send_from_directory(PRIVATE_FOLDER, proof)
 
 
 @app.route("/admin/properties/<int:property_id>", methods=["POST"])
