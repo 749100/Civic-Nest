@@ -1,0 +1,241 @@
+<style>
+  /* the footer now provides the space under the content, so remove the body gap */
+  body {
+    padding-bottom: 0 !important;
+  }
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    margin-top: 56px;
+    padding: 44px 0 calc(112px + env(safe-area-inset-bottom));
+    color: #fff;
+    border-radius: 40px 40px 0 0;
+    background:
+      radial-gradient(
+        520px 320px at 100% 0,
+        rgba(120, 175, 255, 0.35),
+        transparent 70%
+      ),
+      radial-gradient(
+        480px 300px at 0 100%,
+        rgba(45, 99, 200, 0.5),
+        transparent 70%
+      ),
+      linear-gradient(180deg, #0e3478 0, #0a2260 100%);
+  }
+  .site-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.16) 1.1px,
+        transparent 1.6px
+      )
+      0 0/24px 24px;
+    -webkit-mask-image: linear-gradient(0deg, #000, transparent 75%);
+    mask-image: linear-gradient(0deg, #000, transparent 75%);
+  }
+  .site-footer .f-wrap {
+    position: relative;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 22px;
+  }
+  .f-top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  /* brand: same structure as the header logo */
+  .f-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .f-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    background: #fff;
+    color: #1e4fa3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+  .f-mark svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .f-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .f-name {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1;
+    color: #fff;
+  }
+  .f-sub {
+    margin-top: 4px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .f-tag {
+    margin-top: 14px;
+    max-width: 34ch;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .f-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  .f-cols h4 {
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .f-cols a {
+    display: block;
+    padding: 6px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0.92;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+  }
+  .f-cols a:hover {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  .f-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .f-bottom p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .f-top-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .f-top-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  @media (min-width: 700px) {
+    .f-top {
+      grid-template-columns: 1.2fr 1.8fr;
+      gap: 48px;
+    }
+    .f-cols {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .f-bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+</style>
+
+<footer class="site-footer">
+  <div class="f-wrap">
+    <div class="f-top">
+      <div>
+        <a class="f-brand" href="/" aria-label="CivicNest Africa home">
+          <span class="f-mark">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
+              />
+            </svg>
+          </span>
+          <span class="f-text"
+            ><span class="f-name">CivicNest</span
+            ><span class="f-sub">Africa</span></span
+          >
+        </a>
+        <p class="f-tag">
+          Find your next home, hostel, guest house or place to dine across
+          Kenya.
+        </p>
+      </div>
+
+      <div class="f-cols">
+        <div>
+          <h4>Properties</h4>
+          <a href="{{ url_for('rent_page') }}">Rent</a>
+          <a href="{{ url_for('buy_page') }}">Buy</a>
+          <a href="{{ url_for('sell_page') }}">Sell</a>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+          <a href="{{ url_for('invest_page') }}">Invest</a>
+        </div>
+        <div>
+          <h4>Account</h4>
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a href="{{ url_for('register') }}">Create account</a>
+          <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="f-bottom">
+      <p>
+        &copy; {{ current_year }} CivicNest Africa. All rights reserved.
+        Developed by Mabel Africa
+      </p>
+      <button
+        class="f-top-btn"
+        type="button"
+        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+      >
+        Back to top &uarr;
+      </button>
+    </div>
+  </div>
+</footer>
