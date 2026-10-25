@@ -628,7 +628,7 @@
         display: none;
       }
 
-      /* bottom bar */
+      /* Bottom navigation — matched to rent.html */
       .tabbar {
         position: fixed;
         left: 12px;
@@ -637,14 +637,18 @@
         z-index: 40;
         max-width: 520px;
         margin: 0 auto;
+
         display: flex;
-        justify-style: space-around;
+        justify-content: space-around;
         align-items: center;
+
         height: 68px;
         padding: 0 8px;
+
         background: rgba(255, 255, 255, 0.9);
         -webkit-backdrop-filter: blur(16px);
         backdrop-filter: blur(16px);
+
         border: 1px solid rgba(201, 214, 236, 0.9);
         border-radius: 24px;
         box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
@@ -734,6 +738,111 @@
           scroll-behavior: auto !important;
         }
       }
+      /* Compact property grid: 2 per row on phone, 3 on laptop */
+      .plist {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .card {
+        border-radius: 16px;
+      }
+      .photo {
+        height: 120px;
+      }
+      .fav {
+        top: 6px;
+        right: 6px;
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+      }
+      .badge {
+        left: 8px;
+        padding: 3px 8px;
+        font-size: 10px;
+      }
+      .badge.v {
+        top: 8px;
+      }
+      .badge.a {
+        bottom: 8px;
+      }
+      .info {
+        padding: 10px 12px 12px;
+      }
+      .price {
+        font-size: 16px;
+      }
+      .price span {
+        font-size: 11px;
+      }
+      .info h3 {
+        font-size: 14px;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .loc {
+        font-size: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .meta {
+        gap: 5px;
+        margin-top: 8px;
+      }
+      .meta span {
+        padding: 3px 7px;
+        font-size: 11px;
+      }
+      .more {
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      @media (min-width: 900px) {
+        .plist {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+        .photo {
+          height: 180px;
+        }
+        .info {
+          padding: 14px 16px 16px;
+        }
+        .price {
+          font-size: 20px;
+        }
+        .info h3 {
+          font-size: 16px;
+        }
+        .loc {
+          font-size: 13px;
+        }
+      }
+      .tile.wide {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+      }
+      .wide-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .wide-arrow {
+        margin-left: auto;
+        color: rgba(255, 255, 255, 0.85);
+      }
     </style>
   </head>
   <body>
@@ -792,6 +901,10 @@
       </symbol>
       <symbol id="i-chat" viewBox="0 0 24 24">
         <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />
+        <circle cx="7" cy="11" r="1.5" />
       </symbol>
     </svg>
 
@@ -905,11 +1018,9 @@
           <div class="label">Neighborhood insights</div>
           <div class="grid">
             <a class="tile" href="{{ url_for('schools_page') }}">
-              <span class="ico">
-                <svg class="i">
-                  <use href="#i-cap" />
-                </svg>
-              </span>
+              <span class="ico"
+                ><svg class="i"><use href="#i-cap" /></svg
+              ></span>
               <strong>Schools finder</strong>
               <small>EduCore registry</small>
             </a>
@@ -918,6 +1029,20 @@
                 ><svg class="i"><use href="#i-cross" /></svg></span
               ><strong>Hospital finder</strong><small>Medical mapping</small></a
             >
+          </div>
+
+          <div class="label">Stay &amp; Dine</div>
+          <div class="grid">
+            <a class="tile wide" href="{{ url_for('hospitality_page') }}">
+              <span class="ico"
+                ><svg class="i"><use href="#i-bed" /></svg
+              ></span>
+              <span class="wide-text">
+                <strong>Stay &amp; Dine</strong>
+                <small>Guest houses, motels, resorts &amp; restaurants</small>
+              </span>
+              <svg class="i wide-arrow"><use href="#i-arrow" /></svg>
+            </a>
           </div>
         </div>
       </div>

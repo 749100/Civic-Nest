@@ -13,6 +13,7 @@ import os
 import re
 import requests
 import psycopg
+from functools import wraps
 from psycopg.rows import dict_row, tuple_row
 import uuid
 from datetime import date
@@ -109,6 +110,14 @@ ALLOWED_EXTENSIONS = {
     "png",
     "webp"
 }
+
+PLACE_CATEGORIES = [
+    ("guest_house", "Guest house"),
+    ("motel", "Motel"),
+    ("resort", "Resort"),
+    ("restaurant", "Restaurant"),
+]
+VALID_CATEGORIES = {c for c, _ in PLACE_CATEGORIES}
 
 _KENYA_COUNTIES = {
     "Baringo", "Bomet", "Bungoma", "Busia", "Elgeyo-Marakwet", "Embu",
@@ -1346,6 +1355,159 @@ def admin_delete_hospital(hospital_id):
             connection.close()
     return redirect(url_for("admin_hospitals"))    
 
+def get_conn():
+    # If you already have a connection helper, use that instead.
+    return psycopg.connect(os.environ["SUPABASE_DB_URL"])
+
+
+def admin_required(f):
+    # If you already have an admin decorator, use that instead.
+    @wraps(f)
+    @login_required
+    def wrapper(*args, **kwargs):
+        if getattr(current_user, "role", None) != "admin":
+            abort(403)
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def fetch_places(only_active=True):
+    sql = "select * from civicnest.places"
+    if only_active:
+        sql += " where is_active = true"
+    sql += " order by created_at desc"
+    with get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(sql)
+        return cur.fetchall()
+
+
+def read_place_form():
+    f = request.form
+    name = f.get("name", "").strip()
+    category = f.get("category", "")
+    location = f.get("location", "").strip()
+    if not name or not location or category not in VALID_CATEGORIES:
+        return None
+    price = f.get("price", "").strip()
+    return {
+        "name": name,
+        "category": category,
+        "location": location,
+        "price": float(price) if price else None,
+        "phone": f.get("phone", "").strip() or None,
+        "description": f.get("description", "").strip() or None,
+        "cover_image": f.get("cover_image", "").strip() or None,
+        "is_verified": f.get("is_verified") == "on",
+        "is_active": f.get("is_active") == "on",
+    }
+
+
+# ---------- Public page ----------
+@app.route("/stay-and-dine")
+def hospitality_page():
+    return render_template("hospitality.html", places=fetch_places(only_active=True))
+
+
+# ---------- Admin ----------
+@app.route("/admin/places")
+@admin_required
+def admin_places():
+    return render_template(
+        "admin_places.html",
+        places=fetch_places(only_active=False),
+        categories=dict(PLACE_CATEGORIES),
+    )
+
+
+@app.route("/admin/places/add", methods=["GET", "POST"])
+@admin_required
+def admin_place_add():
+    if request.method == "POST":
+        data = read_place_form()
+        if not data:
+            flash("Name, category and location are required.", "error")
+            return render_template(
+                "admin_place_form.html", place=request.form,
+                categories=PLACE_CATEGORIES, towns=get_towns(), editing=False,
+            )
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(
+                """insert into civicnest.places
+                   (name, category, location, price, phone, description,
+                    cover_image, is_verified, is_active)
+                   values (%(name)s, %(category)s, %(location)s, %(price)s,
+                           %(phone)s, %(description)s, %(cover_image)s,
+                           %(is_verified)s, %(is_active)s)""",
+                data,
+            )
+        flash("Place added.", "success")
+        return redirect(url_for("admin_places"))
+    return render_template(
+        "admin_place_form.html", place={"is_active": True},
+        categories=PLACE_CATEGORIES, towns=get_towns(), editing=False,
+    )
+
+
+@app.route("/admin/places/<int:place_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_place_edit(place_id):
+    with get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute("select * from civicnest.places where id = %s", (place_id,))
+        place = cur.fetchone()
+    if not place:
+        abort(404)
+
+    if request.method == "POST":
+        data = read_place_form()
+        if not data:
+            flash("Name, category and location are required.", "error")
+            return render_template(
+                "admin_place_form.html", place=request.form,
+                categories=PLACE_CATEGORIES, towns=get_towns(), editing=True,
+                place_id=place_id,
+            )
+        data["id"] = place_id
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(
+                """update civicnest.places set
+                   name=%(name)s, category=%(category)s, location=%(location)s,
+                   price=%(price)s, phone=%(phone)s, description=%(description)s,
+                   cover_image=%(cover_image)s, is_verified=%(is_verified)s,
+                   is_active=%(is_active)s
+                   where id=%(id)s""",
+                data,
+            )
+        flash("Place updated.", "success")
+        return redirect(url_for("admin_places"))
+
+    return render_template(
+        "admin_place_form.html", place=place, categories=PLACE_CATEGORIES,
+        towns=get_towns(), editing=True, place_id=place_id,
+    )
+
+
+@app.route("/admin/places/<int:place_id>/toggle", methods=["POST"])
+@admin_required
+def admin_place_toggle(place_id):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "update civicnest.places set is_active = not is_active where id = %s",
+            (place_id,),
+        )
+    return redirect(url_for("admin_places"))
+
+
+@app.route("/admin/places/<int:place_id>/delete", methods=["POST"])
+@admin_required
+def admin_place_delete(place_id):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("delete from civicnest.places where id = %s", (place_id,))
+    flash("Place deleted.", "success")
+    return redirect(url_for("admin_places"))
+
+
+def get_towns():
+    return SUPPORTED_TOWNS if "SUPPORTED_TOWNS" in globals() else []
 
 # =========================================================
 # LOGIN
@@ -4175,8 +4337,6 @@ def logout():
     return redirect(
         url_for("home")
     )
-
-
 # =========================================================
 # DATABASE TEST
 # =========================================================

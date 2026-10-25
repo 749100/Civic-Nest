@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <title>
+      Stay &amp; Dine in Kenya | Guest Houses, Motels, Resorts &amp; Restaurants
+      - CivicNest Africa
+    </title>
+    <meta
+      name="description"
+      content="Find guest houses, motels, resorts and restaurants across Kenya on CivicNest Africa."
+    />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('hospitality_page') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+    />
+    <style>
+      :root {
+        --blue: #1e4fa3;
+        --blue2: #2d63c8;
+        --navy: #0a2260;
+        --tint: #e1ebfa;
+        --bg: #f3f7fd;
+        --line: #d9e3f3;
+        --ink: #14213d;
+        --muted: #55627a;
+        --lift:
+          0 1px 2px rgba(20, 33, 61, 0.05), 0 10px 28px rgba(30, 79, 163, 0.09);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        overflow-x: hidden;
+        font-family: "DM Sans", sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        padding-bottom: calc(112px + env(safe-area-inset-bottom));
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      select {
+        font-family: inherit;
+      }
+      :focus-visible {
+        outline: 3px solid #9dc0ff;
+        outline-offset: 2px;
+      }
+      .wrap {
+        position: relative;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 22px;
+      }
+      svg.i {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex: none;
+      }
+
+      /* blue stage */
+      .stage {
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+        padding-bottom: 44px;
+        border-radius: 0 0 40px 40px;
+        background:
+          radial-gradient(
+            700px 420px at 92% 4%,
+            rgba(120, 175, 255, 0.4),
+            transparent 70%
+          ),
+          radial-gradient(
+            600px 400px at 0 70%,
+            rgba(45, 99, 200, 0.55),
+            transparent 70%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(7, 24, 72, 0.8) 0,
+            rgba(14, 52, 128, 0.82) 55%,
+            rgba(8, 30, 86, 0.94) 100%
+          ),
+          url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85")
+            center/cover #0e3478;
+      }
+      .stage::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.22) 1.1px,
+            transparent 1.6px
+          )
+          0 0/24px 24px;
+        -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
+        mask-image: linear-gradient(180deg, #000, transparent 70%);
+      }
+
+      /* header */
+      .top {
+        position: relative;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 76px;
+        padding-top: 6px;
+      }
+      .icon-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 23px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+      }
+      .icon-btn.ring {
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      }
+      .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+      }
+      .brand-name {
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: 25px;
+        color: #fff;
+      }
+      .brand-sub {
+        margin-top: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.78);
+      }
+      .menu {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        z-index: 30;
+        min-width: 230px;
+        background: #fff;
+        color: var(--ink);
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: 0 22px 50px rgba(5, 15, 50, 0.4);
+      }
+      .menu[hidden] {
+        display: none;
+      }
+      .menu a {
+        display: block;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .menu a:hover {
+        background: var(--tint);
+      }
+
+      /* hero + search */
+      h1 {
+        position: relative;
+        margin: clamp(18px, 5vw, 40px) 0 26px;
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: clamp(36px, 6.5vw, 64px);
+        line-height: 1.06;
+        letter-spacing: -0.02em;
+        max-width: 16ch;
+        text-shadow: 0 6px 30px rgba(3, 12, 40, 0.45);
+      }
+      .search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 62px;
+        padding: 0 9px 0 20px;
+        background: #fff;
+        border-radius: 20px;
+        color: var(--muted);
+        max-width: 720px;
+        box-shadow: 0 24px 50px rgba(3, 12, 40, 0.4);
+      }
+      .search input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 16px;
+        color: var(--ink);
+      }
+      .search:focus-within {
+        box-shadow:
+          0 0 0 4px rgba(157, 192, 255, 0.55),
+          0 24px 50px rgba(3, 12, 40, 0.4);
+      }
+      .go {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        border: 0;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(135deg, var(--blue2), #173f85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 18px rgba(30, 79, 163, 0.4);
+      }
+
+      /* tiles */
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 32px 0 14px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .label::before {
+        content: "";
+        width: 26px;
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.2));
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .tile {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 15px 16px;
+        color: #fff;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.11);
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        border-radius: 20px;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        box-shadow:
+          0 14px 34px rgba(3, 12, 40, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        transition:
+          transform 0.2s,
+          background 0.2s,
+          border-color 0.2s;
+      }
+      .tile:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+      .tile.on {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: #fff;
+      }
+      .ico {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+        background: #fff;
+        color: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 18px rgba(3, 12, 40, 0.28);
+      }
+      .tile strong {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .tile small {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      /* filters */
+      .filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 4px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field span {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .field select {
+        width: 100%;
+        height: 50px;
+        padding: 0 40px 0 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.14)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
+          right 12px center/18px no-repeat;
+        color: #fff;
+        font-size: 15px;
+        -webkit-appearance: none;
+        appearance: none;
+        cursor: pointer;
+      }
+      .field select option {
+        color: #14213d;
+      }
+      .ghost {
+        align-self: end;
+        height: 50px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        background: transparent;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .ghost:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      /* listings */
+      .listings {
+        position: relative;
+        padding: 56px 0 8px;
+        background: radial-gradient(
+            circle,
+            rgba(30, 79, 163, 0.1) 1.1px,
+            transparent 1.5px
+          )
+          0 0/24px 24px;
+      }
+      .listings h2 {
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: clamp(28px, 4vw, 40px);
+        color: var(--navy);
+      }
+      .count {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* compact cards: 2 per row on phone, 3 on laptop */
+      .plist {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--lift);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 26px 50px rgba(30, 79, 163, 0.2);
+      }
+      .photo {
+        position: relative;
+        height: 120px;
+        background: linear-gradient(135deg, #c9d8f2, #e1ebfa);
+      }
+      .photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(10, 34, 96, 0.2),
+          transparent 35%,
+          rgba(10, 34, 96, 0.5)
+        );
+        pointer-events: none;
+      }
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .no-photo {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .fav,
+      .badge {
+        z-index: 2;
+      }
+      .fav {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 0;
+        background: rgba(255, 255, 255, 0.94);
+        font-size: 15px;
+        cursor: pointer;
+        color: var(--ink);
+        box-shadow: 0 6px 14px rgba(20, 33, 61, 0.25);
+      }
+      .badge {
+        position: absolute;
+        left: 8px;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .badge.v {
+        top: 8px;
+        background: var(--blue);
+      }
+      .badge.a {
+        bottom: 8px;
+        background: #0f7a55;
+      }
+      .info {
+        padding: 10px 12px 12px;
+      }
+      .price {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--blue);
+      }
+      .price span {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .info h3 {
+        margin-top: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .loc {
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--muted);
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+      }
+      .meta span {
+        padding: 3px 7px;
+        border-radius: 8px;
+        background: var(--tint);
+        font-size: 11px;
+        font-weight: 500;
+        color: #2b4a82;
+      }
+      .more {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--blue);
+      }
+      .more:hover {
+        text-decoration: underline;
+      }
+      .empty {
+        grid-column: 1/-1;
+        padding: 44px 20px;
+        text-align: center;
+        background: #fff;
+        border: 1px dashed #9db4dd;
+        border-radius: 22px;
+      }
+      .empty h3 {
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+      .empty p {
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 420px;
+        margin: auto;
+      }
+      .empty[hidden] {
+        display: none;
+      }
+
+      /* call to action */
+      .cta {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 44px 0 0;
+        padding: 28px;
+        border-radius: 24px;
+        color: #fff;
+        background: linear-gradient(135deg, #1e4fa3, #0a2260);
+        box-shadow: 0 24px 50px rgba(30, 79, 163, 0.3);
+      }
+      .cta h2 {
+        font-family: "Fraunces", serif;
+        font-weight: 600;
+        font-size: 26px;
+        color: #fff;
+      }
+      .cta p {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 15px;
+        max-width: 52ch;
+      }
+      .cta .btn {
+        align-self: flex-start;
+        min-height: 46px;
+        padding: 0 26px;
+        display: flex;
+        align-items: center;
+        border-radius: 13px;
+        background: #fff;
+        color: var(--navy);
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      footer {
+        padding: 36px 0 8px;
+      }
+      footer p {
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      /* bottom nav */
+      .tabbar {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 40;
+        max-width: 520px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 68px;
+        padding: 0 8px;
+        background: rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(201, 214, 236, 0.9);
+        border-radius: 24px;
+        box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
+      }
+      .tab {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 76px;
+        padding: 7px 14px;
+        border-radius: 18px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .tab svg.i {
+        width: 22px;
+        height: 22px;
+      }
+      .tab em {
+        position: absolute;
+        top: 2px;
+        left: calc(50% + 6px);
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: var(--blue);
+        color: #fff;
+        font-style: normal;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 18px;
+        text-align: center;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      h1 {
+        animation: rise 0.7s 0.05s both;
+      }
+      .search {
+        animation: rise 0.7s 0.15s both;
+      }
+      .stage .label,
+      .stage .grid,
+      .stage .filters {
+        animation: rise 0.7s 0.26s both;
+      }
+
+      @media (min-width: 700px) {
+        .stage {
+          padding-bottom: 60px;
+        }
+        .cta {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+      @media (min-width: 900px) {
+        .plist {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+        .photo {
+          height: 180px;
+        }
+        .info {
+          padding: 14px 16px 16px;
+        }
+        .price {
+          font-size: 20px;
+        }
+        .info h3 {
+          font-size: 16px;
+        }
+        .loc {
+          font-size: 13px;
+        }
+      }
+      @media (min-width: 1000px) {
+        .grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .filters {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% include "_admin_bar.html" %}
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+      <symbol id="i-building" viewBox="0 0 24 24">
+        <path
+          d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"
+        />
+      </symbol>
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />
+        <circle cx="7" cy="11" r="1.5" />
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+        />
+      </symbol>
+      <symbol id="i-fork" viewBox="0 0 24 24">
+        <path
+          d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 1-3 4-3 7v3h3"
+        />
+      </symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M20 20l-4-4" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </symbol>
+      <symbol id="i-bookmark" viewBox="0 0 24 24">
+        <path d="M6 3h12v18l-6-4-6 4z" />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+    </svg>
+
+    <main>
+      <div class="stage">
+        <div class="wrap">
+          <header class="top">
+            <button
+              class="icon-btn"
+              id="menuBtn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="menuPanel"
+            >
+              <svg class="i" width="24" height="24"><use href="#i-menu" /></svg>
+            </button>
+            <nav class="menu" id="menuPanel" aria-label="Main menu" hidden>
+              <a href="/">Home</a>
+              <a href="{{ url_for('rent_page') }}">Rent</a>
+              <a href="{{ url_for('buy_page') }}">Buy</a>
+              <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+              <a href="{{ url_for('invest_page') }}">Invest</a>
+              <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+              <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+              <a href="{{ url_for('login', role='landlord') }}"
+                >Landlord login</a
+              >
+              <a href="{{ url_for('register') }}">Create account</a>
+            </nav>
+            <a class="brand" href="/" aria-label="CivicNest Africa home">
+              <span class="brand-mark"
+                ><svg class="i"><use href="#i-house" /></svg
+              ></span>
+              <span class="brand-text"
+                ><span class="brand-name">CivicNest</span
+                ><span class="brand-sub">Africa</span></span
+              >
+            </a>
+            <a
+              class="icon-btn ring"
+              href="{{ url_for('login') }}"
+              aria-label="Your account"
+              ><svg class="i" width="22" height="22"><use href="#i-user" /></svg
+            ></a>
+          </header>
+
+          <h1>Find a place to stay and dine.</h1>
+
+          <form class="search" id="searchForm" role="search">
+            <svg class="i"><use href="#i-search" /></svg>
+            <input
+              type="search"
+              id="locationSearch"
+              aria-label="Search by name, town or neighborhood"
+              placeholder="Search name, town, neighborhood..."
+            />
+            <button class="go" type="submit" aria-label="Search">
+              <svg class="i"><use href="#i-arrow" /></svg>
+            </button>
+          </form>
+
+          <div class="label">Browse by category</div>
+          <div class="grid" id="typeTiles">
+            <button
+              class="tile"
+              type="button"
+              data-type="guest_house"
+              aria-pressed="false"
+            >
+              <span class="ico"
+                ><svg class="i"><use href="#i-bed" /></svg
+              ></span>
+              <strong>Guest houses</strong><small>Homely stays</small>
+            </button>
+            <button
+              class="tile"
+              type="button"
+              data-type="motel"
+              aria-pressed="false"
+            >
+              <span class="ico"
+                ><svg class="i"><use href="#i-building" /></svg
+              ></span>
+              <strong>Motels</strong><small>Quick overnight</small>
+            </button>
+            <button
+              class="tile"
+              type="button"
+              data-type="resort"
+              aria-pressed="false"
+            >
+              <span class="ico"
+                ><svg class="i"><use href="#i-sun" /></svg
+              ></span>
+              <strong>Resorts</strong><small>Getaways</small>
+            </button>
+            <button
+              class="tile"
+              type="button"
+              data-type="restaurant"
+              aria-pressed="false"
+            >
+              <span class="ico"
+                ><svg class="i"><use href="#i-fork" /></svg
+              ></span>
+              <strong>Restaurants</strong><small>Eat out</small>
+            </button>
+          </div>
+
+          <div class="label">Refine your search</div>
+          <div class="filters">
+            <label class="field"
+              ><span>Price range</span>
+              <select id="budgetSearch">
+                <option value="">Any price</option>
+                <option value="0-1000">Below KSh 1,000</option>
+                <option value="1000-3000">KSh 1,000 – 3,000</option>
+                <option value="3000-8000">KSh 3,000 – 8,000</option>
+                <option value="8000-999999999">Above KSh 8,000</option>
+              </select>
+            </label>
+            <label class="field"
+              ><span>Sort by</span>
+              <select id="sortSearch">
+                <option value="">Newest first</option>
+                <option value="low">Price: low to high</option>
+                <option value="high">Price: high to low</option>
+              </select>
+            </label>
+            <button class="ghost" type="button" id="clearBtn">
+              Clear filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section class="listings" id="places" aria-labelledby="listingsTitle">
+        <div class="wrap">
+          <h2 id="listingsTitle">Stay &amp; Dine</h2>
+          <p class="count" id="placeCount">
+            {{ places|length }} {{ 'place' if places|length == 1 else 'places'
+            }} available
+          </p>
+
+          <div class="plist" id="placeGrid">
+            {% if places %} {% for place in places %}
+            <article
+              class="card"
+              data-place-id="{{ place.id }}"
+              data-name="{{ place.name|lower }}"
+              data-location="{{ place.location|lower }}"
+              data-type="{{ place.category }}"
+              data-price="{{ place.price or 0 }}"
+            >
+              <div class="photo">
+                {% if place.cover_image %}
+                <img
+                  src="{{ place.cover_image if place.cover_image.startswith('http') else url_for('static', filename='uploads/places/' + place.cover_image) }}"
+                  onerror="
+                    this.onerror = null;
+                    this.src =
+                      'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800';
+                  "
+                  alt="{{ place.name }}"
+                  loading="lazy"
+                />
+                {% else %}
+                <div class="no-photo">No photo available</div>
+                {% endif %}
+                <button
+                  class="fav"
+                  type="button"
+                  aria-label="Save place"
+                  aria-pressed="false"
+                >
+                  ♡
+                </button>
+                {% if place.is_verified %}<span class="badge v">Verified</span
+                >{% endif %}
+                <span class="badge a"
+                  >{{ place.category|replace('_', ' ')|title }}</span
+                >
+              </div>
+              <div class="info">
+                <div class="price">
+                  {% if place.price %}KSh {{ "{:,.0f}".format(place.price) }}
+                  <span
+                    >{{ '/ meal' if place.category == 'restaurant' else '/
+                    night' }}</span
+                  >
+                  {% else %}<span>Ask for price</span>{% endif %}
+                </div>
+                <h3>{{ place.name }}</h3>
+                <div class="loc">{{ place.location }}</div>
+                {% if place.phone %}
+                <a class="more" href="tel:{{ place.phone }}">Call now</a>
+                {% endif %}
+              </div>
+            </article>
+            {% endfor %} {% else %}
+            <div class="empty">
+              <h3>No places listed yet</h3>
+              <p>
+                Guest houses, motels, resorts and restaurants will appear here
+                as they are added. Check back soon.
+              </p>
+            </div>
+            {% endif %} {% if places %}
+            <div class="empty" id="searchEmptyState" hidden>
+              <h3>No places match your search</h3>
+              <p>
+                Try a different town, a wider price range, or clear the filters.
+              </p>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="cta">
+            <div>
+              <h2>Own a guest house, motel or restaurant?</h2>
+              <p>
+                Get your place in front of travellers, students and families
+                searching on CivicNest.
+              </p>
+            </div>
+            <a class="btn" href="{{ url_for('login', role='landlord') }}"
+              >List your place</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          &copy; {{ current_year }} CivicNest Africa. All rights reserved.
+          Developed by Mabel Africa
+        </p>
+      </div>
+    </footer>
+
+    <nav class="tabbar" aria-label="Primary">
+      <a class="tab" href="/"
+        ><svg class="i"><use href="#i-house" /></svg>Home</a
+      >
+      <a class="tab" href="#places"
+        ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
+          >0</em
+        ></a
+      >
+      <a class="tab" href="#"
+        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+      >
+    </nav>
+
+    <script>
+      // Menu
+      const menuBtn = document.getElementById("menuBtn");
+      const menuPanel = document.getElementById("menuPanel");
+      menuBtn.addEventListener("click", () => {
+        const open = menuPanel.hidden;
+        menuPanel.hidden = !open;
+        menuBtn.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", (e) => {
+        if (
+          !menuPanel.hidden &&
+          !menuPanel.contains(e.target) &&
+          !menuBtn.contains(e.target)
+        ) {
+          menuPanel.hidden = true;
+          menuBtn.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      // Favorites (saved in this browser)
+      const savedCount = document.getElementById("savedCount");
+      let favorites = [];
+      try {
+        favorites = JSON.parse(
+          localStorage.getItem("civicNestPlaceFavorites") || "[]",
+        );
+      } catch (e) {}
+      const paint = (btn, on) => {
+        btn.textContent = on ? "♥" : "♡";
+        btn.style.color = on ? "#ef4444" : "";
+        btn.setAttribute("aria-pressed", String(on));
+      };
+      document.querySelectorAll(".fav").forEach((btn, i) => {
+        const id = btn.closest(".card")?.dataset.placeId || String(i);
+        paint(btn, favorites.includes(id));
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const on = !favorites.includes(id);
+          favorites = on
+            ? [...new Set([...favorites, id])]
+            : favorites.filter((x) => x !== id);
+          try {
+            localStorage.setItem(
+              "civicNestPlaceFavorites",
+              JSON.stringify(favorites),
+            );
+          } catch (e) {}
+          paint(btn, on);
+          savedCount.textContent = favorites.length;
+        });
+      });
+      savedCount.textContent = favorites.length;
+
+      // Search, category tiles, filters and sorting
+      const grid = document.getElementById("placeGrid");
+      const cards = [...document.querySelectorAll(".card")];
+      const originalOrder = [...cards];
+      const form = document.getElementById("searchForm");
+      const searchInput = document.getElementById("locationSearch");
+      const budgetSel = document.getElementById("budgetSearch");
+      const sortSel = document.getElementById("sortSearch");
+      const countLabel = document.getElementById("placeCount");
+      const emptyState = document.getElementById("searchEmptyState");
+      const tiles = [...document.querySelectorAll("#typeTiles .tile")];
+      let activeType = "";
+
+      function applyFilters() {
+        const q = searchInput.value.trim().toLowerCase();
+        const range = budgetSel.value
+          ? budgetSel.value.split("-").map(Number)
+          : null;
+        let found = 0;
+
+        cards.forEach((c) => {
+          const price = parseFloat(c.dataset.price || 0);
+          const okText =
+            !q ||
+            (c.dataset.location || "").includes(q) ||
+            (c.dataset.name || "").includes(q);
+          const okType = !activeType || c.dataset.type === activeType;
+          const okBudget = !range || (price >= range[0] && price <= range[1]);
+          const show = okText && okType && okBudget;
+          c.style.display = show ? "" : "none";
+          if (show) found++;
+        });
+
+        const sorted = sortSel.value
+          ? [...cards].sort((a, b) => {
+              const d =
+                parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+              return sortSel.value === "low" ? d : -d;
+            })
+          : originalOrder;
+        sorted.forEach((c) => grid.insertBefore(c, emptyState));
+
+        countLabel.textContent = `${found} ${found === 1 ? "place" : "places"} available`;
+        if (emptyState) emptyState.hidden = found !== 0;
+      }
+
+      tiles.forEach((t) =>
+        t.addEventListener("click", () => {
+          activeType = activeType === t.dataset.type ? "" : t.dataset.type;
+          tiles.forEach((x) => {
+            const on = x.dataset.type === activeType;
+            x.classList.toggle("on", on);
+            x.setAttribute("aria-pressed", String(on));
+          });
+          applyFilters();
+          document
+            .getElementById("places")
+            .scrollIntoView({ behavior: "smooth" });
+        }),
+      );
+
+      [searchInput, budgetSel, sortSel].forEach((el) =>
+        el.addEventListener("input", applyFilters),
+      );
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        applyFilters();
+        document
+          .getElementById("places")
+          .scrollIntoView({ behavior: "smooth" });
+      });
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        searchInput.value = "";
+        budgetSel.value = "";
+        sortSel.value = "";
+        activeType = "";
+        tiles.forEach((x) => {
+          x.classList.remove("on");
+          x.setAttribute("aria-pressed", "false");
+        });
+        applyFilters();
+      });
+    </script>
+  </body>
+</html>
