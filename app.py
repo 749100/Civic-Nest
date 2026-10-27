@@ -1357,7 +1357,7 @@ def admin_delete_hospital(hospital_id):
 
 def get_conn():
     # If you already have a connection helper, use that instead.
-    return psycopg.connect(os.environ["SUPABASE_DB_URL"])
+    return get_db_connection()
 
 
 def admin_required(f):
@@ -1372,34 +1372,128 @@ def admin_required(f):
 
 
 def fetch_places(only_active=True):
-    sql = "select * from civicnest.places"
+    sql = "SELECT * FROM civicnest.places"
     if only_active:
-        sql += " where is_active = true"
-    sql += " order by created_at desc"
-    with get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
+        sql += " WHERE is_active = TRUE AND status = 'approved'"
+    sql += " ORDER BY (status = 'pending') DESC, created_at DESC"
+    with get_db_connection() as conn, conn.cursor(dictionary=True) as cur:
         cur.execute(sql)
         return cur.fetchall()
 
-
-def read_place_form():
+def place_form_to_dict():
+    """Turn the submitted form into a dict the template can re-display."""
     f = request.form
+    d = f.to_dict()
+    d["amenities"] = f.getlist("amenities")
+    d["delivery"] = f.get("delivery") == "on"
+    d["is_verified"] = f.get("is_verified") == "on"
+    d["is_active"] = f.get("is_active") == "on"
+    return d
+
+
+def read_admin_place_form(existing=None):
+    """Validate the admin form and upload photos.
+    Returns (data, error). On error, data is None."""
+    f = request.form
+    category = f.get("category", "").strip()
     name = f.get("name", "").strip()
-    category = f.get("category", "")
     location = f.get("location", "").strip()
-    if not name or not location or category not in VALID_CATEGORIES:
-        return None
-    price = f.get("price", "").strip()
+    phone = f.get("phone", "").strip()
+    description = f.get("description", "").strip()
+
+    if category not in VALID_CATEGORIES:
+        return None, "Choose what type of place this is."
+    if not name or len(name) > 120:
+        return None, "Enter a name of up to 120 characters."
+    if location not in SUPPORTED_TOWNS:
+        return None, "Please select a valid town from the list."
+    if location == "Other":
+        other = f.get("location_other", "").strip()[:120]
+        if len(other) < 3:
+            return None, "Enter the town and country for this place."
+        location = other
+    if not phone or len(phone) > 30:
+        return None, "Enter a valid phone number."
+    if len(description) < 30:
+        return None, "Write a description of at least 30 characters."
+
+    try:
+        price = Decimal(f.get("price", "").strip())
+        if not price.is_finite() or price <= 0 or price > Decimal("9999999999"):
+            raise InvalidOperation
+    except (InvalidOperation, ValueError):
+        return None, "Enter a valid price."
+
+    rooms = None
+    if category != "restaurant" and f.get("rooms", "").strip():
+        try:
+            rooms = int(f.get("rooms"))
+            if not 1 <= rooms <= 5000:
+                raise ValueError
+        except ValueError:
+            return None, "Enter a valid number of rooms."
+
+    website = f.get("website", "").strip()[:255] or None
+    if website:
+        if "://" in website and not website.lower().startswith(("http://", "https://")):
+            return None, "The website must start with http:// or https://."
+        if "://" not in website:
+            website = "https://" + website
+
+    cover_url = f.get("cover_image", "").strip()[:500] or None
+    if cover_url and not cover_url.lower().startswith(("http://", "https://")):
+        return None, "The cover image URL must start with http:// or https://."
+
+    new_files = [p for p in request.files.getlist("photos") if p and p.filename]
+    if len(new_files) > 5:
+        return None, "You can add up to 5 photos."
+    if not all(allowed_file(p.filename) for p in new_files):
+        return None, "Only JPG, PNG and WEBP photos are allowed."
+
+    old_photos = list((existing or {}).get("photos") or [])
+    old_cover = (existing or {}).get("cover_image")
+    if not new_files and not (cover_url or old_cover):
+        return None, "Add at least one photo or a cover image URL."
+
+    # Upload last, after everything else has been validated
+    uploaded = []
+    try:
+        for p in new_files:
+            uploaded.append(save_photo(p))
+    except ValueError as exc:
+        remove_uploads(uploaded)
+        return None, str(exc)
+    except Exception:
+        app.logger.exception("Photo upload failed in admin place form.")
+        remove_uploads(uploaded)
+        return None, "We could not upload the photos. Please try again."
+
+    if uploaded:
+        photos, cover = uploaded, uploaded[0]
+    else:
+        photos = old_photos
+        cover = cover_url or old_cover
+
     return {
         "name": name,
         "category": category,
         "location": location,
-        "price": float(price) if price else None,
-        "phone": f.get("phone", "").strip() or None,
-        "description": f.get("description", "").strip() or None,
-        "cover_image": f.get("cover_image", "").strip() or None,
+        "price": price,
+        "phone": phone,
+        "description": description,
+        "cover_image": cover,
+        "photos": photos,
+        "website": website,
+        "rooms": rooms,
+        "check_in_time": f.get("check_in_time", "").strip()[:60] or None,
+        "amenities": ", ".join(f.getlist("amenities"))[:500] or None,
+        "cuisine": f.get("cuisine", "").strip()[:120] or None,
+        "opening_hours": f.get("opening_hours", "").strip()[:150] or None,
+        "delivery": f.get("delivery") == "on",
         "is_verified": f.get("is_verified") == "on",
         "is_active": f.get("is_active") == "on",
-    }
+        "_uploaded": uploaded,   # used only for cleanup, not saved
+    }, None
 
 
 # ---------- Public page ----------
@@ -1422,30 +1516,58 @@ def admin_places():
 @app.route("/admin/places/add", methods=["GET", "POST"])
 @admin_required
 def admin_place_add():
-    if request.method == "POST":
-        data = read_place_form()
-        if not data:
-            flash("Name, category and location are required.", "error")
-            return render_template(
-                "admin_place_form.html", place=request.form,
-                categories=PLACE_CATEGORIES, towns=get_towns(), editing=False,
-            )
+    def show(place, status=200):
+        return render_template(
+            "admin_place_form.html", place=place,
+            categories=PLACE_CATEGORIES, towns=get_towns(), editing=False,
+        ), status
+
+    if request.method == "GET":
+        return show({"is_active": True})
+
+    data, error = read_admin_place_form()
+    if error:
+        flash(error, "error")
+        return show(place_form_to_dict(), 400)
+
+    uploaded = data.pop("_uploaded")
+    data["status"] = "approved"          # admin-added places go live
+    data["owner_role"] = "owner"
+    data["owner_id"] = str(current_user.id)
+
+    try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(
-                """insert into civicnest.places
-                   (name, category, location, price, phone, description,
-                    cover_image, is_verified, is_active)
-                   values (%(name)s, %(category)s, %(location)s, %(price)s,
-                           %(phone)s, %(description)s, %(cover_image)s,
-                           %(is_verified)s, %(is_active)s)""",
+                """
+                INSERT INTO civicnest.places (
+                    name, category, location, price, phone, description,
+                    cover_image, photos, website, wants_website, rooms,
+                    check_in_time, amenities, cuisine, opening_hours,
+                    delivery, owner_role, owner_id, status,
+                    is_verified, is_active
+                )
+                VALUES (
+                    %(name)s, %(category)s, %(location)s, %(price)s, %(phone)s,
+                    %(description)s, %(cover_image)s, %(photos)s, %(website)s,
+                    FALSE, %(rooms)s, %(check_in_time)s, %(amenities)s,
+                    %(cuisine)s, %(opening_hours)s, %(delivery)s,
+                    %(owner_role)s, %(owner_id)s, %(status)s,
+                    %(is_verified)s, %(is_active)s
+                )
+                """,
                 data,
             )
-        flash("Place added.", "success")
-        return redirect(url_for("admin_places"))
-    return render_template(
-        "admin_place_form.html", place={"is_active": True},
-        categories=PLACE_CATEGORIES, towns=get_towns(), editing=False,
-    )
+    except Exception:
+        app.logger.exception("Admin could not save the place.")
+        try:
+            remove_uploads(uploaded)
+        except Exception:
+            pass
+        flash("Something went wrong while saving. Please try again.", "error")
+        return show(place_form_to_dict(), 500)
+
+    flash("Place added.", "success")
+    return redirect(url_for("admin_places"))
 
 
 @app.route("/admin/places/<int:place_id>/edit", methods=["GET", "POST"])
@@ -1457,33 +1579,56 @@ def admin_place_edit(place_id):
     if not place:
         abort(404)
 
-    if request.method == "POST":
-        data = read_place_form()
-        if not data:
-            flash("Name, category and location are required.", "error")
-            return render_template(
-                "admin_place_form.html", place=request.form,
-                categories=PLACE_CATEGORIES, towns=get_towns(), editing=True,
-                place_id=place_id,
-            )
-        data["id"] = place_id
+    def show(p, status=200):
+        return render_template(
+            "admin_place_form.html", place=p,
+            categories=PLACE_CATEGORIES, towns=get_towns(),
+            editing=True, place_id=place_id,
+        ), status
+
+    if request.method == "GET":
+        # amenities are stored as "Wi-Fi, Parking"; the form wants a list
+        place["amenities"] = [
+            a.strip() for a in (place.get("amenities") or "").split(",") if a.strip()
+        ]
+        return show(place)
+
+    data, error = read_admin_place_form(existing=place)
+    if error:
+        flash(error, "error")
+        return show(place_form_to_dict(), 400)
+
+    uploaded = data.pop("_uploaded")
+    data["id"] = place_id
+
+    try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute(
-                """update civicnest.places set
-                   name=%(name)s, category=%(category)s, location=%(location)s,
-                   price=%(price)s, phone=%(phone)s, description=%(description)s,
-                   cover_image=%(cover_image)s, is_verified=%(is_verified)s,
-                   is_active=%(is_active)s
-                   where id=%(id)s""",
+                """
+                UPDATE civicnest.places SET
+                    name=%(name)s, category=%(category)s, location=%(location)s,
+                    price=%(price)s, phone=%(phone)s, description=%(description)s,
+                    cover_image=%(cover_image)s, photos=%(photos)s,
+                    website=%(website)s, rooms=%(rooms)s,
+                    check_in_time=%(check_in_time)s, amenities=%(amenities)s,
+                    cuisine=%(cuisine)s, opening_hours=%(opening_hours)s,
+                    delivery=%(delivery)s, is_verified=%(is_verified)s,
+                    is_active=%(is_active)s
+                WHERE id=%(id)s
+                """,
                 data,
             )
-        flash("Place updated.", "success")
-        return redirect(url_for("admin_places"))
+    except Exception:
+        app.logger.exception("Admin could not update the place.")
+        try:
+            remove_uploads(uploaded)
+        except Exception:
+            pass
+        flash("Something went wrong while saving. Please try again.", "error")
+        return show(place_form_to_dict(), 500)
 
-    return render_template(
-        "admin_place_form.html", place=place, categories=PLACE_CATEGORIES,
-        towns=get_towns(), editing=True, place_id=place_id,
-    )
+    flash("Place updated.", "success")
+    return redirect(url_for("admin_places"))
 
 
 @app.route("/admin/places/<int:place_id>/toggle", methods=["POST"])
@@ -1504,6 +1649,209 @@ def admin_place_delete(place_id):
         cur.execute("delete from civicnest.places where id = %s", (place_id,))
     flash("Place deleted.", "success")
     return redirect(url_for("admin_places"))
+
+def notify_admin_place(name, category, location, owner_name, phone,
+                       website, wants_website):
+    esc = lambda v: html.escape(str(v or ""))
+    lines = [
+        "🏨 <b>New Stay &amp; Dine listing pending!</b>",
+        "",
+        f"<b>Name:</b> {esc(name)}",
+        f"<b>Type:</b> {esc(dict(PLACE_CATEGORIES).get(category, category))}",
+        f"<b>Location:</b> {esc(location)}",
+        f"<b>Owner:</b> {esc(owner_name)}",
+        f"<b>Phone:</b> {esc(phone)}",
+    ]
+    if website:
+        lines.append(f"<b>Website:</b> {esc(website)}")
+    if wants_website:
+        lines.append("🌐 <b>Wants a website built</b>")
+    lines += ["", "Open /admin/places to review and approve it."]
+    _send_telegram("\n".join(lines))
+
+
+def render_place_form(status=200):
+    saved = (
+        {k: request.form.getlist(k) for k in request.form}
+        if request.method == "POST" else {}
+    )
+    return render_template(
+        "list_place.html", towns=SUPPORTED_TOWNS, saved=saved
+    ), status
+
+
+@app.route("/stay-and-dine/list", methods=["GET", "POST"])
+def list_place():
+    if not current_user.is_authenticated:
+        return redirect(url_for(
+            "login", role="landlord", next=url_for("list_place")
+        ))
+    if current_user.role not in ("landlord", "admin"):
+        flash("Listing is for owner accounts. Sign in with a landlord account.", "error")
+        return redirect(url_for("hospitality_page"))
+
+    if request.method == "GET":
+        return render_place_form()
+
+    def fail(message):
+        flash(message, "error")
+        return render_place_form(400)
+
+    def cleanup(urls):
+        try:
+            remove_uploads(urls)
+        except Exception:
+            app.logger.exception("Could not clean up place photos.")
+
+    f = request.form
+    category = f.get("category", "").strip()
+    name = f.get("name", "").strip()
+    location = f.get("location", "").strip()
+    phone = f.get("phone", "").strip()
+    description = f.get("description", "").strip()
+    ownership_role = f.get("ownership_role", "").strip()
+
+    if category not in VALID_CATEGORIES:
+        return fail("Choose what you are listing.")
+    if not name or len(name) > 120:
+        return fail("Enter a name of up to 120 characters.")
+    if location not in SUPPORTED_TOWNS:
+        return fail("Please select a valid town from the list.")
+    if location == "Other":
+        other = f.get("location_other", "").strip()[:120]
+        if len(other) < 3:
+            return fail("Enter the town and country for this place.")
+        location = other
+    if not phone or len(phone) > 30:
+        return fail("Enter a valid phone number.")
+    if len(description) < 30:
+        return fail("Write a description of at least 30 characters.")
+    if ownership_role not in {"owner", "agent"}:
+        return fail("Say whether you are the owner or an authorized manager.")
+
+    try:
+        price = Decimal(f.get("price", "").strip())
+        if not price.is_finite() or price <= 0 or price > Decimal("9999999999"):
+            raise InvalidOperation
+    except (InvalidOperation, ValueError):
+        return fail("Enter a valid price.")
+
+    rooms = None
+    if category != "restaurant" and f.get("rooms", "").strip():
+        try:
+            rooms = int(f.get("rooms"))
+            if not 1 <= rooms <= 5000:
+                raise ValueError
+        except ValueError:
+            return fail("Enter a valid number of rooms.")
+
+    website = f.get("website", "").strip()[:255] or None
+    if website:
+        if "://" in website and not website.lower().startswith(("http://", "https://")):
+            return fail("The website must start with http:// or https://.")
+        if "://" not in website:
+            website = "https://" + website
+
+    photos = [p for p in request.files.getlist("photos") if p and p.filename]
+    if not photos:
+        return fail("Add at least one photo.")
+    if len(photos) > 5:
+        return fail("You can add up to 5 photos.")
+    if not all(allowed_file(p.filename) for p in photos):
+        return fail("Only JPG, PNG and WEBP photos are allowed.")
+
+    saved_photos = []
+    try:
+        for photo in photos:
+            saved_photos.append(save_photo(photo))
+    except ValueError as exc:
+        cleanup(saved_photos)
+        return fail(str(exc))
+    except Exception:
+        app.logger.exception("Supabase upload failed while listing a place.")
+        cleanup(saved_photos)
+        return fail("We could not upload your photos. Please try again later.")
+
+    is_admin = current_user.role == "admin"
+    wants_website = f.get("wants_website") == "on"
+    data = {
+        "name": name,
+        "category": category,
+        "location": location,
+        "price": price,
+        "phone": phone,
+        "description": description,
+        "cover_image": saved_photos[0],
+        "photos": saved_photos,
+        "website": website,
+        "wants_website": wants_website,
+        "rooms": rooms,
+        "check_in_time": f.get("check_in_time", "").strip()[:60] or None,
+        "amenities": ", ".join(f.getlist("amenities"))[:500] or None,
+        "cuisine": f.get("cuisine", "").strip()[:120] or None,
+        "opening_hours": f.get("opening_hours", "").strip()[:150] or None,
+        "delivery": f.get("delivery") == "on",
+        "owner_role": ownership_role,
+        "owner_id": str(current_user.id),
+        "status": "approved" if is_admin else "pending",
+    }
+
+    try:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO civicnest.places (
+                    name, category, location, price, phone, description,
+                    cover_image, photos, website, wants_website, rooms,
+                    check_in_time, amenities, cuisine, opening_hours,
+                    delivery, owner_role, owner_id, status,
+                    is_verified, is_active
+                )
+                VALUES (
+                    %(name)s, %(category)s, %(location)s, %(price)s, %(phone)s,
+                    %(description)s, %(cover_image)s, %(photos)s, %(website)s,
+                    %(wants_website)s, %(rooms)s, %(check_in_time)s,
+                    %(amenities)s, %(cuisine)s, %(opening_hours)s,
+                    %(delivery)s, %(owner_role)s, %(owner_id)s, %(status)s,
+                    FALSE, TRUE
+                )
+                """,
+                data,
+            )
+    except Exception:
+        app.logger.exception("Failed to save the place listing.")
+        cleanup(saved_photos)
+        return fail("Something went wrong while saving the listing. Please try again.")
+
+    if not is_admin:
+        try:
+            notify_admin_place(
+                name, category, location, current_user.full_name,
+                phone, website, wants_website
+            )
+        except Exception:
+            app.logger.exception("Telegram notification failed for a place.")
+
+    flash(
+        "Your place is now live." if is_admin else
+        "Thanks! Your place was sent for review. It will appear once approved.",
+        "success",
+    )
+    return redirect(url_for("hospitality_page"))
+
+
+@app.route("/admin/places/<int:place_id>/status/<status>", methods=["POST"])
+@admin_required
+def admin_place_status(place_id, status):
+    if status not in ("approved", "rejected"):
+        abort(400)
+    with get_db_connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE civicnest.places SET status = %s WHERE id = %s",
+            (status, place_id),
+        )
+    flash("Place " + status + ".", "success")
+    return redirect(url_for("admin_places"))    
 
 
 def get_towns():

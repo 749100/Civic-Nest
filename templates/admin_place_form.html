@@ -1,563 +1,347 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
-    <title>
-      {{ 'Edit place' if editing else 'Add place' }} | CivicNest Admin
-    </title>
-    <meta name="robots" content="noindex, nofollow" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
-    />
-    <style>
-      :root {
-        --blue: #1e4fa3;
-        --blue2: #2d63c8;
-        --navy: #0a2260;
-        --tint: #e1ebfa;
-        --bg: #f3f7fd;
-        --line: #d9e3f3;
-        --ink: #14213d;
-        --muted: #55627a;
-        --lift:
-          0 1px 2px rgba(20, 33, 61, 0.05), 0 10px 28px rgba(30, 79, 163, 0.09);
-      }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        scroll-behavior: smooth;
-      }
-      body {
-        overflow-x: hidden;
-        font-family: "DM Sans", sans-serif;
-        color: var(--ink);
-        background: var(--bg);
-        padding-bottom: calc(112px + env(safe-area-inset-bottom));
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      button,
-      input,
-      select,
-      textarea {
-        font-family: inherit;
-      }
-      :focus-visible {
-        outline: 3px solid #9dc0ff;
-        outline-offset: 2px;
-      }
-      .wrap {
-        position: relative;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 0 22px;
-      }
-      svg.i {
-        width: 20px;
-        height: 20px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex: none;
-      }
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>{{ 'Edit place' if editing else 'Add place' }} | CivicNest Admin</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" />
+<style>
+:root{--blue:#1e4fa3;--blue2:#2d63c8;--navy:#0a2260;--tint:#e1ebfa;--bg:#f3f7fd;--line:#d9e3f3;--ink:#14213d;--muted:#55627a;--lift:0 1px 2px rgba(20,33,61,.05),0 10px 28px rgba(30,79,163,.09)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--bg);padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:3px solid #9dc0ff;outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{position:relative;max-width:1180px;margin:0 auto;padding:0 22px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.stage{position:relative;overflow:hidden;color:#fff;padding-bottom:40px;border-radius:0 0 40px 40px;background:radial-gradient(700px 420px at 92% 4%,rgba(120,175,255,.4),transparent 70%),radial-gradient(600px 400px at 0 70%,rgba(45,99,200,.55),transparent 70%),linear-gradient(180deg,rgba(7,24,72,.8) 0,rgba(14,52,128,.82) 55%,rgba(8,30,86,.94) 100%),url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85") center/cover #0e3478}
+.stage::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.22) 1.1px,transparent 1.6px) 0 0/24px 24px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 70%);mask-image:linear-gradient(180deg,#000,transparent 70%)}
+.top{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;height:76px;padding-top:6px}
+.icon-btn{width:46px;height:46px;border-radius:23px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:36px;height:36px;border-radius:12px;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-name{font-family:"Fraunces",serif;font-weight:600;font-size:25px;color:#fff}
+.brand-sub{margin-top:3px;font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+h1{position:relative;margin:clamp(14px,4vw,32px) 0 8px;font-family:"Fraunces",serif;font-weight:600;font-size:clamp(34px,6vw,56px);line-height:1.06;letter-spacing:-.02em;text-shadow:0 6px 30px rgba(3,12,40,.45);animation:rise .7s .05s both}
+.sub{color:rgba(255,255,255,.82);font-size:15px;max-width:46ch;animation:rise .7s .2s both}
+.opt-label{display:flex;align-items:center;gap:10px;margin:26px 0 12px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.opt-label::before{content:"";width:26px;height:3px;border-radius:2px;background:linear-gradient(90deg,#fff,rgba(255,255,255,.2))}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px}
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:15px 16px;color:#fff;text-align:left;font:inherit;cursor:pointer;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.26);border-radius:20px;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 14px 34px rgba(3,12,40,.22),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .2s,background .2s,border-color .2s}
+.opt:hover{transform:translateY(-3px);background:rgba(255,255,255,.2)}
+.opt.on{background:rgba(255,255,255,.3);border-color:#fff}
+.opt .ico{width:40px;height:40px;border-radius:13px;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(3,12,40,.28)}
+.opt strong{font-size:16px;font-weight:600}
+.opt small{font-size:13px;color:rgba(255,255,255,.82)}
+.listings{position:relative;padding:40px 0 8px;background:radial-gradient(circle,rgba(30,79,163,.1) 1.1px,transparent 1.5px) 0 0/24px 24px}
+.flash{max-width:860px;margin:0 auto 16px;padding:12px 16px;border-radius:14px;font-size:14px;font-weight:500;background:#fde8e8;color:#b42318}
+.flash.success{background:#e3f6ec;color:#0f7a55}
+.form-wrap{max-width:860px;margin:0 auto}
+.card{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--lift);padding:24px;margin-bottom:18px}
+.card>h2{font-family:"Fraunces",serif;font-weight:600;font-size:22px;color:var(--navy)}
+.muted{margin-top:2px;font-size:14px;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);font-weight:400}
+.row{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
+.f{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.f input[type=text],.f input[type=number],.f input[type=url],.f select,.f textarea{width:100%;padding:12px 14px;font-size:16px;color:var(--ink);background:#fff;border:1px solid #c9d6ec;border-radius:12px}
+.f input[type=text],.f input[type=number],.f input[type=url],.f select{height:48px}
+.f textarea{min-height:110px;resize:vertical}
+.f input[type=file]{padding:10px;border:1px dashed #c9d6ec;border-radius:12px;background:#f7fafe;font-size:14px}
+.f input:focus,.f select:focus,.f textarea:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,79,163,.15)}
+.check{display:flex;align-items:center;gap:10px;min-height:48px;font-size:15px;font-weight:500}
+.check input{width:22px;height:22px;accent-color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid #c9d6ec;border-radius:22px;font-size:14px;font-weight:500;cursor:pointer;background:#fff}
+.chip input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip input:focus-visible+span{outline:3px solid #9dc0ff;outline-offset:2px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.thumbs img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 28px;border-radius:14px;border:0;cursor:pointer;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--blue2),#173f85);box-shadow:0 8px 18px rgba(30,79,163,.35)}
+.btn.ghost{background:var(--tint);color:var(--blue);box-shadow:none}
+footer{padding:36px 0 8px}
+footer p{text-align:center;font-size:13px;color:var(--muted)}
+.tabbar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:40;max-width:520px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:68px;padding:0 8px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(201,214,236,.9);border-radius:24px;box-shadow:0 18px 44px rgba(5,15,50,.3)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:76px;padding:7px 14px;border-radius:18px;font-size:12px;font-weight:500;color:var(--muted)}
+.tab.on{background:var(--tint);color:var(--blue);font-weight:600}
+.tab svg.i{width:22px;height:22px}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(min-width:700px){.row.two{grid-template-columns:1fr 1fr}.row.three{grid-template-columns:repeat(3,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-bed" viewBox="0 0 24 24"><path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.5"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+</svg>
 
-      .stage {
-        position: relative;
-        overflow: hidden;
-        color: #fff;
-        padding-bottom: 40px;
-        border-radius: 0 0 40px 40px;
-        background:
-          radial-gradient(
-            700px 420px at 92% 4%,
-            rgba(120, 175, 255, 0.4),
-            transparent 70%
-          ),
-          radial-gradient(
-            600px 400px at 0 70%,
-            rgba(45, 99, 200, 0.55),
-            transparent 70%
-          ),
-          linear-gradient(
-            180deg,
-            rgba(7, 24, 72, 0.8) 0,
-            rgba(14, 52, 128, 0.82) 55%,
-            rgba(8, 30, 86, 0.94) 100%
-          ),
-          url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85")
-            center/cover #0e3478;
-      }
-      .stage::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.22) 1.1px,
-            transparent 1.6px
-          )
-          0 0/24px 24px;
-        -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
-        mask-image: linear-gradient(180deg, #000, transparent 70%);
-      }
-      .top {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 76px;
-        padding-top: 6px;
-      }
-      .icon-btn {
-        width: 46px;
-        height: 46px;
-        border-radius: 23px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.32);
-        -webkit-backdrop-filter: blur(10px);
-        backdrop-filter: blur(10px);
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .brand-mark {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        background: #fff;
-        color: var(--blue);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-      }
-      .brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1;
-      }
-      .brand-name {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 25px;
-        color: #fff;
-      }
-      .brand-sub {
-        margin-top: 3px;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.78);
-      }
-      h1 {
-        position: relative;
-        margin: clamp(14px, 4vw, 32px) 0 8px;
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(34px, 6vw, 56px);
-        line-height: 1.06;
-        letter-spacing: -0.02em;
-        text-shadow: 0 6px 30px rgba(3, 12, 40, 0.45);
-      }
-      .sub {
-        color: rgba(255, 255, 255, 0.82);
-        font-size: 15px;
-        max-width: 46ch;
-      }
+<main>
+  <div class="stage">
+    <div class="wrap">
+      <header class="top">
+        <a class="icon-btn" href="{{ url_for('admin_places') }}" aria-label="Back to places"><svg class="i" width="22" height="22"><use href="#i-back"/></svg></a>
+        <a class="brand" href="/" aria-label="CivicNest Africa home">
+          <span class="brand-mark"><svg class="i"><use href="#i-house"/></svg></span>
+          <span class="brand-text"><span class="brand-name">CivicNest</span><span class="brand-sub">Admin</span></span>
+        </a>
+        <span style="width:46px"></span>
+      </header>
 
-      .listings {
-        position: relative;
-        padding: 40px 0 8px;
-        background: radial-gradient(
-            circle,
-            rgba(30, 79, 163, 0.1) 1.1px,
-            transparent 1.5px
-          )
-          0 0/24px 24px;
-      }
-      .flash {
-        max-width: 760px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        margin-bottom: 16px;
-        font-size: 14px;
-        font-weight: 500;
-        background: #fde8e8;
-        color: #b42318;
-      }
-      .formcard {
-        max-width: 760px;
-        padding: 24px;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        box-shadow: var(--lift);
-        display: grid;
-        gap: 16px;
-      }
-      .formcard label {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--muted);
-      }
-      .formcard input[type="text"],
-      .formcard input[type="number"],
-      .formcard input[type="url"],
-      .formcard select,
-      .formcard textarea {
-        width: 100%;
-        padding: 12px 14px;
-        font-size: 16px;
-        color: var(--ink);
-        background: #fff;
-        border: 1px solid #c9d6ec;
-        border-radius: 12px;
-      }
-      .formcard input[type="text"],
-      .formcard input[type="number"],
-      .formcard input[type="url"],
-      .formcard select {
-        height: 48px;
-      }
-      .formcard textarea {
-        min-height: 110px;
-        resize: vertical;
-      }
-      .formcard input:focus,
-      .formcard select:focus,
-      .formcard textarea:focus {
-        outline: 0;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(30, 79, 163, 0.15);
-      }
-      .two {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-      .checks {
-        display: flex;
-        gap: 22px;
-        flex-wrap: wrap;
-      }
-      .formcard .checks label {
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        color: var(--ink);
-        font-size: 14px;
-        font-weight: 500;
-      }
-      .formcard .checks input {
-        width: 18px;
-        height: 18px;
-      }
-      .btns {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 50px;
-        padding: 0 28px;
-        border-radius: 14px;
-        border: 0;
-        cursor: pointer;
-        font-size: 15px;
-        font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, var(--blue2), #173f85);
-        box-shadow: 0 8px 18px rgba(30, 79, 163, 0.35);
-      }
-      .btn.ghost {
-        background: var(--tint);
-        color: var(--blue);
-        box-shadow: none;
-      }
+      <h1>{{ 'Edit place' if editing else 'Add place' }}</h1>
+      <p class="sub">Fill in the details for the guest house, motel, resort or restaurant.</p>
 
-      footer {
-        padding: 36px 0 8px;
-      }
-      footer p {
-        text-align: center;
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      .tabbar {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 40;
-        max-width: 520px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        height: 68px;
-        padding: 0 8px;
-        background: rgba(255, 255, 255, 0.9);
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(201, 214, 236, 0.9);
-        border-radius: 24px;
-        box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
-      }
-      .tab {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        min-width: 76px;
-        padding: 7px 14px;
-        border-radius: 18px;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--muted);
-      }
-      .tab.on {
-        background: var(--tint);
-        color: var(--blue);
-        font-weight: 600;
-      }
-      .tab svg.i {
-        width: 22px;
-        height: 22px;
-      }
-
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      h1 {
-        animation: rise 0.7s 0.05s both;
-      }
-      .sub {
-        animation: rise 0.7s 0.2s both;
-      }
-      @media (min-width: 600px) {
-        .two {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        * {
-          transition: none !important;
-          animation: none !important;
-          scroll-behavior: auto !important;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
-      <symbol id="i-house" viewBox="0 0 24 24">
-        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-      </symbol>
-      <symbol id="i-back" viewBox="0 0 24 24">
-        <path d="M19 12H5M11 6l-6 6 6 6" />
-      </symbol>
-      <symbol id="i-bed" viewBox="0 0 24 24">
-        <path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />
-        <circle cx="7" cy="11" r="1.5" />
-      </symbol>
-      <symbol id="i-dash" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="9" rx="1" />
-        <rect x="14" y="3" width="7" height="5" rx="1" />
-        <rect x="14" y="12" width="7" height="9" rx="1" />
-        <rect x="3" y="16" width="7" height="5" rx="1" />
-      </symbol>
-    </svg>
-
-    <main>
-      <div class="stage">
-        <div class="wrap">
-          <header class="top">
-            <a
-              class="icon-btn"
-              href="{{ url_for('admin_places') }}"
-              aria-label="Back to places"
-              ><svg class="i" width="22" height="22"><use href="#i-back" /></svg
-            ></a>
-            <a class="brand" href="/" aria-label="CivicNest Africa home">
-              <span class="brand-mark"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <span class="brand-text"
-                ><span class="brand-name">CivicNest</span
-                ><span class="brand-sub">Admin</span></span
-              >
-            </a>
-            <span style="width: 46px"></span>
-          </header>
-
-          <h1>{{ 'Edit place' if editing else 'Add place' }}</h1>
-          <p class="sub">
-            Fill in the details for the guest house, motel, resort or
-            restaurant.
-          </p>
-        </div>
+      <div class="opt-label">What are you listing?</div>
+      <div class="opt-grid" id="typeTiles">
+        <button class="opt" type="button" data-type="guest_house" aria-pressed="false">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.5"/></svg></span>
+          <strong>Guest house</strong><small>Homely stays</small>
+        </button>
+        <button class="opt" type="button" data-type="motel" aria-pressed="false">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"/></svg></span>
+          <strong>Motel</strong><small>Quick overnight</small>
+        </button>
+        <button class="opt" type="button" data-type="resort" aria-pressed="false">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+          <strong>Resort</strong><small>Getaways</small>
+        </button>
+        <button class="opt" type="button" data-type="restaurant" aria-pressed="false">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 1-3 4-3 7v3h3"/></svg></span>
+          <strong>Restaurant</strong><small>Eat out</small>
+        </button>
       </div>
+    </div>
+  </div>
 
-      <section class="listings">
-        <div class="wrap">
-          {% with messages = get_flashed_messages(with_categories=true) %}
-          {% for cat, msg in messages %}
-          <div class="flash">{{ msg }}</div>
-          {% endfor %}
-          {% endwith %}
+  <section class="listings">
+    <div class="wrap">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+      {% endwith %}
 
-          <form class="formcard" method="post">
-            <label
-              >Name
-              <input
-                type="text"
-                name="name"
-                required
-                value="{{ place.name or '' }}"
-              />
-            </label>
+      <div class="form-wrap">
+        <form id="listForm" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="category" id="category" value="{{ place.category or 'guest_house' }}" />
 
-            <div class="two">
-              <label
-                >Category
-                <select name="category" required>
-                  <option value="">Choose...</option>
-                  {% for value, label in categories %}
+          <div class="card">
+            <h2>The basics</h2>
+            <p class="muted">The name and town people will search for.</p>
+            <div class="row two">
+              <label class="f"><span>Name</span>
+                <input type="text" name="name" maxlength="120" required placeholder="e.g. Lakeview Guest House" value="{{ place.name or '' }}" />
+              </label>
+              {% set known = (place.location in towns) if place.location else true %}
+              <label class="f"><span>Town or county</span>
+                <select name="location" id="location" required>
+                  <option value="" disabled {{ 'selected' if not place.location }}>-- Select a town --</option>
+                  {% for town in towns %}
                   <!-- prettier-ignore -->
-                  <option value="{{ value }}" {{ 'selected' if place.category == value }}>{{ label }}</option>
+                  <option value="{{ town }}" {{ 'selected' if place.location == town }}>{{ town }}</option>
                   {% endfor %}
                 </select>
               </label>
-              <label
-                >Town / location
-                <input
-                  type="text"
-                  name="location"
-                  list="townList"
-                  required
-                  value="{{ place.location or '' }}"
-                />
-                <datalist id="townList">
-                  {% for t in towns %}
-                  <option value="{{ t }}"></option>
-                  {% endfor %}
-                </datalist>
+            </div>
+            <div class="row" id="otherTownRow" hidden>
+              <label class="f"><span>Town and country <small class="hint">(for places outside Kenya)</small></span>
+                <input type="text" name="location_other" id="locationOther" maxlength="120" placeholder="e.g. Kampala, Uganda" value="{{ '' if known else place.location }}" />
               </label>
             </div>
-
-            <div class="two">
-              <label
-                >Price (KSh, per night or per meal)
-                <input
-                  type="number"
-                  name="price"
-                  min="0"
-                  step="1"
-                  value="{{ place.price|int if place.price else '' }}"
-                />
+            <div class="row two">
+              <label class="f"><span>Phone number</span>
+                <input type="text" name="phone" inputmode="tel" required placeholder="e.g. 0712 345 678" value="{{ place.phone or '' }}" />
               </label>
-              <label
-                >Phone
-                <input
-                  type="text"
-                  name="phone"
-                  inputmode="tel"
-                  value="{{ place.phone or '' }}"
-                />
+              <label class="f"><span>Website URL <small class="hint">(optional)</small></span>
+                <input type="url" name="website" placeholder="https://www.example.com" value="{{ place.website or '' }}" />
               </label>
             </div>
+          </div>
 
-            <label
-              >Cover image URL
-              <input
-                type="url"
-                name="cover_image"
-                placeholder="https://..."
-                value="{{ place.cover_image or '' }}"
-              />
-            </label>
-
-            <label
-              >Description
-              <!-- prettier-ignore -->
-              <textarea name="description">{{ place.description or '' }}</textarea>
-            </label>
-
-            <div class="checks">
-              <label>
+          <div class="card">
+            <h2>Price and details</h2>
+            <p class="muted" id="priceHelp">Set the usual price for one night.</p>
+            <div class="row three">
+              <label class="f"><span id="priceLabel">Price per night (KSh)</span>
+                <input type="number" name="price" id="price" min="1" step="any" inputmode="numeric" required placeholder="e.g. 2500" value="{{ place.price|int if place.price else '' }}" />
+              </label>
+              <label class="f" data-only="lodging"><span>Number of rooms</span>
+                <input type="number" name="rooms" min="1" inputmode="numeric" placeholder="e.g. 10" value="{{ place.rooms or '' }}" />
+              </label>
+              <label class="f" data-only="lodging"><span>Check-in time <small class="hint">(optional)</small></span>
+                <input type="text" name="check_in_time" placeholder="e.g. From 2 pm" value="{{ place.check_in_time or '' }}" />
+              </label>
+            </div>
+            <div class="row two">
+              <label class="f" data-only="restaurant"><span>Cuisine</span>
+                <input type="text" name="cuisine" placeholder="e.g. Kenyan, grills, fast food" value="{{ place.cuisine or '' }}" />
+              </label>
+              <label class="f" data-only="restaurant"><span>Opening hours</span>
+                <input type="text" name="opening_hours" placeholder="e.g. Mon-Sun, 7 am - 10 pm" value="{{ place.opening_hours or '' }}" />
+              </label>
+            </div>
+            <div class="row">
+              <label class="check" data-only="restaurant">
                 <!-- prettier-ignore -->
-                <input type="checkbox" name="is_verified" {{ 'checked' if place.is_verified }} />
-                Verified
+                <input type="checkbox" name="delivery" {{ 'checked' if place.delivery }} /> We offer delivery
               </label>
-              <label>
+            </div>
+          </div>
+
+          <div class="card" data-only="lodging">
+            <h2>Amenities</h2>
+            <p class="muted">Tick everything that applies.</p>
+            <div class="chips">
+              {% for a in ['Wi-Fi','Parking','Breakfast included','Restaurant on site','Swimming pool','Hot water','Security','Conference space'] %}
+              <label class="chip">
                 <!-- prettier-ignore -->
-                <input type="checkbox" name="is_active" {{ 'checked' if place.is_active }} />
-                Visible on site
+                <input type="checkbox" name="amenities" value="{{ a }}" {{ 'checked' if a in (place.amenities or []) }} /><span>{{ a }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- ========== PART 2 STARTS HERE ========== -->
+          <div class="card">
+            <h2>Description</h2>
+            <p class="muted">Mention what makes it special and what is close by (menu highlights, views, transport, security).</p>
+            <div class="row">
+              <label class="f"><span>Tell people about the place</span>
+                <!-- prettier-ignore -->
+                <textarea name="description" required minlength="30" placeholder="Describe the place, the service and what guests can expect.">{{ place.description or '' }}</textarea>
               </label>
             </div>
+          </div>
 
-            <div class="btns">
-              <button class="btn" type="submit">
-                {{ 'Save changes' if editing else 'Add place' }}
-              </button>
-              <a class="btn ghost" href="{{ url_for('admin_places') }}"
-                >Cancel</a
-              >
+          <div class="card">
+            <h2>Photos</h2>
+            <p class="muted">Up to 5 clear, bright photos. The first one is the cover. Large photos are shrunk automatically before they upload.{% if editing %} Leave empty to keep the current photos.{% endif %}</p>
+            {% if editing and place.cover_image %}
+            <div class="thumbs">
+              <img src="{{ place.cover_image if place.cover_image.startswith('http') else url_for('static', filename='uploads/places/' + place.cover_image) }}" alt="Current cover" />
             </div>
-          </form>
-        </div>
-      </section>
-    </main>
+            {% endif %}
+            <div class="row">
+              <label class="f"><span>Choose photos</span>
+                <input type="file" id="photos" name="photos" accept="image/jpeg,image/png,image/webp" multiple />
+              </label>
+              <p class="hint" id="photoMsg" role="status" aria-live="polite"></p>
+              <label class="f"><span>Or cover image URL <small class="hint">(optional, used if no photo is uploaded)</small></span>
+                <input type="url" name="cover_image" placeholder="https://..." value="{{ place.cover_image if place.cover_image and place.cover_image.startswith('http') else '' }}" />
+              </label>
+            </div>
+          </div>
 
-    <footer>
-      {% include "_footer.html" %}
-    </footer>
+          <div class="card">
+            <h2>Status</h2>
+            <div class="row">
+              <label class="check">
+                <!-- prettier-ignore -->
+                <input type="checkbox" name="is_verified" {{ 'checked' if place.is_verified }} /> Verified
+              </label>
+              <label class="check">
+                <!-- prettier-ignore -->
+                <input type="checkbox" name="is_active" {{ 'checked' if place.is_active }} /> Visible on site
+              </label>
+            </div>
+          </div>
 
-    <nav class="tabbar" aria-label="Admin">
-      <a class="tab" href="/"
-        ><svg class="i"><use href="#i-house" /></svg>Home</a
-      >
-      <a class="tab on" href="{{ url_for('admin_places') }}"
-        ><svg class="i"><use href="#i-bed" /></svg>Places</a
-      >
-      <a class="tab" href="{{ url_for('admin_dashboard') }}"
-        ><svg class="i"><use href="#i-dash" /></svg>Admin</a
-      >
-    </nav>
-  </body>
+          <div class="btns">
+            <button class="btn" type="submit">{{ 'Save changes' if editing else 'Add place' }}</button>
+            <a class="btn ghost" href="{{ url_for('admin_places') }}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>{% include "_footer.html" %}</footer>
+
+<nav class="tabbar" aria-label="Admin">
+  <a class="tab" href="/"><svg class="i"><use href="#i-house"/></svg>Home</a>
+  <a class="tab on" href="{{ url_for('admin_places') }}"><svg class="i"><use href="#i-bed"/></svg>Places</a>
+  <a class="tab" href="{{ url_for('admin_dashboard') }}"><svg class="i"><use href="#i-dash"/></svg>Admin</a>
+</nav>
+
+<script>
+var GROUP = { guest_house: "lodging", motel: "lodging", resort: "lodging", restaurant: "restaurant" };
+var tiles = Array.prototype.slice.call(document.querySelectorAll("#typeTiles .opt"));
+var hiddenCat = document.getElementById("category");
+var townSelect = document.getElementById("location");
+var otherRow = document.getElementById("otherTownRow");
+var otherInput = document.getElementById("locationOther");
+
+{% if place.location and place.location not in towns %}
+townSelect.value = "Other";
+{% endif %}
+
+function syncOther() {
+  var isOther = townSelect.value === "Other";
+  otherRow.hidden = !isOther;
+  otherInput.required = isOther;
+  if (!isOther) otherInput.value = "";
+}
+townSelect.addEventListener("change", syncOther);
+
+function refresh() {
+  var g = GROUP[hiddenCat.value] || "lodging";
+  document.querySelectorAll("[data-only]").forEach(function (el) {
+    var show = el.dataset.only.split(" ").indexOf(g) !== -1;
+    el.hidden = !show;
+    el.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = !show; });
+  });
+}
+
+function setCategory(cat) {
+  if (!GROUP[cat]) cat = "guest_house";
+  hiddenCat.value = cat;
+  tiles.forEach(function (t) {
+    var on = t.dataset.type === cat;
+    t.classList.toggle("on", on);
+    t.setAttribute("aria-pressed", String(on));
+  });
+  var lodging = GROUP[cat] === "lodging";
+  document.getElementById("priceLabel").textContent = lodging ? "Price per night (KSh)" : "Average price per meal (KSh)";
+  document.getElementById("priceHelp").textContent = lodging ? "Set the usual price for one night." : "Set the average amount one person spends on a meal.";
+  document.getElementById("price").placeholder = lodging ? "e.g. 2500" : "e.g. 600";
+  refresh();
+}
+tiles.forEach(function (t) { t.addEventListener("click", function () { setCategory(t.dataset.type); }); });
+setCategory(hiddenCat.value);
+syncOther();
+
+var photos = document.getElementById("photos");
+var photoMsg = document.getElementById("photoMsg");
+async function shrink(file) {
+  try {
+    var bmp = await createImageBitmap(file);
+    var s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    var c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * s);
+    c.height = Math.round(bmp.height * s);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    var blob = await new Promise(function (r) { c.toBlob(r, "image/jpeg", 0.82); });
+    return blob ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
+  } catch (e) { return file; }
+}
+photos.addEventListener("change", async function () {
+  var files = Array.prototype.slice.call(photos.files);
+  if (files.length > 5) { photoMsg.textContent = "Please choose at most 5 photos."; photos.value = ""; return; }
+  photoMsg.textContent = "Preparing photos...";
+  var dt = new DataTransfer();
+  for (var i = 0; i < files.length; i++) dt.items.add(await shrink(files[i]));
+  photos.files = dt.files;
+  photoMsg.textContent = dt.files.length + " photo(s) ready. The first one is the cover.";
+});
+</script>
+</body>
 </html>
