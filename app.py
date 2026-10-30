@@ -79,8 +79,49 @@ import mysql.connector
 from config import Config
 
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="static",
+    static_url_path="/static"
+)
+
 app.config.from_object(Config)
+
+app.logger.info("Application root: %s", app.root_path)
+app.logger.info("Static folder: %s", app.static_folder)
+app.logger.info(
+    "Static folder exists: %s",
+    os.path.isdir(app.static_folder)
+)
+
+@app.route("/debug-static")
+def debug_static():
+    static_dir = app.static_folder
+
+    files_to_check = [
+        "home.css",
+        "theme.css",
+        "site.css",
+        "img/cat-houses.jpeg",
+        "img/cat-hostels.jpeg",
+        "img/cat-plots.jpeg",
+        "img/cat-roommates.jpeg",
+        "img/cat-stay.jpeg",
+        "img/cat-travel.jpeg",
+        "img/hero-house.jpeg",
+    ]
+
+    return jsonify({
+        "app_root": app.root_path,
+        "static_folder": static_dir,
+        "static_folder_exists": os.path.isdir(static_dir),
+        "files": {
+            filename: os.path.isfile(
+                os.path.join(static_dir, filename)
+            )
+            for filename in files_to_check
+        }
+    })
 
 @app.template_filter("photo_url")
 def photo_url(filename):
