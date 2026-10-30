@@ -1,169 +1,154 @@
-{% extends "base.html" %} {% block title %}{{ profile.full_name }}{% endblock %}
-{% block stage_class %}compact{% endblock %} {% block page_title %}{{
-profile.full_name }}{% endblock %} {% block page_sub %}
-<p class="page-sub">{{ profile.campus or 'Looking for a roommate' }}</p>
-{% endblock %} {% block head %}
-<style>
-  .pf {
-    max-width: 860px;
-    margin: 0 auto;
-  }
-  .pf-head {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--line);
-  }
-  .pf-head .avatar {
-    width: 96px;
-    height: 96px;
-    font-size: 36px;
-  }
-  .pf-sec {
-    padding: 20px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .pf-sec h2 {
-    margin-bottom: 12px;
-    font-family: "Fraunces", serif;
-    font-weight: 600;
-    font-size: 19px;
-    color: var(--navy);
-  }
-  .pf-sec.last {
-    border-bottom: 0;
-  }
-  .pf-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 22px;
-  }
-  .pf-note {
-    margin-top: 16px;
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: var(--bg);
-    color: var(--muted);
-    font-size: 14px;
-  }
-  @media (min-width: 700px) {
-    .pf-actions {
-      flex-direction: row;
-    }
-  }
-</style>
-{% endblock %} {% block content %}
-<div class="pf">
-  <p style="margin-bottom: 14px">
-    <a class="btn ghost" href="{{ url_for('roommate_finder') }}"
-      >&larr; All roommates</a
-    >
-  </p>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>{{ profile.full_name }} | Roommate | CivicNest Africa</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='roommates.css') }}?v=1"
+    />
+  </head>
+  <body>
+    {% include "_site_nav.html" %}
 
-  <div class="card">
-    <div class="pf-head">
-      <span class="avatar">
-        {% if profile.profile_image %}
-        <img
-          src="{{ url_for('static', filename='uploads/' ~ profile.profile_image) }}"
-          alt="{{ profile.full_name }}"
-        />
-        {% else %} {{ profile.full_name[0]|upper }} {% endif %}
-      </span>
-      <div>
-        <h2
-          style="
-            font-family: &quot;Fraunces&quot;, serif;
-            font-weight: 600;
-            font-size: 26px;
-            color: var(--navy);
-          "
-        >
-          {{ profile.full_name }}
-        </h2>
-        {% if profile.campus %}
-        <p class="muted">{{ profile.campus }}</p>
-        {% endif %}
-      </div>
-    </div>
+    <main>
+      <section class="hero rm" style="padding-bottom: 44px">
+        <div class="wrap">
+          <div class="eyebrow">Roommate profile</div>
+          <h1>{{ profile.full_name }}</h1>
+          <p>{{ profile.campus or 'Looking for a roommate' }}</p>
+        </div>
+      </section>
 
-    <div class="pf-sec">
-      <h2>Accommodation preferences</h2>
-      <div class="tags">
-        {% if profile.preferred_location %}<span class="tag"
-          >{{ profile.preferred_location }}</span
-        >{% endif %} {% if profile.budget_min or profile.budget_max %}
-        <span class="tag"
-          >KSh {% if profile.budget_min %}{{
-          "{:,.0f}".format(profile.budget_min) }}{% endif %}{% if
-          profile.budget_min and profile.budget_max %} – {% endif %}{% if
-          profile.budget_max %}{{ "{:,.0f}".format(profile.budget_max) }}{%
-          endif %}</span
-        >
-        {% endif %} {% if profile.accommodation_type %}<span class="tag"
-          >{{ profile.accommodation_type }}</span
-        >{% endif %} {% if profile.people_needed %}<span class="tag"
-          >Looking for {{ profile.people_needed }} roommate{{ 's' if
-          profile.people_needed != 1 else '' }}</span
-        >{% endif %} {% if profile.gender_preference %}<span class="tag"
-          >{{ 'Open to anyone' if profile.gender_preference == 'any' else
-          'Prefers ' ~ profile.gender_preference|capitalize }}</span
-        >{% endif %}
-      </div>
-    </div>
+      <section class="sec rm" style="padding-top: 30px">
+        <div class="wrap">
+          <div class="pf">
+            <p class="pf-back">
+              <a class="rbtn ghost" href="{{ url_for('roommate_finder') }}"
+                >&larr; All roommates</a
+              >
+            </p>
 
-    {% if profile.move_in_date %}
-    <div class="pf-sec">
-      <h2>Move-in</h2>
-      <p class="prose">
-        {{ profile.move_in_date.strftime('%d %B %Y') if
-        profile.move_in_date.strftime is defined else profile.move_in_date }}
-      </p>
-    </div>
-    {% endif %} {% if profile.lifestyle_preferences %}
-    <div class="pf-sec">
-      <h2>Lifestyle</h2>
-      <p class="prose">{{ profile.lifestyle_preferences }}</p>
-    </div>
-    {% endif %} {% if profile.study_preferences %}
-    <div class="pf-sec">
-      <h2>Study preferences</h2>
-      <p class="prose">{{ profile.study_preferences }}</p>
-    </div>
-    {% endif %} {% if profile.bio %}
-    <div class="pf-sec last">
-      <h2>About</h2>
-      <p class="prose">{{ profile.bio }}</p>
-    </div>
-    {% endif %}
+            <div class="card">
+              <div class="pf-head">
+                <span class="ravatar">
+                  {% if profile.profile_image %}
+                  <img
+                    src="{{ url_for('static', filename='uploads/' ~ profile.profile_image) }}"
+                    alt="{{ profile.full_name }}"
+                  />
+                  {% else %}{{ profile.full_name[0]|upper }}{% endif %}
+                </span>
+                <div>
+                  <h2>{{ profile.full_name }}</h2>
+                  {% if profile.campus %}
+                  <p class="rmuted">{{ profile.campus }}</p>
+                  {% endif %}
+                </div>
+              </div>
 
-    <div class="pf-actions">
-      {% if profile.user_id != current_user.id and profile.whatsapp_phone %}
-      <a
-        class="btn good"
-        href="https://wa.me/{{ profile.whatsapp_phone }}"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Contact {{ profile.full_name }} on WhatsApp</a
-      >
-      {% elif profile.user_id == current_user.id %}
-      <a class="btn" href="{{ url_for('edit_roommate_profile') }}"
-        >Edit my profile</a
-      >
-      {% else %}
-      <button class="btn ghost" type="button" disabled>
-        WhatsApp contact unavailable
-      </button>
-      {% endif %}
-    </div>
+              <div class="pf-sec">
+                <h3>Accommodation preferences</h3>
+                <div class="rtags">
+                  {% if profile.preferred_location %}<span class="rtag"
+                    >{{ profile.preferred_location }}</span
+                  >{% endif %} {% if profile.budget_min or profile.budget_max %}
+                  <span class="rtag g"
+                    >KSh {% if profile.budget_min %}{{
+                    "{:,.0f}".format(profile.budget_min) }}{% endif %}{% if
+                    profile.budget_min and profile.budget_max %} – {% endif %}{%
+                    if profile.budget_max %}{{
+                    "{:,.0f}".format(profile.budget_max) }}{% endif %}</span
+                  >
+                  {% endif %} {% if profile.accommodation_type %}<span
+                    class="rtag p"
+                    >{{ profile.accommodation_type }}</span
+                  >{% endif %} {% if profile.people_needed %}<span class="rtag"
+                    >Looking for {{ profile.people_needed }} roommate{{ 's' if
+                    profile.people_needed != 1 else '' }}</span
+                  >{% endif %} {% if profile.gender_preference %}<span
+                    class="rtag"
+                    >{{ 'Open to anyone' if profile.gender_preference == 'any'
+                    else 'Prefers ' ~ profile.gender_preference|capitalize
+                    }}</span
+                  >{% endif %}
+                </div>
+              </div>
 
-    {% if profile.user_id != current_user.id %}
-    <p class="pf-note">
-      WhatsApp opens in a new tab so you can contact this student directly.
-    </p>
-    {% endif %}
-  </div>
-</div>
-{% endblock %}
+              {% if profile.move_in_date %}
+              <div class="pf-sec">
+                <h3>Move-in</h3>
+                <p>
+                  {{ profile.move_in_date.strftime('%d %B %Y') if
+                  profile.move_in_date.strftime is defined else
+                  profile.move_in_date }}
+                </p>
+              </div>
+              {% endif %} {% if profile.lifestyle_preferences %}
+              <div class="pf-sec">
+                <h3>Lifestyle</h3>
+                <p>{{ profile.lifestyle_preferences }}</p>
+              </div>
+              {% endif %} {% if profile.study_preferences %}
+              <div class="pf-sec">
+                <h3>Study preferences</h3>
+                <p>{{ profile.study_preferences }}</p>
+              </div>
+              {% endif %} {% if profile.bio %}
+              <div class="pf-sec last">
+                <h3>About</h3>
+                <p>{{ profile.bio }}</p>
+              </div>
+              {% endif %}
+
+              <div class="pf-actions">
+                {% if profile.user_id != current_user.id and
+                profile.whatsapp_phone %}
+                <a
+                  class="rbtn good"
+                  href="https://wa.me/{{ profile.whatsapp_phone }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Contact {{ profile.full_name }} on WhatsApp</a
+                >
+                {% elif profile.user_id == current_user.id %}
+                <a class="rbtn" href="{{ url_for('edit_roommate_profile') }}"
+                  >Edit my profile</a
+                >
+                {% else %}
+                <button class="rbtn ghost" type="button" disabled>
+                  WhatsApp contact unavailable
+                </button>
+                {% endif %}
+              </div>
+
+              {% if profile.user_id != current_user.id %}
+              <p class="pf-note">
+                WhatsApp opens in a new tab so you can contact this student
+                directly.
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {% include "_site_foot.html" %}
+  </body>
+</html>

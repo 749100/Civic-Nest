@@ -1,269 +1,1136 @@
-{% extends "base.html" %} {% block title %}{{ property.title }} | CivicNest
-Africa{% endblock %} {% block stage_class %}compact{% endblock %} {% block
-page_title %}{{ property.title }}{% endblock %} {% block page_sub %}
-<p class="page-sub">
-  {{ property.location }}{% if property.campus %} · near {{ property.campus }}{%
-  endif %}
-</p>
-{% endblock %} {% block head %}
-<!-- Primary SEO Meta Tags -->
-<meta
-  name="title"
-  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }} | CivicNest Africa"
-/>
-<meta
-  name="description"
-  content="{{ property.description|truncate(150) if property.description else 'View details, photos, price, and contact information for ' ~ property.title ~ ' in ' ~ property.location ~ ' on CivicNest Africa.' }}"
-/>
-<meta
-  name="keywords"
-  content="{{ property.title }}, {{ property.location }}, {{ property.property_type }}, civicnest property"
-/>
-<meta name="robots" content="index, follow" />
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
-<!-- Dynamic Canonical URL -->
-<link
-  rel="canonical"
-  href="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
-/>
+    <title>{{ property.title }} | CivicNest Africa</title>
 
-<!-- Open Graph / Facebook / WhatsApp Preview -->
-<meta property="og:type" content="article" />
-<meta
-  property="og:url"
-  content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
-/>
-<meta
-  property="og:title"
-  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
-/>
-<meta
-  property="og:description"
-  content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
-/>
-{% if images %}
-<meta
-  property="og:image"
-  content="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename='uploads/properties/' + images[0].filename, _external=True) }}"
-/>
-{% else %}
-<meta
-  property="og:image"
-  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-/>
-{% endif %}
+    <meta
+      name="title"
+      content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }} | CivicNest Africa"
+    />
+    <meta
+      name="description"
+      content="{{ property.description|truncate(150) if property.description else 'View details, photos, price, and contact information for ' ~ property.title ~ ' in ' ~ property.location ~ ' on CivicNest Africa.' }}"
+    />
+    <meta
+      name="keywords"
+      content="{{ property.title }}, {{ property.location }}, {{ property.property_type }}, civicnest property"
+    />
+    <meta name="author" content="CivicNest Africa" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1456d8" />
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+    />
 
-<!-- Twitter Card -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta
-  property="twitter:url"
-  content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
-/>
-<meta
-  property="twitter:title"
-  content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
-/>
-<meta
-  property="twitter:description"
-  content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
-/>
-{% endblock %} {% block content %} {% macro fact(label, value) %}{% if value is
-defined and value is not none and value != '' %}
-<div class="fact"><span>{{ label }}</span><strong>{{ value }}</strong></div>
-{% endif %}{% endmacro %} {% set is_sale = (property.listing_type or 'rent') ==
-'sale' %} {% set photo_dir = 'uploads/properties/' %} {% if property.status !=
-'active' %}
-<div class="flash warning" role="status">
-  This listing is not live yet (status: {{ property.status|title }}). Only you
-  and the review team can see this page.
-</div>
-{% endif %}
-
-<div class="detail">
-  <div class="stack">
-    <div class="card">
-      <div class="gallery-main">
-        {% if images %}
-        <img
-          id="mainPhoto"
-          src="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename=photo_dir + images[0].filename) }}"
-          onerror="
-            this.onerror = null;
-            this.src =
-              'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
-          "
-          alt="{{ property.title }}"
-        />
-        {% else %}
-        <div class="no-photo">No photo available</div>
-        {% endif %} {% if property.is_verified %}<span class="badge"
-          >Verified</span
-        >{% endif %}
-      </div>
-      {% if images|length > 1 %}
-      <div class="thumbs">
-        {% for img in images %} {% set img_src = img.filename if
-        img.filename.startswith('http') else url_for('static',
-        filename=photo_dir + img.filename) %}
-        <button
-          type="button"
-          class="thumb {{ 'on' if loop.first else '' }}"
-          data-src="{{ img_src }}"
-          aria-label="Show photo {{ loop.index }}"
-        >
-          <img
-            src="{{ img_src }}"
-            onerror="
-              this.onerror = null;
-              this.src =
-                'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
-            "
-            alt=""
-          />
-        </button>
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="card">
-      <h2 class="sec-title" style="margin-top: 0">Details</h2>
-      <div class="facts">
-        {{ fact('Type', property.property_type|replace('_', ' ')|title) }} {{
-        fact('Listed for', 'Sale' if is_sale else 'Rent') }} {{ fact('Bedrooms',
-        property.bedrooms) }} {{ fact('Bathrooms', property.bathrooms) }} {{
-        fact('Size', (property.size_sqm|string ~ ' sqm') if property.size_sqm
-        else none) }} {{ fact('Furnished', 'Yes' if property.furnished else
-        none) }} {{ fact('Distance from campus',
-        (property.distance_from_campus|string ~ ' km') if
-        property.distance_from_campus is not none else none) }} {{ fact('Vacant
-        units', property.vacant_units ~ ' of ' ~ property.total_units) if not
-        is_sale else '' }}
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 class="sec-title" style="margin-top: 0">About this property</h2>
-      <p class="prose">{{ property.description }}</p>
-    </div>
-
-    {% if amenities %}
-    <div class="card">
-      <h2 class="sec-title" style="margin-top: 0">Amenities</h2>
-      <div class="tags">
-        {% for a in amenities %}<span class="tag">{{ a.name }}</span>{% endfor
-        %}
-      </div>
-    </div>
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="CivicNest Africa" />
+    <meta
+      property="og:url"
+      content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+    />
+    <meta
+      property="og:title"
+      content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
+    />
+    <meta
+      property="og:description"
+      content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
+    />
+    {% if images %}
+    <meta
+      property="og:image"
+      content="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename='uploads/properties/' + images[0].filename, _external=True) }}"
+    />
+    {% else %}
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
     {% endif %}
-  </div>
 
-  <aside class="detail-side stack">
-    <div class="card">
-      <div class="price">
-        KSh {{ "{:,.0f}".format(property.price) }}{% if not is_sale %}
-        <small>/ month</small>{% endif %}
-      </div>
-      {% if not is_sale and property.deposit %}
-      <p class="muted" style="margin-top: 4px">
-        Deposit: KSh {{ "{:,.0f}".format(property.deposit) }}
-      </p>
-      {% endif %}
-      <p style="margin-top: 10px">
-        {% if property.available and property.vacant_units > 0 %}
-        <span class="pill ok">Available</span>
-        {% else %}
-        <span class="pill st-unavailable">Not available</span>
-        {% endif %}
-      </p>
-    </div>
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://civic-nest.onrender.com{{ url_for('property_details', property_id=property.id) }}"
+    />
+    <meta
+      property="twitter:title"
+      content="{{ property.title }} - KSh {{ '{:,.0f}'.format(property.price) }}"
+    />
+    <meta
+      property="twitter:description"
+      content="{{ property.description|truncate(150) if property.description else 'View details for ' ~ property.title ~ ' in ' ~ property.location }}"
+    />
 
-    <div class="card">
-      <div class="who">
-        <span class="avatar">
-          {% if property.landlord_image %}
-          <img
-            src="{{ property.landlord_image if property.landlord_image.startswith('http') else url_for('static', filename='uploads/profiles/' + property.landlord_image) }}"
-            onerror="
-              this.onerror = null;
-              this.style.display = 'none';
-            "
-            alt=""
-          />
-          {% else %} {{ property.landlord_name[:1]|upper }} {% endif %}
-        </span>
-        <div>
-          <strong>{{ property.landlord_name }}</strong>
-          <p class="muted">{{ 'Seller' if is_sale else 'Landlord' }}</p>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+
+    <style>
+      /* =====================================================
+         CIVICNEST AFRICA — PROPERTY DETAILS PAGE
+         Design matched to the Buy, Travel and Stay & Dine pages.
+         ===================================================== */
+
+      .hero.h.pd {
+        padding-bottom: 56px;
+      }
+
+      .sec.h.pd {
+        padding-top: 34px;
+      }
+
+      .h a:focus-visible,
+      .h button:focus-visible,
+      .h textarea:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
+      }
+
+      .pdloc {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 10px;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .pdloc .i {
+        width: 16px;
+        height: 16px;
+      }
+
+      .pdback {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        color: #1456d8;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .pdback:hover {
+        opacity: 0.75;
+      }
+
+      .pdback .i {
+        width: 14px;
+        height: 14px;
+        transform: rotate(180deg);
+      }
+
+      .bflash {
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #fff4d6;
+        color: #8a5a00;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.6;
+      }
+
+      /* Layout */
+      .pdgrid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .pdgrid {
+          grid-template-columns: minmax(0, 1fr) 340px;
+        }
+
+        .pdside {
+          position: sticky;
+          top: 85px;
+        }
+      }
+
+      .pdmain,
+      .pdside {
+        display: grid;
+        gap: 18px;
+        min-width: 0;
+      }
+
+      .pdcard {
+        min-width: 0;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .pdcard h2 {
+        margin: 0 0 4px;
+        color: #001b5e;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .pdcard > p.pdsub {
+        margin: 0 0 14px;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .pdmuted {
+        margin: 0;
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .pdtext {
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.9;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+
+      /* Gallery */
+      .pdgallery {
+        padding: 0;
+      }
+
+      .pdmainphoto {
+        position: relative;
+        min-height: 280px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      @media (min-width: 600px) {
+        .pdmainphoto {
+          min-height: 380px;
+        }
+      }
+
+      .pdmainphoto img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .pdmainphoto .nophoto {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .pdmainphoto .bbadges {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .bpill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #1456d8;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .bpill.sale {
+        background: #0f7a55;
+        color: #fff;
+      }
+
+      .pdthumbs {
+        display: flex;
+        gap: 8px;
+        padding: 12px;
+        overflow-x: auto;
+      }
+
+      .pdthumb {
+        flex: 0 0 auto;
+        width: 84px;
+        height: 62px;
+        padding: 0;
+        overflow: hidden;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        background: #e6eeff;
+        cursor: pointer;
+      }
+
+      .pdthumb.on {
+        border-color: #1456d8;
+      }
+
+      .pdthumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Facts */
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      @media (min-width: 600px) {
+        .facts {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .fact {
+        min-width: 0;
+        padding: 13px;
+        border: 1px solid #d3e0f5;
+        border-radius: 14px;
+        background: #f2f7fd;
+      }
+
+      .fact span {
+        display: block;
+        margin-bottom: 4px;
+        color: #405578;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .fact strong {
+        display: block;
+        color: #001b5e;
+        font-size: 13px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      /* Amenities */
+      .pdtags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pdtag {
+        padding: 7px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 999px;
+        background: #f2f7fd;
+        color: #1456d8;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      /* Price card */
+      .pdprice {
+        color: #1456d8;
+        font-size: 26px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      .pdprice small {
+        color: #405578;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pdstatus {
+        margin-top: 12px;
+      }
+
+      .pdpill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .pdpill.ok {
+        background: #d9f5e8;
+        color: #0f7a55;
+      }
+
+      .pdpill.off {
+        background: #ffe1e1;
+        color: #b42318;
+      }
+
+      /* Landlord */
+      .pdwho {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .pdavatar {
+        display: flex;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 50%;
+        background: #c5dcff;
+        color: #0047ff;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .pdavatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .pdwho strong {
+        display: block;
+        color: #001b5e;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+
+      .pdwho p {
+        margin: 2px 0 0;
+        color: #405578;
+        font-size: 11px;
+      }
+
+      .pdactions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      /* Buttons */
+      .bbtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 42px;
+        padding: 9px 14px;
+        border: 1px solid #1456d8;
+        border-radius: 10px;
+        background: #fff;
+        color: #1456d8;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .bbtn:hover {
+        background: #e6eeff;
+      }
+
+      .bbtn.solid {
+        background: #1456d8;
+        color: #fff;
+      }
+
+      .bbtn.solid:hover {
+        background: #001b5e;
+        border-color: #001b5e;
+      }
+
+      .bbtn.block {
+        display: flex;
+        width: 100%;
+      }
+
+      /* Enquiry form */
+      .pdform {
+        display: grid;
+        gap: 12px;
+      }
+
+      .pdform label {
+        display: grid;
+        gap: 5px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .pdform textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 10px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
+        background: #fff;
+        color: #001b5e;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.6;
+        resize: vertical;
+      }
+
+      @media (max-width: 600px) {
+        .pdmainphoto {
+          min-height: 230px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .h *,
+        .h *::before,
+        .h *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_admin_bar.html" %} {% macro fact(label, value) %}{% if value is
+    defined and value is not none and value != '' %}
+    <div class="fact"><span>{{ label }}</span><strong>{{ value }}</strong></div>
+    {% endif %}{% endmacro %} {% set is_sale = (property.listing_type or 'rent')
+    == 'sale' %} {% set photo_dir = 'uploads/properties/' %}
+
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
+
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
+
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </symbol>
+
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+
+      <symbol id="i-tag" viewBox="0 0 24 24">
+        <path d="M3 12V4h8l10 10-8 8z" />
+        <circle cx="7.5" cy="8.5" r="1.5" />
+      </symbol>
+    </svg>
+
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a
+            {%
+            if
+            is_sale
+            %}class="on"
+            {%
+            endif
+            %}
+            href="{{ url_for('buy_page') }}"
+            >Buy</a
+          >
+          <a
+            {%
+            if
+            not
+            is_sale
+            %}class="on"
+            {%
+            endif
+            %}
+            href="{{ url_for('rent_page') }}"
+            >Properties</a
+          >
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a
+            class="t"
+            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          {% if current_user.is_authenticated %}
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          {% else %}
+          <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+          {% endif %}
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {% if property.landlord_phone %}
-      <div class="links">
-        <a
-          class="btn ghost"
-          href="{{ url_for('track_contact', property_id=property.id, method='call') }}"
-          >Call</a
-        >
-        <a
-          class="btn good"
-          href="{{ url_for('track_contact', property_id=property.id, method='whatsapp') }}"
-          target="_blank"
-          rel="noopener"
-          >WhatsApp</a
-        >
-      </div>
-      {% endif %}
-    </div>
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        <a href="{{ url_for('register') }}">Create account</a>
+      </nav>
+    </header>
 
-    <div class="card">
-      <h2 class="sec-title" style="margin-top: 0; font-size: 20px">
-        Send an enquiry
-      </h2>
-      {% if current_user.is_authenticated %} {% if current_user.role ==
-      'landlord' %}
-      <p class="muted">Landlord accounts cannot send enquiries.</p>
-      {% elif property.status == 'active' and property.available and
-      property.vacant_units > 0 %}
-      <form
-        method="post"
-        action="{{ url_for('send_inquiry', property_id=property.id) }}"
-        class="stack"
+    <main>
+      <!-- HERO -->
+      <section class="hero h pd">
+        <div class="wrap">
+          <div class="eyebrow">{{ 'For sale' if is_sale else 'For rent' }}</div>
+
+          <h1>{{ property.title }}</h1>
+
+          <div class="pdloc">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-pin" />
+            </svg>
+            <span
+              >{{ property.location }}{% if property.campus %} · near {{
+              property.campus }}{% endif %}</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- DETAILS -->
+      <section class="sec h pd">
+        <div class="wrap">
+          <a
+            class="pdback"
+            href="{{ url_for('buy_page') if is_sale else url_for('rent_page') }}"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-arrow" />
+            </svg>
+            Back to {{ 'Buy' if is_sale else 'Properties' }}
+          </a>
+
+          {% if property.status != 'active' %}
+          <div class="bflash" role="status">
+            This listing is not live yet (status: {{ property.status|title }}).
+            Only you and the review team can see this page.
+          </div>
+          {% endif %}
+
+          <div class="pdgrid">
+            <div class="pdmain">
+              <!-- GALLERY -->
+              <div class="card pdcard pdgallery">
+                <div class="pdmainphoto">
+                  {% if images %}
+                  <img
+                    id="mainPhoto"
+                    src="{{ images[0].filename if images[0].filename.startswith('http') else url_for('static', filename=photo_dir + images[0].filename) }}"
+                    onerror="
+                      this.onerror = null;
+                      this.src =
+                        'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                    "
+                    alt="{{ property.title }}"
+                    fetchpriority="high"
+                  />
+                  {% else %}
+                  <div class="nophoto">No photo available</div>
+                  {% endif %}
+
+                  <div class="bbadges">
+                    {% if property.is_verified %}<span class="bpill"
+                      >Verified</span
+                    >{% endif %}
+                    <span class="bpill sale"
+                      >{{ 'For sale' if is_sale else 'For rent' }}</span
+                    >
+                  </div>
+                </div>
+
+                {% if images|length > 1 %}
+                <div class="pdthumbs">
+                  {% for img in images %} {% set img_src = img.filename if
+                  img.filename.startswith('http') else url_for('static',
+                  filename=photo_dir + img.filename) %}
+                  <button
+                    type="button"
+                    class="pdthumb thumb {{ 'on' if loop.first else '' }}"
+                    data-src="{{ img_src }}"
+                    aria-label="Show photo {{ loop.index }}"
+                  >
+                    <img
+                      src="{{ img_src }}"
+                      onerror="
+                        this.onerror = null;
+                        this.src =
+                          'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                      "
+                      alt=""
+                      loading="lazy"
+                    />
+                  </button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- DETAILS -->
+              <section class="card pdcard">
+                <div class="eb">Overview</div>
+                <h2>Details</h2>
+                <p class="pdsub">The key facts about this property.</p>
+
+                <div class="facts">
+                  {{ fact('Type', property.property_type|replace('_', '
+                  ')|title) }} {{ fact('Listed for', 'Sale' if is_sale else
+                  'Rent') }} {{ fact('Bedrooms', property.bedrooms) }} {{
+                  fact('Bathrooms', property.bathrooms) }} {{ fact('Size',
+                  (property.size_sqm|string ~ ' sqm') if property.size_sqm else
+                  none) }} {{ fact('Furnished', 'Yes' if property.furnished else
+                  none) }} {{ fact('Distance from campus',
+                  (property.distance_from_campus|string ~ ' km') if
+                  property.distance_from_campus is not none else none) }} {{
+                  fact('Vacant units', property.vacant_units ~ ' of ' ~
+                  property.total_units) if not is_sale else '' }}
+                </div>
+              </section>
+
+              <!-- ABOUT -->
+              <section class="card pdcard">
+                <div class="eb">Discover</div>
+                <h2>About this property</h2>
+                <p class="pdsub">Get to know more about this listing.</p>
+
+                <div class="pdtext">{{ property.description }}</div>
+              </section>
+
+              <!-- AMENITIES -->
+              {% if amenities %}
+              <section class="card pdcard">
+                <div class="eb">What to expect</div>
+                <h2>Amenities</h2>
+                <p class="pdsub">Features and services that come with it.</p>
+
+                <div class="pdtags">
+                  {% for a in amenities %}<span class="pdtag">{{ a.name }}</span
+                  >{% endfor %}
+                </div>
+              </section>
+              {% endif %}
+            </div>
+
+            <!-- SIDEBAR -->
+            <aside class="pdside">
+              <!-- PRICE -->
+              <section class="card pdcard">
+                <div class="pdprice">
+                  KSh {{ "{:,.0f}".format(property.price) }}{% if not is_sale %}
+                  <small>/ month</small>{% endif %}
+                </div>
+
+                {% if not is_sale and property.deposit %}
+                <p class="pdmuted" style="margin-top: 4px">
+                  Deposit: KSh {{ "{:,.0f}".format(property.deposit) }}
+                </p>
+                {% endif %}
+
+                <div class="pdstatus">
+                  {% if property.available and property.vacant_units > 0 %}
+                  <span class="pdpill ok">Available</span>
+                  {% else %}
+                  <span class="pdpill off">Not available</span>
+                  {% endif %}
+                </div>
+              </section>
+
+              <!-- LANDLORD / SELLER -->
+              <section class="card pdcard">
+                <div class="pdwho">
+                  <span class="pdavatar">
+                    {% if property.landlord_image %}
+                    <img
+                      src="{{ property.landlord_image if property.landlord_image.startswith('http') else url_for('static', filename='uploads/profiles/' + property.landlord_image) }}"
+                      onerror="
+                        this.onerror = null;
+                        this.style.display = 'none';
+                      "
+                      alt=""
+                    />
+                    {% else %} {{ property.landlord_name[:1]|upper }} {% endif
+                    %}
+                  </span>
+
+                  <div>
+                    <strong>{{ property.landlord_name }}</strong>
+                    <p>{{ 'Seller' if is_sale else 'Landlord' }}</p>
+                  </div>
+                </div>
+
+                {% if property.landlord_phone %}
+                <div class="pdactions">
+                  <a
+                    class="bbtn"
+                    href="{{ url_for('track_contact', property_id=property.id, method='call') }}"
+                  >
+                    <svg
+                      class="i"
+                      style="width: 14px; height: 14px"
+                      aria-hidden="true"
+                    >
+                      <use href="#i-phone" />
+                    </svg>
+                    Call
+                  </a>
+
+                  <a
+                    class="bbtn solid"
+                    href="{{ url_for('track_contact', property_id=property.id, method='whatsapp') }}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg
+                      class="i"
+                      style="width: 14px; height: 14px"
+                      aria-hidden="true"
+                    >
+                      <use href="#i-chat" />
+                    </svg>
+                    WhatsApp
+                  </a>
+                </div>
+                {% endif %}
+              </section>
+
+              <!-- ENQUIRY -->
+              <section class="card pdcard">
+                <h2>Send an enquiry</h2>
+                <p class="pdsub">Ask a question or arrange a viewing.</p>
+
+                {% if current_user.is_authenticated %} {% if current_user.role
+                == 'landlord' %}
+                <p class="pdmuted">Landlord accounts cannot send enquiries.</p>
+                {% elif property.status == 'active' and property.available and
+                property.vacant_units > 0 %}
+                <form
+                  method="post"
+                  action="{{ url_for('send_inquiry', property_id=property.id) }}"
+                  class="pdform"
+                >
+                  <label>
+                    Your message
+                    <textarea
+                      name="message"
+                      required
+                      maxlength="2000"
+                      placeholder="Hello, I am interested in this property. Is it still available?"
+                    ></textarea>
+                  </label>
+
+                  <button class="bbtn solid block" type="submit">
+                    Send enquiry
+                  </button>
+                </form>
+                {% else %}
+                <p class="pdmuted">
+                  This property is not taking enquiries right now.
+                </p>
+                {% endif %} {% else %}
+                <p class="pdmuted" style="margin-bottom: 12px">
+                  Log in to message the {{ 'seller' if is_sale else 'landlord'
+                  }}.
+                </p>
+                <a
+                  class="bbtn solid block"
+                  href="{{ url_for('login', next=request.path) }}"
+                  >Log in to send an enquiry</a
+                >
+                {% endif %}
+              </section>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
+            <div>
+              +254 768387842
+              <small>Call or WhatsApp</small>
+            </div>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </div>
+
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a
+        {%
+        if
+        is_sale
+        %}class="on"
+        {%
+        endif
+        %}
+        href="{{ url_for('buy_page') }}"
       >
-        <label class="f"
-          ><span>Your message</span>
-          <textarea
-            name="message"
-            required
-            maxlength="2000"
-            placeholder="Hello, I am interested in this property. Is it still available?"
-          ></textarea>
-        </label>
-        <button class="btn block" type="submit">Send enquiry</button>
-      </form>
-      {% else %}
-      <p class="muted">This property is not taking enquiries right now.</p>
-      {% endif %} {% else %}
-      <p class="muted" style="margin-bottom: 12px">
-        Log in to message the {{ 'seller' if is_sale else 'landlord' }}.
-      </p>
-      <a class="btn block" href="{{ url_for('login', next=request.path) }}"
-        >Log in to send an enquiry</a
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-tag" />
+        </svg>
+        Buy
+      </a>
+
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
       >
-      {% endif %}
-    </div>
-  </aside>
-</div>
-{% endblock %} {% block scripts %}
-<script>
-  document.querySelectorAll(".thumb").forEach(function (b) {
-    b.addEventListener("click", function () {
-      document.getElementById("mainPhoto").src = b.dataset.src;
-      document.querySelectorAll(".thumb").forEach(function (x) {
-        x.classList.remove("on");
-      });
-      b.classList.add("on");
-    });
-  });
-</script>
-{% endblock %}
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Chats
+      </a>
+
+      <a href="{{ url_for('sell_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List
+      </a>
+    </nav>
+
+    <!-- JAVASCRIPT -->
+    <script>
+      (() => {
+        "use strict";
+
+        // MOBILE NAVIGATION
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
+
+        if (menuBtn && menuPanel) {
+          menuBtn.addEventListener("click", () => {
+            const isOpening = menuPanel.hidden;
+
+            menuPanel.hidden = !isOpening;
+            menuBtn.setAttribute("aria-expanded", String(isOpening));
+            menuBtn.setAttribute(
+              "aria-label",
+              isOpening ? "Close menu" : "Open menu",
+            );
+          });
+
+          document.addEventListener("click", (event) => {
+            if (
+              !menuPanel.hidden &&
+              !menuPanel.contains(event.target) &&
+              !menuBtn.contains(event.target)
+            ) {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.setAttribute("aria-label", "Open menu");
+            }
+          });
+
+          menuPanel.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.focus();
+            }
+          });
+        }
+
+        // GALLERY THUMBNAILS
+        const mainPhoto = document.getElementById("mainPhoto");
+        const thumbs = [...document.querySelectorAll(".thumb")];
+
+        thumbs.forEach((b) => {
+          b.addEventListener("click", () => {
+            if (mainPhoto) mainPhoto.src = b.dataset.src;
+            thumbs.forEach((x) => x.classList.remove("on"));
+            b.classList.add("on");
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

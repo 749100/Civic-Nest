@@ -1,0 +1,301 @@
+{% extends "admin/travel_base.html" %}
+
+{% block title %}
+  {% if is_edit %}Edit trip{% else %}Create trip{% endif %}
+{% endblock %}
+
+{% block content %}
+{% set values = form_data if form_data else trip %}
+
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Travel operations</p>
+
+    <h1>
+      {% if is_edit %}Edit trip{% else %}Create a trip{% endif %}
+    </h1>
+
+    <p class="sub">
+      Enter the route, departure details, operator, capacity and customer price.
+    </p>
+  </div>
+
+  <a class="btn secondary" href="{{ url_for('admin_trips') }}">
+    ← Back to trips
+  </a>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Trip details</h2>
+      <p class="sub">Fields marked * are required.</p>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <form
+      method="post"
+      action="{% if is_edit %}{{ url_for('admin_trip_form_edit', trip_id=trip_id) }}{% else %}{{ url_for('admin_trip_form_new') }}{% endif %}"
+    >
+
+      {% if csrf_token is defined %}
+        <input
+          type="hidden"
+          name="csrf_token"
+          value="{{ csrf_token() }}"
+        >
+      {% endif %}
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="route_from">Departure city / origin *</label>
+          <input
+            id="route_from"
+            name="route_from"
+            type="text"
+            maxlength="80"
+            required
+            value="{{ values.get('route_from', '') }}"
+            placeholder="e.g. Nairobi"
+          >
+        </div>
+
+        <div class="field">
+          <label for="route_to">Destination *</label>
+          <input
+            id="route_to"
+            name="route_to"
+            type="text"
+            maxlength="80"
+            required
+            value="{{ values.get('route_to', '') }}"
+            placeholder="e.g. Kisumu"
+          >
+        </div>
+
+        <div class="field">
+          <label for="departure_date">Departure date *</label>
+          <input
+            id="departure_date"
+            name="departure_date"
+            type="date"
+            required
+            value="{{ values.get('departure_date', '') }}"
+          >
+        </div>
+
+        <div class="field">
+          <label for="departure_time">Departure time *</label>
+          <input
+            id="departure_time"
+            name="departure_time"
+            type="time"
+            required
+            value="{{ values.get('departure_time', '') }}"
+          >
+        </div>
+
+        <div class="field">
+          <label for="operator_name">Transport operator / company *</label>
+          <input
+            id="operator_name"
+            name="operator_name"
+            type="text"
+            maxlength="120"
+            required
+            value="{{ values.get('operator_name', '') }}"
+            placeholder="Operator or company name"
+          >
+        </div>
+
+        <div class="field">
+          <label for="operator_phone">Operator phone</label>
+          <input
+            id="operator_phone"
+            name="operator_phone"
+            type="tel"
+            maxlength="30"
+            value="{{ values.get('operator_phone', '') }}"
+            placeholder="+254..."
+          >
+        </div>
+
+        <div class="field">
+          <label for="pickup_point">Pickup point</label>
+          <input
+            id="pickup_point"
+            name="pickup_point"
+            type="text"
+            maxlength="200"
+            value="{{ values.get('pickup_point', '') }}"
+            placeholder="Terminal, stage or meeting point"
+          >
+        </div>
+
+        <div class="field">
+          <label for="vehicle_type">Vehicle type</label>
+          <input
+            id="vehicle_type"
+            name="vehicle_type"
+            type="text"
+            maxlength="60"
+            value="{{ values.get('vehicle_type', '') }}"
+            placeholder="e.g. Shuttle, bus or van"
+          >
+        </div>
+
+        <div class="field">
+          <label for="price">Customer price (KSh) *</label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            min="0.01"
+            max="1000000"
+            step="0.01"
+            required
+            value="{{ values.get('price', '') }}"
+            placeholder="1500.00"
+          >
+          <p class="help">
+            The price shown to customers booking this trip.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="operator_price">Operator cost per seat (KSh)</label>
+          <input
+            id="operator_price"
+            name="operator_price"
+            type="number"
+            min="0"
+            max="1000000"
+            step="0.01"
+            value="{{ values.get('operator_price', '') }}"
+            placeholder="Optional"
+          >
+          <p class="help">
+            Optional internal cost used for margin reporting.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="seats_total">Total seat capacity *</label>
+          <input
+            id="seats_total"
+            name="seats_total"
+            type="number"
+            min="1"
+            max="200"
+            step="1"
+            required
+            value="{{ values.get('seats_total', 40) }}"
+          >
+          <p class="help">
+            Capacity cannot be reduced below already confirmed or paid seats.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="status">Trip status *</label>
+          <select id="status" name="status" required>
+            {% for status in statuses %}
+              <option
+                value="{{ status }}"
+                {% if values.get('status', 'open') == status %}selected{% endif %}
+              >
+                {{ status|capitalize }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="notes">Trip notes / passenger instructions</label>
+          <textarea
+            id="notes"
+            name="notes"
+            maxlength="1000"
+            placeholder="Optional luggage, arrival or passenger instructions"
+          >{{ values.get('notes', '') }}</textarea>
+        </div>
+
+        <div class="field full">
+          <div class="checkrow">
+            <input
+              id="operator_verified"
+              name="operator_verified"
+              type="checkbox"
+              {% if values.get('operator_verified') in [true, 1, '1', 'on', 'true'] %}checked{% endif %}
+            >
+
+            <div>
+              <label for="operator_verified">Operator verified</label>
+              <p class="help">
+                Mark this only after your team has verified the operator.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field full">
+          <div class="checkrow">
+            <input
+              id="is_active"
+              name="is_active"
+              type="checkbox"
+              {% if values.get('is_active') in [true, 1, '1', 'on', 'true'] %}checked{% endif %}
+            >
+
+            <div>
+              <label for="is_active">
+                Show this trip on the public travel page
+              </label>
+              <p class="help">
+                Uncheck to hide the trip without deleting its booking history.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <a class="btn secondary" href="{{ url_for('admin_trips') }}">
+          Cancel
+        </a>
+
+        <button class="btn" type="submit">
+          {% if is_edit %}Save trip changes{% else %}Create trip{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const dateInput = document.getElementById("departure_date");
+    const isEdit = {{ is_edit|tojson }};
+
+    if (!dateInput || isEdit) {
+      return;
+    }
+
+    const now = new Date();
+
+    const localDate = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0")
+    ].join("-");
+
+    dateInput.min = localDate;
+  })();
+</script>
+{% endblock %}

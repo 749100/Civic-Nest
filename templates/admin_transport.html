@@ -1,0 +1,903 @@
+{% extends "admin/travel_base.html" %} {% block title %}Transport management{%
+endblock %} {% block page_head %}
+<style>
+  /* Bulk route entry */
+
+  .am .bulk-route-card {
+    margin-bottom: 14px;
+    padding: 16px;
+    border: 1px solid #d3e0f5;
+    border-radius: 16px;
+    background: #f8fbff;
+  }
+
+  .am .bulk-route-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .am .bulk-route-heading h3 {
+    margin: 0;
+    color: #001b5e;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .am .bulk-route-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .am .bulk-departure-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #d3e0f5;
+  }
+
+  .am .bulk-departure-section h4 {
+    margin: 0 0 12px;
+    color: #001b5e;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .am .bulk-departures {
+    margin-bottom: 12px;
+  }
+
+  .am .bulk-departure-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+
+  .am .bulk-route-error {
+    margin: 0 0 14px;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: #ffe1e1;
+    color: #b42318;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .am .bulk-route-error[hidden] {
+    display: none;
+  }
+
+  .am .bulk-note {
+    margin: 10px 0 0;
+    color: #405578;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .am .bulk-submit-row {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #d3e0f5;
+  }
+
+  .am .btn:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+
+  @media (max-width: 430px) {
+    .am .bulk-route-card {
+      padding: 12px;
+    }
+
+    .am .bulk-departure-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .am .bulk-departure-row .btn {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Transport</p>
+    <h1>Transport management</h1>
+    <p class="sub">
+      Register transport companies, manage their routes and add departure times.
+    </p>
+  </div>
+
+  <div class="actions">
+    <a class="btn secondary" href="/admin/transport/requests">
+      Availability requests
+    </a>
+  </div>
+</section>
+
+<section class="stats three" aria-label="Transport overview">
+  <div class="stat">
+    <span>Companies</span>
+    <strong>{{ companies|length }}</strong>
+  </div>
+
+  <div class="stat">
+    <span>Routes</span>
+    <strong>{{ routes|length }}</strong>
+  </div>
+
+  <div class="stat">
+    <span>Departures</span>
+    <strong>{{ departures|length }}</strong>
+  </div>
+</section>
+
+<!-- REGISTER COMPANY -->
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>1. Register transport company</h2>
+      <p class="sub">
+        Add a company first. Its name appears on customer search results. The
+        company phone is for internal admin use.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('admin_add_transport_company') }}">
+      {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      {% endif %}
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="company_name">Company name *</label>
+          <input
+            id="company_name"
+            name="company_name"
+            type="text"
+            placeholder="e.g. Ena Coach"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="company_phone">Company phone (private)</label>
+          <input
+            id="company_phone"
+            name="company_phone"
+            type="tel"
+            placeholder="Company contact number"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="main_boarding_station">Main boarding station</label>
+          <input
+            id="main_boarding_station"
+            name="main_boarding_station"
+            type="text"
+            placeholder="e.g. Nairobi main booking office"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="logo_url">Company logo URL (optional)</label>
+          <input
+            id="logo_url"
+            name="logo_url"
+            type="url"
+            placeholder="https://example.com/logo.png"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="vehicle_image_url">Vehicle image URL (optional)</label>
+          <input
+            id="vehicle_image_url"
+            name="vehicle_image_url"
+            type="url"
+            placeholder="https://example.com/bus.jpg"
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit">Register company</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- BULK ROUTE ENTRY -->
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>2. Add routes and departures</h2>
+      <p class="sub">
+        Select a company once, then enter its routes and departure times. Copy a
+        route to create a return journey.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <form
+      method="POST"
+      action="{{ url_for('admin_add_transport_routes_bulk') }}"
+      id="bulkRouteForm"
+    >
+      {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      {% endif %}
+
+      <div class="field" style="margin-bottom: 16px">
+        <label for="bulk_company_id">Transport company *</label>
+        <select id="bulk_company_id" name="company_id" required>
+          <option value="">Select company</option>
+          {% for company in companies %} {% if company.is_active %}
+          <option value="{{ company.id }}">{{ company.company_name }}</option>
+          {% endif %} {% endfor %}
+        </select>
+      </div>
+
+      <div
+        id="bulkRouteError"
+        class="bulk-route-error"
+        role="alert"
+        aria-live="polite"
+        hidden
+      ></div>
+
+      <div id="bulkRoutes"></div>
+
+      <button type="button" class="btn secondary" id="addRouteBtn">
+        + Add another route
+      </button>
+
+      <input type="hidden" name="routes_json" id="routesJson" />
+
+      <div class="bulk-submit-row">
+        <button type="submit" class="btn" id="saveRoutesBtn">
+          Save all routes and departures
+        </button>
+
+        <p class="bulk-note">
+          All routes and their departure times are saved together. If one entry
+          is invalid, nothing from the batch is saved.
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- REGISTERED COMPANIES -->
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Registered companies</h2>
+      <p class="sub">{{ companies|length }} registered</p>
+    </div>
+  </div>
+
+  {% if companies %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Private phone</th>
+          <th>Main station</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for company in companies %}
+        <tr>
+          <td><strong>{{ company.company_name }}</strong></td>
+          <td>{{ company.company_phone or "—" }}</td>
+          <td>{{ company.main_boarding_station or "—" }}</td>
+          <td>
+            {% if company.is_active %}
+            <span class="badge open">Active</span>
+            {% else %}
+            <span class="badge cancelled">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <strong>No transport companies yet</strong>
+    <p>Register your first company using the form above.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- REGISTERED ROUTES -->
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Registered routes</h2>
+      <p class="sub">{{ routes|length }} routes registered</p>
+    </div>
+  </div>
+
+  {% if routes %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Route</th>
+          <th>Stops</th>
+          <th>Boarding</th>
+          <th>Drop-off</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for route in routes %}
+        <tr>
+          <td>{{ route.company_name }}</td>
+          <td>
+            <span class="route"
+              >{{ route.route_from }} → {{ route.route_to }}</span
+            >
+          </td>
+          <td>{{ route.intermediate_stops or "—" }}</td>
+          <td>{{ route.boarding_point or "—" }}</td>
+          <td>{{ route.dropoff_point or "—" }}</td>
+          <td>
+            {% if route.is_active %}
+            <span class="badge open">Active</span>
+            {% else %}
+            <span class="badge cancelled">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <strong>No routes registered yet</strong>
+    <p>Add routes with the form above.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- REGISTERED DEPARTURES -->
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Departure times and fares</h2>
+      <p class="sub">{{ departures|length }} departures registered</p>
+    </div>
+  </div>
+
+  {% if departures %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Route</th>
+          <th>Departure</th>
+          <th>Fare per passenger</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for departure in departures %}
+        <tr>
+          <td>{{ departure.company_name }}</td>
+          <td>
+            <span class="route"
+              >{{ departure.route_from }} → {{ departure.route_to }}</span
+            >
+          </td>
+          <td>
+            {% if departure.departure_time %} {{
+            departure.departure_time.strftime("%H:%M") if
+            departure.departure_time.strftime is defined else
+            departure.departure_time }} {% else %} — {% endif %}
+          </td>
+          <td>
+            <strong
+              >KSh {{ "{:,.2f}".format(departure.price_per_passenger) }}</strong
+            >
+          </td>
+          <td>
+            {% if departure.is_active %}
+            <span class="badge open">Active</span>
+            {% else %}
+            <span class="badge cancelled">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <strong>No departure times yet</strong>
+    <p>Departure times are saved together with each route.</p>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const routesContainer = document.getElementById("bulkRoutes");
+    const addRouteButton = document.getElementById("addRouteBtn");
+    const bulkForm = document.getElementById("bulkRouteForm");
+    const routesJson = document.getElementById("routesJson");
+    const companySelect = document.getElementById("bulk_company_id");
+    const saveButton = document.getElementById("saveRoutesBtn");
+    const errorBox = document.getElementById("bulkRouteError");
+
+    if (
+      !routesContainer ||
+      !addRouteButton ||
+      !bulkForm ||
+      !routesJson ||
+      !companySelect ||
+      !saveButton ||
+      !errorBox
+    ) {
+      console.error("Bulk transport route form elements are missing.");
+      return;
+    }
+
+    let isSubmitting = false;
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+      errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.hidden = true;
+    }
+
+    function createField(labelText, fieldClass, inputClass, type, placeholder) {
+      const field = document.createElement("div");
+      field.className = "field" + (fieldClass === "full" ? " full" : "");
+
+      const label = document.createElement("label");
+      label.textContent = labelText;
+
+      let input;
+
+      if (type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = 2;
+      } else {
+        input = document.createElement("input");
+        input.type = type;
+      }
+
+      input.className = inputClass;
+      input.placeholder = placeholder || "";
+
+      field.appendChild(label);
+      field.appendChild(input);
+
+      return field;
+    }
+
+    function addDeparture(card, data = {}) {
+      const departureList = card.querySelector(".bulk-departures");
+
+      const row = document.createElement("div");
+      row.className = "bulk-departure-row";
+
+      const timeField = document.createElement("div");
+      timeField.className = "field";
+
+      const timeLabel = document.createElement("label");
+      timeLabel.textContent = "Departure time *";
+
+      const timeInput = document.createElement("input");
+      timeInput.type = "time";
+      timeInput.className = "bulk-time";
+      timeInput.required = true;
+      timeInput.value = data.departure_time || "";
+
+      timeField.appendChild(timeLabel);
+      timeField.appendChild(timeInput);
+
+      const fareField = document.createElement("div");
+      fareField.className = "field";
+
+      const fareLabel = document.createElement("label");
+      fareLabel.textContent = "Fare per passenger (KSh) *";
+
+      const fareInput = document.createElement("input");
+      fareInput.type = "number";
+      fareInput.className = "bulk-fare";
+      fareInput.min = "0";
+      fareInput.step = "0.01";
+      fareInput.placeholder = "e.g. 1500";
+      fareInput.required = true;
+      fareInput.value =
+        data.price_per_passenger !== undefined &&
+        data.price_per_passenger !== null
+          ? data.price_per_passenger
+          : "";
+
+      fareField.appendChild(fareLabel);
+      fareField.appendChild(fareInput);
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "btn danger small bulk-remove-departure";
+      removeButton.textContent = "Remove";
+      removeButton.setAttribute("aria-label", "Remove departure time");
+
+      removeButton.addEventListener("click", function () {
+        if (departureList.children.length > 1) {
+          row.remove();
+          clearError();
+        } else {
+          showError(
+            "Each route must have at least one departure time and fare.",
+          );
+        }
+      });
+
+      row.appendChild(timeField);
+      row.appendChild(fareField);
+      row.appendChild(removeButton);
+
+      departureList.appendChild(row);
+
+      return row;
+    }
+
+    function readRoute(card) {
+      return {
+        route_from: card.querySelector(".bulk-from").value.trim(),
+        route_to: card.querySelector(".bulk-to").value.trim(),
+        intermediate_stops: card.querySelector(".bulk-stops").value.trim(),
+        boarding_point: card.querySelector(".bulk-boarding").value.trim(),
+        dropoff_point: card.querySelector(".bulk-dropoff").value.trim(),
+        vehicle_type: card.querySelector(".bulk-vehicle").value.trim(),
+
+        departures: Array.from(
+          card.querySelectorAll(".bulk-departure-row"),
+        ).map(function (row) {
+          return {
+            departure_time: row.querySelector(".bulk-time").value,
+            price_per_passenger: row.querySelector(".bulk-fare").value,
+          };
+        }),
+      };
+    }
+
+    function updateRouteNumbers() {
+      Array.from(routesContainer.children).forEach(function (card, index) {
+        card.querySelector(".bulk-route-heading h3").textContent =
+          "Route " + (index + 1);
+      });
+    }
+
+    function addRoute(copyData = null) {
+      const card = document.createElement("div");
+      card.className = "bulk-route-card";
+
+      const heading = document.createElement("div");
+      heading.className = "bulk-route-heading";
+
+      const title = document.createElement("h3");
+      title.textContent = "Route";
+
+      const actions = document.createElement("div");
+      actions.className = "bulk-route-actions";
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "btn secondary small";
+      copyButton.textContent = "Copy route";
+
+      copyButton.addEventListener("click", function () {
+        const copiedData = readRoute(card);
+
+        addRoute(copiedData);
+
+        const newCard = routesContainer.lastElementChild;
+
+        // Keep the copied details but clear the endpoints for the new journey.
+        newCard.querySelector(".bulk-from").value = "";
+        newCard.querySelector(".bulk-to").value = "";
+        newCard.querySelector(".bulk-from").focus();
+
+        clearError();
+      });
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "btn danger small";
+      removeButton.textContent = "Remove route";
+
+      removeButton.addEventListener("click", function () {
+        if (routesContainer.children.length > 1) {
+          card.remove();
+          updateRouteNumbers();
+          clearError();
+        } else {
+          showError("At least one route is required.");
+        }
+      });
+
+      actions.appendChild(copyButton);
+      actions.appendChild(removeButton);
+
+      heading.appendChild(title);
+      heading.appendChild(actions);
+
+      const fields = document.createElement("div");
+      fields.className = "form-grid";
+
+      fields.appendChild(
+        createField(
+          "Departure town *",
+          "",
+          "bulk-from",
+          "text",
+          "e.g. Nairobi",
+        ),
+      );
+
+      fields.appendChild(
+        createField("Destination town *", "", "bulk-to", "text", "e.g. Kisumu"),
+      );
+
+      fields.appendChild(
+        createField(
+          "Intermediate stops",
+          "full",
+          "bulk-stops",
+          "textarea",
+          "e.g. Naivasha, Nakuru, Kericho",
+        ),
+      );
+
+      fields.appendChild(
+        createField(
+          "Boarding point",
+          "",
+          "bulk-boarding",
+          "text",
+          "e.g. Nairobi Bus Station",
+        ),
+      );
+
+      fields.appendChild(
+        createField(
+          "Drop-off point",
+          "",
+          "bulk-dropoff",
+          "text",
+          "e.g. Kisumu Bus Park",
+        ),
+      );
+
+      fields.appendChild(
+        createField(
+          "Vehicle type",
+          "full",
+          "bulk-vehicle",
+          "text",
+          "e.g. 50-seater bus",
+        ),
+      );
+
+      const departureSection = document.createElement("div");
+      departureSection.className = "bulk-departure-section";
+
+      const departureHeading = document.createElement("h4");
+      departureHeading.textContent = "Departure times and fares";
+
+      const departureList = document.createElement("div");
+      departureList.className = "bulk-departures";
+
+      const addDepartureButton = document.createElement("button");
+      addDepartureButton.type = "button";
+      addDepartureButton.className = "btn secondary small";
+      addDepartureButton.textContent = "+ Add departure time";
+
+      addDepartureButton.addEventListener("click", function () {
+        addDeparture(card);
+        clearError();
+      });
+
+      departureSection.appendChild(departureHeading);
+      departureSection.appendChild(departureList);
+      departureSection.appendChild(addDepartureButton);
+
+      card.appendChild(heading);
+      card.appendChild(fields);
+      card.appendChild(departureSection);
+
+      routesContainer.appendChild(card);
+
+      if (copyData) {
+        card.querySelector(".bulk-from").value = copyData.route_from || "";
+        card.querySelector(".bulk-to").value = copyData.route_to || "";
+        card.querySelector(".bulk-stops").value =
+          copyData.intermediate_stops || "";
+        card.querySelector(".bulk-boarding").value =
+          copyData.boarding_point || "";
+        card.querySelector(".bulk-dropoff").value =
+          copyData.dropoff_point || "";
+        card.querySelector(".bulk-vehicle").value = copyData.vehicle_type || "";
+
+        if (Array.isArray(copyData.departures) && copyData.departures.length) {
+          copyData.departures.forEach(function (departure) {
+            addDeparture(card, departure);
+          });
+        } else {
+          addDeparture(card);
+        }
+      } else {
+        addDeparture(card);
+      }
+
+      updateRouteNumbers();
+
+      return card;
+    }
+
+    addRouteButton.addEventListener("click", function () {
+      if (routesContainer.children.length >= 100) {
+        showError("You can add up to 100 routes in one batch.");
+        return;
+      }
+
+      addRoute();
+      clearError();
+    });
+
+    bulkForm.addEventListener("submit", function (event) {
+      if (isSubmitting) {
+        event.preventDefault();
+        return;
+      }
+
+      clearError();
+
+      if (!companySelect.value) {
+        event.preventDefault();
+        showError("Please select an active transport company.");
+        companySelect.focus();
+        return;
+      }
+
+      if (routesContainer.children.length === 0) {
+        event.preventDefault();
+        showError("Please add at least one route.");
+        return;
+      }
+
+      if (routesContainer.children.length > 100) {
+        event.preventDefault();
+        showError("You can add up to 100 routes in one batch.");
+        return;
+      }
+
+      const routes = Array.from(routesContainer.children).map(readRoute);
+
+      for (let i = 0; i < routes.length; i++) {
+        const route = routes[i];
+        const routeNumber = i + 1;
+
+        if (!route.route_from || !route.route_to) {
+          event.preventDefault();
+          showError(
+            "Route " +
+              routeNumber +
+              ": enter both the departure town and destination town.",
+          );
+          return;
+        }
+
+        if (route.route_from.toLowerCase() === route.route_to.toLowerCase()) {
+          event.preventDefault();
+          showError(
+            "Route " +
+              routeNumber +
+              ": departure and destination cannot be the same.",
+          );
+          return;
+        }
+
+        if (!route.departures.length) {
+          event.preventDefault();
+          showError(
+            "Route " +
+              routeNumber +
+              ": add at least one departure time and fare.",
+          );
+          return;
+        }
+
+        for (let j = 0; j < route.departures.length; j++) {
+          const departure = route.departures[j];
+
+          if (
+            !departure.departure_time ||
+            departure.price_per_passenger === ""
+          ) {
+            event.preventDefault();
+            showError(
+              "Route " +
+                routeNumber +
+                ": complete every departure time and fare.",
+            );
+            return;
+          }
+
+          const fare = Number(departure.price_per_passenger);
+
+          if (!Number.isFinite(fare) || fare < 0) {
+            event.preventDefault();
+            showError(
+              "Route " + routeNumber + ": enter a valid non-negative fare.",
+            );
+            return;
+          }
+
+          if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(departure.departure_time)) {
+            event.preventDefault();
+            showError(
+              "Route " + routeNumber + ": enter a valid departure time.",
+            );
+            return;
+          }
+        }
+      }
+
+      routesJson.value = JSON.stringify(routes);
+
+      isSubmitting = true;
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving routes...";
+    });
+
+    // Re-enable the button if the browser blocks the submission.
+    bulkForm.addEventListener(
+      "invalid",
+      function () {
+        isSubmitting = false;
+        saveButton.disabled = false;
+        saveButton.textContent = "Save all routes and departures";
+      },
+      true,
+    );
+
+    // Start with one blank route.
+    addRoute();
+  });
+</script>
+{% endblock %}

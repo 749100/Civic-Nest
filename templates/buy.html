@@ -7,51 +7,46 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
-    <!-- Primary SEO Meta Tags -->
-    <title>
-      Buy Properties in Kenya | Houses, Apartments & Land for Sale - CivicNest
-      Africa
-    </title>
+    <title>Buy Properties in Kenya | Houses &amp; Land for Sale</title>
+
     <meta
       name="title"
       content="Buy Properties in Kenya | Houses, Apartments & Land for Sale - CivicNest Africa"
     />
     <meta
       name="description"
-      content="Browse verified houses, apartments, commercial spaces, and plots of land for sale in Kenya. Use our mortgage estimator to find your next home on CivicNest Africa."
+      content="Browse verified houses and plots of land for sale in Kenya. Use our mortgage estimator to find your next home on CivicNest Africa."
     />
     <meta
       name="keywords"
-      content="houses for sale in kenya, apartments for sale nairobi, land for sale, property for sale kenya, buy home civicnest"
+      content="houses for sale in kenya, land for sale, plots for sale, property for sale kenya, buy home civicnest"
     />
+    <meta name="author" content="CivicNest Africa" />
     <meta name="robots" content="index, follow" />
-
-    <!-- Canonical URL -->
+    <meta name="theme-color" content="#1456d8" />
     <link
       rel="canonical"
       href="https://civic-nest.onrender.com{{ url_for('buy_page') }}"
     />
 
-    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CivicNest Africa" />
     <meta
       property="og:url"
       content="https://civic-nest.onrender.com{{ url_for('buy_page') }}"
     />
     <meta
       property="og:title"
-      content="Buy Properties in Kenya | Houses, Apartments & Land for Sale"
+      content="Buy Properties in Kenya | Houses &amp; Land for Sale"
     />
     <meta
       property="og:description"
-      content="Explore verified family homes, apartments, and land for sale across Kenya."
+      content="Explore verified family homes and land for sale across Kenya."
     />
     <meta
       property="og:image"
       content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
     />
-
-    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta
       property="twitter:url"
@@ -59,973 +54,758 @@
     />
     <meta
       property="twitter:title"
-      content="Buy Properties in Kenya | Houses, Apartments & Land for Sale"
+      content="Buy Properties in Kenya | Houses &amp; Land for Sale"
     />
     <meta
       property="twitter:description"
-      content="Explore verified family homes, apartments, and land for sale across Kenya."
+      content="Explore verified family homes and land for sale across Kenya."
     />
     <meta
       property="twitter:image"
       content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
     />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
     />
+
     <style>
-      :root {
-        --blue: #1e4fa3;
-        --blue2: #2d63c8;
-        --navy: #0a2260;
-        --tint: #e1ebfa;
-        --bg: #f3f7fd;
-        --line: #d9e3f3;
-        --ink: #14213d;
-        --muted: #55627a;
-        --lift:
-          0 1px 2px rgba(20, 33, 61, 0.05), 0 10px 28px rgba(30, 79, 163, 0.09);
-      }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        scroll-behavior: smooth;
-      }
-      body {
-        overflow-x: hidden;
-        font-family: "DM Sans", sans-serif;
-        color: var(--ink);
-        background: var(--bg);
-        padding-bottom: calc(112px + env(safe-area-inset-bottom));
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      button,
-      input,
-      select {
-        font-family: inherit;
-      }
-      :focus-visible {
-        outline: 3px solid #9dc0ff;
-        outline-offset: 2px;
-      }
-      .wrap {
-        position: relative;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 0 22px;
-      }
-      svg.i {
-        width: 20px;
-        height: 20px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex: none;
+      /* =====================================================
+         CIVICNEST AFRICA — BUY PAGE
+         Design matched to the Travel and Stay & Dine pages.
+         ===================================================== */
+
+      .hero.h {
+        padding-bottom: 150px;
       }
 
-      .stage {
-        position: relative;
-        overflow: hidden;
-        color: #fff;
-        padding-bottom: 44px;
-        border-radius: 0 0 40px 40px;
-        background:
-          radial-gradient(
-            700px 420px at 92% 4%,
-            rgba(120, 175, 255, 0.4),
-            transparent 70%
-          ),
-          radial-gradient(
-            600px 400px at 0 70%,
-            rgba(45, 99, 200, 0.55),
-            transparent 70%
-          ),
-          linear-gradient(
-            180deg,
-            rgba(7, 24, 72, 0.8) 0,
-            rgba(14, 52, 128, 0.82) 55%,
-            rgba(8, 30, 86, 0.94) 100%
-          ),
-          url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85")
-            center/cover #0e3478;
-      }
-      .stage::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.22) 1.1px,
-            transparent 1.6px
-          )
-          0 0/24px 24px;
-        -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
-        mask-image: linear-gradient(180deg, #000, transparent 70%);
+      .search.s4 {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        bottom: -80px;
       }
 
-      .top {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 76px;
-        padding-top: 6px;
-      }
-      .icon-btn {
-        width: 46px;
-        height: 46px;
-        border-radius: 23px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-      }
-      .icon-btn.ring {
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.32);
-        -webkit-backdrop-filter: blur(10px);
-        backdrop-filter: blur(10px);
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .brand-mark {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        background: #fff;
-        color: var(--blue);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-      }
-      .brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1;
-      }
-      .brand-name {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 25px;
-        color: #fff;
-      }
-      .brand-sub {
-        margin-top: 3px;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.78);
-      }
-      .menu {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        z-index: 30;
-        min-width: 230px;
-        background: #fff;
-        color: var(--ink);
-        border-radius: 16px;
-        padding: 6px;
-        box-shadow: 0 22px 50px rgba(5, 15, 50, 0.4);
-      }
-      .menu[hidden] {
-        display: none;
-      }
-      .menu a {
-        display: block;
-        padding: 12px 14px;
-        border-radius: 10px;
-        font-weight: 500;
-        font-size: 15px;
-      }
-      .menu a:hover {
-        background: var(--tint);
+      .search.s4 .field:first-child,
+      .search.s4 .go {
+        grid-column: 1 / -1;
       }
 
-      h1 {
-        position: relative;
-        margin: clamp(18px, 5vw, 40px) 0 26px;
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(36px, 6.5vw, 64px);
-        line-height: 1.06;
-        letter-spacing: -0.02em;
-        max-width: 16ch;
-        text-shadow: 0 6px 30px rgba(3, 12, 40, 0.45);
-      }
-      .search {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        height: 62px;
-        padding: 0 9px 0 20px;
-        background: #fff;
-        border-radius: 20px;
-        color: var(--muted);
-        max-width: 720px;
-        box-shadow: 0 24px 50px rgba(3, 12, 40, 0.4);
-      }
-      .search input {
-        flex: 1;
+      .search.s4 select {
+        width: 100%;
         min-width: 0;
         border: 0;
         outline: 0;
         background: transparent;
-        font-size: 16px;
-        color: var(--ink);
-      }
-      .search:focus-within {
-        box-shadow:
-          0 0 0 4px rgba(157, 192, 255, 0.55),
-          0 24px 50px rgba(3, 12, 40, 0.4);
-      }
-      .go {
-        width: 46px;
-        height: 46px;
-        border-radius: 15px;
-        border: 0;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
         cursor: pointer;
-        color: #fff;
-        background: linear-gradient(135deg, var(--blue2), #173f85);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 18px rgba(30, 79, 163, 0.4);
       }
 
-      .label {
+      .sec.h {
+        padding-top: 112px;
+      }
+
+      @media (min-width: 600px) {
+        .hero.h {
+          padding-bottom: 110px;
+        }
+
+        .search.s4 {
+          bottom: -48px;
+        }
+
+        .sec.h {
+          padding-top: 85px;
+        }
+      }
+
+      @media (min-width: 960px) {
+        .search.s4 {
+          grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr)
+            minmax(0, 1fr)
+            auto;
+        }
+
+        .search.s4 .field:first-child,
+        .search.s4 .go {
+          grid-column: auto;
+        }
+      }
+
+      .h a:focus-visible,
+      .h button:focus-visible,
+      .h input:focus-visible,
+      .h select:focus-visible,
+      .search.s4 button:focus-visible,
+      .search.s4 input:focus-visible,
+      .search.s4 select:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
+      }
+
+      .blist .card[hidden],
+      .bempty[hidden] {
+        display: none !important;
+      }
+
+      /* Type tiles + toolbar */
+      .chips button.on {
+        background: #1456d8;
+        border-color: #1456d8;
+        color: #fff;
+      }
+
+      .btoolbar {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
+        align-items: end;
         gap: 10px;
-        margin: 32px 0 14px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.82);
+        margin-top: 18px;
       }
-      .label::before {
-        content: "";
-        width: 26px;
-        height: 3px;
-        border-radius: 2px;
-        background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.2));
-      }
-      .grid {
+
+      .btoolbar label {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 5px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
       }
-      .tile {
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-        padding: 15px 16px;
-        color: #fff;
-        text-align: left;
-        font: inherit;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.11);
-        border: 1px solid rgba(255, 255, 255, 0.26);
-        border-radius: 20px;
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        box-shadow:
-          0 14px 34px rgba(3, 12, 40, 0.22),
-          inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        transition:
-          transform 0.2s,
-          background 0.2s,
-          border-color 0.2s;
-      }
-      .tile:hover {
-        transform: translateY(-4px);
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-      }
-      .tile.on {
-        background: rgba(255, 255, 255, 0.3);
-        border-color: #fff;
-      }
-      .ico {
-        width: 40px;
-        height: 40px;
-        border-radius: 13px;
+
+      .btoolbar select {
+        min-height: 40px;
+        padding: 9px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
         background: #fff;
-        color: var(--blue);
-        display: flex;
+        color: #001b5e;
+        font-family: inherit;
+        font-size: 13px;
+      }
+
+      .bbtn {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 18px rgba(3, 12, 40, 0.28);
-      }
-      .tile strong {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .tile small {
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.82);
-      }
-
-      .filters {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 4px;
-      }
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .field span {
-        font-size: 12px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.85);
-      }
-      .field select {
-        width: 100%;
-        height: 50px;
-        padding: 0 40px 0 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.14)
-          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
-          right 12px center/18px no-repeat;
-        color: #fff;
-        font-size: 15px;
-        -webkit-appearance: none;
-        appearance: none;
-        cursor: pointer;
-      }
-      .field select option {
-        color: #14213d;
-      }
-      .ghost {
-        align-self: end;
-        height: 50px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.45);
-        background: transparent;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .ghost:hover {
-        background: rgba(255, 255, 255, 0.16);
-      }
-
-      .listings {
-        position: relative;
-        padding: 56px 0 8px;
-        background: radial-gradient(
-            circle,
-            rgba(30, 79, 163, 0.1) 1.1px,
-            transparent 1.5px
-          )
-          0 0/24px 24px;
-      }
-      .listings h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(28px, 4vw, 40px);
-        color: var(--navy);
-      }
-      .count {
-        margin-top: 4px;
-        color: var(--muted);
-        font-size: 15px;
-      }
-      .plist {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        margin-top: 22px;
-      }
-      .card {
+        min-height: 40px;
+        padding: 9px 14px;
+        border: 1px solid #1456d8;
+        border-radius: 10px;
         background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 22px;
+        color: #1456d8;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .bbtn:hover {
+        background: #e6eeff;
+      }
+
+      .bbtn.solid {
+        background: #1456d8;
+        color: #fff;
+      }
+
+      .bbtn.solid:hover {
+        background: #001b5e;
+        border-color: #001b5e;
+      }
+
+      .hcount {
+        margin-top: 12px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      /* Property grid */
+      .blist {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      @media (min-width: 600px) {
+        .blist {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 960px) {
+        .blist {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .blist .card {
+        min-width: 0;
         overflow: hidden;
-        box-shadow: var(--lift);
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
       }
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 26px 50px rgba(30, 79, 163, 0.2);
-      }
-      .photo {
+
+      .bphoto {
         position: relative;
-        height: 210px;
-        background: linear-gradient(135deg, #c9d8f2, #e1ebfa);
+        min-height: 190px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
       }
-      .photo::after {
-        content: "";
+
+      .bphoto img {
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(10, 34, 96, 0.2),
-          transparent 35%,
-          rgba(10, 34, 96, 0.5)
-        );
-        pointer-events: none;
-      }
-      .photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
-      .no-photo {
-        height: 100%;
+
+      .bphoto .nophoto {
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        font-weight: 800;
       }
-      .fav,
-      .badge {
+
+      .bphoto .bbadges {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
         z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
       }
+
+      .bpill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #1456d8;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .bpill.sale {
+        background: #0f7a55;
+        color: #fff;
+      }
+
       .fav {
         position: absolute;
         top: 10px;
         right: 10px;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
+        z-index: 2;
+        width: 40px;
+        height: 40px;
         border: 0;
+        border-radius: 50%;
         background: rgba(255, 255, 255, 0.94);
-        font-size: 18px;
+        color: #14213d;
         cursor: pointer;
-        color: var(--ink);
+        font-size: 18px;
         box-shadow: 0 6px 14px rgba(20, 33, 61, 0.25);
       }
-      .badge {
-        position: absolute;
-        left: 12px;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 600;
-        color: #fff;
-      }
-      .badge.v {
-        top: 12px;
-        background: var(--blue);
-      }
-      .badge.a {
-        bottom: 12px;
-        background: #0f7a55;
-      }
-      .info {
-        padding: 16px 18px 18px;
-      }
-      .price {
-        font-size: 22px;
-        font-weight: 600;
-        color: var(--blue);
-      }
-      .info h3 {
-        margin-top: 4px;
-        font-size: 17px;
-        font-weight: 600;
-      }
-      .loc {
-        margin-top: 2px;
-        font-size: 13px;
-        color: var(--muted);
-      }
-      .meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 12px;
-      }
-      .meta span {
-        padding: 4px 10px;
-        border-radius: 8px;
-        background: var(--tint);
-        font-size: 12px;
-        font-weight: 500;
-        color: #2b4a82;
-      }
-      .more {
-        display: inline-block;
-        margin-top: 14px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--blue);
-      }
-      .more:hover {
-        text-decoration: underline;
-      }
-      .empty {
-        grid-column: 1/-1;
-        padding: 44px 20px;
-        text-align: center;
-        background: #fff;
-        border: 1px dashed #9db4dd;
-        border-radius: 22px;
-      }
-      .empty h3 {
-        font-size: 18px;
-        margin-bottom: 6px;
-      }
-      .empty p {
-        color: var(--muted);
-        font-size: 14px;
-        max-width: 420px;
-        margin: auto;
-      }
-      .empty[hidden] {
-        display: none;
+
+      .blist .info {
+        min-width: 0;
       }
 
-      .calc {
-        margin-top: 44px;
-        padding: 26px;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        box-shadow: var(--lift);
+      .blist .info h3 {
+        overflow-wrap: anywhere;
       }
-      .calc h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 26px;
-        color: var(--navy);
+
+      .blist .loc {
+        overflow-wrap: anywhere;
       }
-      .calc > p {
-        margin-top: 4px;
-        color: var(--muted);
-        font-size: 14px;
-      }
-      .cgrid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 18px;
-      }
-      .cfield {
-        display: flex;
-        flex-direction: column;
+
+      .blist .more {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         gap: 6px;
-      }
-      .cfield span {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--muted);
-      }
-      .cfield input {
-        height: 48px;
-        padding: 0 14px;
-        border: 1px solid #c9d6ec;
-        border-radius: 12px;
-        font-size: 16px;
-        color: var(--ink);
-        background: #fff;
-      }
-      .cfield input:focus {
-        outline: 0;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(30, 79, 163, 0.15);
-      }
-      .result {
-        margin-top: 18px;
-        padding: 18px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #1e4fa3, #0a2260);
-        color: #fff;
-      }
-      .result small {
-        display: block;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.8);
-      }
-      .result strong {
-        display: block;
-        margin-top: 2px;
-        font-size: 28px;
-        font-weight: 700;
-      }
-      .result em {
-        display: block;
-        margin-top: 6px;
-        font-style: normal;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none;
       }
 
-      .cta {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin: 44px 0 0;
-        padding: 28px;
-        border-radius: 24px;
-        color: #fff;
-        background: linear-gradient(135deg, #1e4fa3, #0a2260);
-        box-shadow: 0 24px 50px rgba(30, 79, 163, 0.3);
-      }
-      .cta h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 26px;
-        color: #fff;
-      }
-      .cta p {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 15px;
-        max-width: 52ch;
-      }
-      .cta .btn {
-        align-self: flex-start;
-        min-height: 46px;
-        padding: 0 26px;
-        display: flex;
-        align-items: center;
-        border-radius: 13px;
-        background: #fff;
-        color: var(--navy);
-        font-weight: 700;
-        font-size: 14px;
-      }
-
-      .tabbar {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 40;
-        max-width: 520px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        height: 68px;
-        padding: 0 8px;
-        background: rgba(255, 255, 255, 0.9);
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(201, 214, 236, 0.9);
-        border-radius: 24px;
-        box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
-      }
-      .tab {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        min-width: 76px;
-        padding: 7px 14px;
+      .bempty {
+        grid-column: 1 / -1;
+        padding: 36px 18px;
+        border: 1px dashed #d3e0f5;
         border-radius: 18px;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--muted);
-      }
-      .tab svg.i {
-        width: 22px;
-        height: 22px;
-      }
-      .tab em {
-        position: absolute;
-        top: 2px;
-        left: calc(50% + 6px);
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        border-radius: 9px;
-        background: var(--blue);
-        color: #fff;
-        font-style: normal;
-        font-size: 11px;
-        font-weight: 600;
-        line-height: 18px;
+        background: #f2f7fd;
         text-align: center;
       }
 
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
+      .bempty h3 {
+        margin: 0 0 8px;
+        color: #001b5e;
       }
-      h1 {
-        animation: rise 0.7s 0.05s both;
+
+      .bempty p {
+        max-width: 420px;
+        margin: 0 auto;
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.7;
       }
-      .search {
-        animation: rise 0.7s 0.15s both;
+
+      .bflash {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #ffe1e1;
+        color: #b42318;
+        font-size: 12px;
+        font-weight: 700;
       }
-      .stage .label,
-      .stage .grid,
-      .stage .filters {
-        animation: rise 0.7s 0.26s both;
+
+      /* Payment estimator */
+      .bcalc {
+        margin-top: 34px;
+        padding: 20px;
+      }
+
+      .bcalc h2 {
+        margin: 0;
+        color: #001b5e;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .bcalc > p {
+        margin: 4px 0 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .bcgrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
       }
 
       @media (min-width: 700px) {
-        .plist {
-          grid-template-columns: 1fr 1fr;
+        .bcgrid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
         }
-        .stage {
-          padding-bottom: 60px;
-        }
-        .cta {
+      }
+
+      .bcgrid label {
+        display: grid;
+        gap: 5px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .bcgrid input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
+        background: #fff;
+        color: #001b5e;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .bresult {
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 14px;
+        color: #fff;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .bresult small {
+        display: block;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 11px;
+      }
+
+      .bresult strong {
+        display: block;
+        margin-top: 2px;
+        font-size: 26px;
+        font-weight: 800;
+      }
+
+      .bresult em {
+        display: block;
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 11px;
+        font-style: normal;
+      }
+
+      /* Call to action */
+      .bcta {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 14px;
+        padding: 22px;
+        border-radius: 18px;
+        color: #fff;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .bcta h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .bcta p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .bcta .bbtn {
+        align-self: flex-start;
+        border-color: #fff;
+        color: #0047ff;
+      }
+
+      @media (min-width: 700px) {
+        .bcta {
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
         }
-        .cgrid {
-          grid-template-columns: repeat(4, 1fr);
-        }
       }
-      @media (min-width: 1000px) {
-        .grid {
-          grid-template-columns: repeat(4, 1fr);
-        }
-        .plist {
-          grid-template-columns: repeat(3, 1fr);
-        }
-        .filters {
-          grid-template-columns: repeat(4, 1fr);
-        }
-      }
+
       @media (prefers-reduced-motion: reduce) {
-        * {
-          transition: none !important;
-          animation: none !important;
+        .h *,
+        .h *::before,
+        .h *::after,
+        .search.s4 *,
+        .search.s4 *::before,
+        .search.s4 *::after {
           scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
         }
       }
     </style>
   </head>
+
   <body>
     {% include "_admin_bar.html" %}
 
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
       <symbol id="i-house" viewBox="0 0 24 24">
         <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
       </symbol>
-      <symbol id="i-building" viewBox="0 0 24 24">
-        <path
-          d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"
-        />
-      </symbol>
+
       <symbol id="i-land" viewBox="0 0 24 24">
         <path d="M3 20l5-9 4 6 3-4 6 7z" />
         <circle cx="17" cy="6" r="2" />
       </symbol>
-      <symbol id="i-shop" viewBox="0 0 24 24">
+
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
+
+      <symbol id="i-heart" viewBox="0 0 24 24">
         <path
-          d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9M10 20v-5h4v5"
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
         />
       </symbol>
-      <symbol id="i-menu" viewBox="0 0 24 24">
-        <path d="M4 7h16M4 12h16M4 17h16" />
+
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
       </symbol>
-      <symbol id="i-user" viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-      </symbol>
+
       <symbol id="i-search" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="7" />
         <path d="M20 20l-4-4" />
       </symbol>
+
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+
       <symbol id="i-arrow" viewBox="0 0 24 24">
         <path d="M5 12h14M13 6l6 6-6 6" />
       </symbol>
-      <symbol id="i-bookmark" viewBox="0 0 24 24">
-        <path d="M6 3h12v18l-6-4-6 4z" />
+
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
       </symbol>
-      <symbol id="i-chat" viewBox="0 0 24 24">
-        <path d="M4 5h16v11H9l-5 4z" />
+
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+
+      <symbol id="i-tag" viewBox="0 0 24 24">
+        <path d="M3 12V4h8l10 10-8 8z" />
+        <circle cx="7.5" cy="8.5" r="1.5" />
       </symbol>
     </svg>
 
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a class="on" href="{{ url_for('buy_page') }}" aria-current="page"
+            >Buy</a
+          >
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a
+            class="t"
+            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          {% if current_user.is_authenticated %}
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          {% else %}
+          <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+          {% endif %}
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        <a href="{{ url_for('register') }}">Create account</a>
+      </nav>
+    </header>
+
     <main>
-      <div class="stage">
+      <!-- HERO AND SEARCH -->
+      <section class="hero h">
         <div class="wrap">
-          <header class="top">
-            <button
-              class="icon-btn"
-              id="menuBtn"
-              type="button"
-              aria-label="Open menu"
-              aria-expanded="false"
-              aria-controls="menuPanel"
-            >
-              <svg class="i" width="24" height="24"><use href="#i-menu" /></svg>
-            </button>
-            <nav class="menu" id="menuPanel" aria-label="Main menu" hidden>
-              <a href="{{ url_for('rent_page') }}">Rent</a>
-              <a href="{{ url_for('buy_page') }}">Buy</a>
-              <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
-              <a href="{{ url_for('invest_page') }}">Invest</a>
-              <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
-              <a href="{{ url_for('login', role='landlord') }}"
-                >Landlord login</a
-              >
-              <a href="{{ url_for('register') }}">Create account</a>
-            </nav>
-            <a class="brand" href="/" aria-label="CivicNest Africa home">
-              <span class="brand-mark"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <span class="brand-text"
-                ><span class="brand-name">CivicNest</span
-                ><span class="brand-sub">Africa</span></span
-              >
-            </a>
-            <a
-              class="icon-btn ring"
-              href="{{ url_for('login') }}"
-              aria-label="Your account"
-              ><svg class="i" width="22" height="22"><use href="#i-user" /></svg
-            ></a>
-          </header>
+          <div class="eyebrow">Houses and land for sale</div>
 
-          <h1>Buy a home you will love.</h1>
+          <h1>Buy a home <em>you will love.</em></h1>
 
-          <form class="search" id="searchForm" role="search">
-            <svg class="i"><use href="#i-search" /></svg>
+          <p>
+            Browse verified family homes and plots of land across Kenya, and
+            estimate your monthly payment.
+          </p>
+        </div>
+
+        <form class="search s4" id="searchForm" role="search">
+          <label class="field">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-search" />
+            </svg>
+
             <input
               type="search"
               id="locationSearch"
               aria-label="Search town or neighborhood"
               placeholder="Search town, neighborhood..."
+              autocomplete="off"
             />
-            <button class="go" type="submit" aria-label="Search">
-              <svg class="i"><use href="#i-arrow" /></svg>
-            </button>
-          </form>
+          </label>
 
-          <div class="label">Browse by property</div>
-          <div class="grid" id="typeTiles">
-            <button
-              class="tile"
-              type="button"
-              data-type="house"
-              aria-pressed="false"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <strong>Houses</strong><small>Family homes</small>
+          <label class="field">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-tag" />
+            </svg>
+
+            <select id="budgetSearch" aria-label="Price range">
+              <option value="">Any price</option>
+              <option value="0-2000000">Below KSh 2M</option>
+              <option value="2000000-5000000">KSh 2M – 5M</option>
+              <option value="5000000-10000000">KSh 5M – 10M</option>
+              <option value="10000000-999999999999">Above KSh 10M</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-bed" />
+            </svg>
+
+            <select id="bedSearch" aria-label="Bedrooms">
+              <option value="">Any bedrooms</option>
+              <option value="1">1 or more</option>
+              <option value="2">2 or more</option>
+              <option value="3">3 or more</option>
+              <option value="4">4 or more</option>
+            </select>
+          </label>
+
+          <button class="go" type="submit">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-search" />
+            </svg>
+            Search
+          </button>
+        </form>
+      </section>
+
+      <!-- LISTINGS -->
+      <section class="sec h" id="properties">
+        <div class="wrap">
+          <div class="eb">Buy</div>
+
+          <h2 id="listingsTitle">Properties for sale</h2>
+
+          <p class="sub">Browse by property type, then refine and sort.</p>
+
+          {% if properties_error %}
+          <div class="bflash" role="alert">
+            We could not load properties right now. Please try again shortly.
+          </div>
+          {% endif %}
+
+          <div class="chips" id="typeTiles" style="margin-top: 14px">
+            <button type="button" data-type="house" aria-pressed="false">
+              <svg class="i" aria-hidden="true">
+                <use href="#i-house" />
+              </svg>
+              Houses
             </button>
-            <button
-              class="tile"
-              type="button"
-              data-type="apartment"
-              aria-pressed="false"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-building" /></svg
-              ></span>
-              <strong>Apartments</strong><small>Flats and units</small>
-            </button>
-            <button
-              class="tile"
-              type="button"
-              data-type="land"
-              aria-pressed="false"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-land" /></svg
-              ></span>
-              <strong>Land &amp; plots</strong><small>Build your own</small>
-            </button>
-            <button
-              class="tile"
-              type="button"
-              data-type="commercial"
-              aria-pressed="false"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-shop" /></svg
-              ></span>
-              <strong>Commercial</strong><small>Shops and offices</small>
+
+            <button type="button" data-type="plot" aria-pressed="false">
+              <svg class="i" aria-hidden="true">
+                <use href="#i-land" />
+              </svg>
+              Land &amp; plots
             </button>
           </div>
 
-          <div class="label">Refine your search</div>
-          <div class="filters">
-            <label class="field"
-              ><span>Price range</span>
-              <select id="budgetSearch">
-                <option value="">Any price</option>
-                <option value="0-2000000">Below KSh 2M</option>
-                <option value="2000000-5000000">KSh 2M – 5M</option>
-                <option value="5000000-10000000">KSh 5M – 10M</option>
-                <option value="10000000-999999999999">Above KSh 10M</option>
-              </select>
-            </label>
-            <label class="field"
-              ><span>Bedrooms</span>
-              <select id="bedSearch">
-                <option value="">Any</option>
-                <option value="1">1 or more</option>
-                <option value="2">2 or more</option>
-                <option value="3">3 or more</option>
-                <option value="4">4 or more</option>
-              </select>
-            </label>
-            <label class="field"
-              ><span>Sort by</span>
+          <div class="btoolbar">
+            <label>
+              Sort by
               <select id="sortSearch">
                 <option value="">Newest first</option>
                 <option value="low">Price: low to high</option>
                 <option value="high">Price: high to low</option>
               </select>
             </label>
-            <button class="ghost" type="button" id="clearBtn">
+
+            <button class="bbtn" type="button" id="clearBtn">
               Clear filters
             </button>
           </div>
-        </div>
-      </div>
 
-      <section class="listings" id="properties" aria-labelledby="listingsTitle">
-        <div class="wrap">
-          <h2 id="listingsTitle">Properties for sale</h2>
-          <p class="count" id="propertyCount">
+          <p class="hcount" id="propertyCount" aria-live="polite">
             {{ properties|length }} {{ 'property' if properties|length == 1 else
             'properties' }} for sale
           </p>
 
-          <div class="plist" id="propertyGrid">
+          <div class="blist" id="propertyGrid">
             {% if properties %} {% for property in properties %}
             <article
               class="card"
@@ -1035,10 +815,10 @@
               data-price="{{ property.price }}"
               data-beds="{{ property.bedrooms or 0 }}"
             >
-              <div class="photo">
+              <div class="bphoto">
                 {% if property.cover_image %}
                 <img
-                  src="{{ property.cover_image if property.cover_image.startswith('http') else url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  src="{{ property.cover_image|photo_url }}"
                   onerror="
                     this.onerror = null;
                     this.src =
@@ -1048,8 +828,9 @@
                   loading="lazy"
                 />
                 {% else %}
-                <div class="no-photo">No photo available</div>
+                <div class="nophoto">No photo available</div>
                 {% endif %}
+
                 <button
                   class="fav"
                   type="button"
@@ -1058,17 +839,29 @@
                 >
                   ♡
                 </button>
-                {% if property.is_verified %}<span class="badge v"
-                  >Verified</span
-                >{% endif %}
-                <span class="badge a">For sale</span>
+
+                <div class="bbadges">
+                  {% if property.is_verified %}<span class="bpill"
+                    >Verified</span
+                  >{% endif %}
+                  <span class="bpill sale">For sale</span>
+                </div>
               </div>
+
               <div class="info">
                 <div class="price">
                   KSh {{ "{:,.0f}".format(property.price) }}
                 </div>
+
                 <h3>{{ property.title }}</h3>
-                <div class="loc">{{ property.location }}</div>
+
+                <div class="loc">
+                  <svg class="i" aria-hidden="true">
+                    <use href="#i-pin" />
+                  </svg>
+                  <span>{{ property.location }}</span>
+                </div>
+
                 <div class="meta">
                   <span
                     >{{ property.property_type|replace('_', ' ')|title }}</span
@@ -1081,15 +874,24 @@
                     >{{ property.size_sqm }} sqm</span
                   >{% endif %}
                 </div>
+
                 <a
                   class="more"
                   href="{{ url_for('property_details', property_id=property.id) }}"
-                  >View details</a
                 >
+                  View details
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
               </div>
             </article>
             {% endfor %} {% else %}
-            <div class="empty">
+            <div class="bempty">
               <h3>No properties for sale yet</h3>
               <p>
                 New listings appear here as sellers publish them. Check back
@@ -1097,7 +899,7 @@
               </p>
             </div>
             {% endif %} {% if properties %}
-            <div class="empty" id="searchEmptyState" hidden>
+            <div class="bempty" id="searchEmptyState" hidden>
               <h3>No properties match your search</h3>
               <p>
                 Try a different area, a wider price range, or clear the filters.
@@ -1106,249 +908,396 @@
             {% endif %}
           </div>
 
-          <div class="calc">
+          <!-- PAYMENT ESTIMATOR -->
+          <section class="card bcalc" aria-label="Monthly payment estimator">
             <h2>Estimate your monthly payment</h2>
             <p>
               A rough guide only. Your bank or lender will give you the real
               figures.
             </p>
-            <div class="cgrid">
-              <label class="cfield"
-                ><span>Property price (KSh)</span
-                ><input
+
+            <div class="bcgrid">
+              <label>
+                Property price (KSh)
+                <input
                   id="cPrice"
                   type="number"
                   inputmode="numeric"
                   min="0"
                   value="5000000"
-              /></label>
-              <label class="cfield"
-                ><span>Deposit (%)</span
-                ><input
+                />
+              </label>
+
+              <label>
+                Deposit (%)
+                <input
                   id="cDeposit"
                   type="number"
                   inputmode="decimal"
                   min="0"
                   max="100"
                   value="20"
-              /></label>
-              <label class="cfield"
-                ><span>Loan term (years)</span
-                ><input
+                />
+              </label>
+
+              <label>
+                Loan term (years)
+                <input
                   id="cYears"
                   type="number"
                   inputmode="numeric"
                   min="1"
                   max="40"
                   value="15"
-              /></label>
-              <label class="cfield"
-                ><span>Interest rate (% a year)</span
-                ><input
+                />
+              </label>
+
+              <label>
+                Interest rate (% a year)
+                <input
                   id="cRate"
                   type="number"
                   inputmode="decimal"
                   min="0"
                   step="0.1"
                   value="13"
-              /></label>
+                />
+              </label>
             </div>
-            <div class="result" aria-live="polite">
+
+            <div class="bresult" aria-live="polite">
               <small>Estimated monthly payment</small>
               <strong id="cMonthly">KSh 0</strong>
               <em id="cDetail"></em>
             </div>
-          </div>
+          </section>
 
-          <div class="cta">
+          <!-- CALL TO ACTION -->
+          <section class="bcta">
             <div>
               <h2>Selling a property?</h2>
               <p>
-                List your house, apartment or plot in a few minutes and reach
-                serious buyers.
+                List your house or plot in a few minutes and reach serious
+                buyers.
               </p>
             </div>
-            <a class="btn" href="{{ url_for('sell_page') }}"
+
+            <a class="bbtn" href="{{ url_for('sell_page') }}"
               >List your property</a
             >
+          </section>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
+            <div>
+              +254 768387842
+              <small>Call or WhatsApp</small>
+            </div>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </div>
+
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
           </div>
         </div>
       </section>
     </main>
 
-    <nav class="tabbar" aria-label="Primary">
-      <a class="tab" href="/"
-        ><svg class="i"><use href="#i-house" /></svg>Home</a
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a class="on" href="{{ url_for('buy_page') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-tag" />
+        </svg>
+        Buy
+      </a>
+
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
       >
-      <a class="tab" href="#properties"
-        ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
-          >0</em
-        ></a
-      >
-      <a class="tab" href="#"
-        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
-      >
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Chats
+      </a>
+
+      <a href="{{ url_for('sell_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List
+      </a>
     </nav>
 
+    <!-- JAVASCRIPT -->
     <script>
-      // Menu
-      const menuBtn = document.getElementById("menuBtn");
-      const menuPanel = document.getElementById("menuPanel");
-      menuBtn.addEventListener("click", () => {
-        const open = menuPanel.hidden;
-        menuPanel.hidden = !open;
-        menuBtn.setAttribute("aria-expanded", String(open));
-      });
-      document.addEventListener("click", (e) => {
-        if (
-          !menuPanel.hidden &&
-          !menuPanel.contains(e.target) &&
-          !menuBtn.contains(e.target)
-        ) {
-          menuPanel.hidden = true;
-          menuBtn.setAttribute("aria-expanded", "false");
-        }
-      });
+      (() => {
+        "use strict";
 
-      // Favorites (saved in this browser)
-      const savedCount = document.getElementById("savedCount");
-      let favorites = [];
-      try {
-        favorites = JSON.parse(
-          localStorage.getItem("civicNestFavorites") || "[]",
-        );
-      } catch (e) {}
-      const paint = (btn, on) => {
-        btn.textContent = on ? "♥" : "♡";
-        btn.style.color = on ? "#ef4444" : "";
-        btn.setAttribute("aria-pressed", String(on));
-      };
-      document.querySelectorAll(".fav").forEach((btn, i) => {
-        const id = btn.closest(".card")?.dataset.propertyId || String(i);
-        paint(btn, favorites.includes(id));
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const on = !favorites.includes(id);
-          favorites = on
-            ? [...new Set([...favorites, id])]
-            : favorites.filter((x) => x !== id);
-          try {
-            localStorage.setItem(
-              "civicNestFavorites",
-              JSON.stringify(favorites),
+        // MOBILE NAVIGATION
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
+
+        if (menuBtn && menuPanel) {
+          menuBtn.addEventListener("click", () => {
+            const isOpening = menuPanel.hidden;
+
+            menuPanel.hidden = !isOpening;
+            menuBtn.setAttribute("aria-expanded", String(isOpening));
+            menuBtn.setAttribute(
+              "aria-label",
+              isOpening ? "Close menu" : "Open menu",
             );
-          } catch (e) {}
-          paint(btn, on);
-          savedCount.textContent = favorites.length;
-        });
-      });
-      savedCount.textContent = favorites.length;
-
-      // Search, property type tiles, filters and sorting
-      const grid = document.getElementById("propertyGrid");
-      const cards = [...document.querySelectorAll(".card")];
-      const originalOrder = [...cards];
-      const form = document.getElementById("searchForm");
-      const locationInput = document.getElementById("locationSearch");
-      const budgetSel = document.getElementById("budgetSearch");
-      const bedSel = document.getElementById("bedSearch");
-      const sortSel = document.getElementById("sortSearch");
-      const countLabel = document.getElementById("propertyCount");
-      const emptyState = document.getElementById("searchEmptyState");
-      const tiles = [...document.querySelectorAll("#typeTiles .tile")];
-      let activeType = "";
-
-      function applyFilters() {
-        const q = locationInput.value.trim().toLowerCase();
-        const range = budgetSel.value
-          ? budgetSel.value.split("-").map(Number)
-          : null;
-        const minBeds = bedSel.value ? Number(bedSel.value) : 0;
-        let found = 0;
-
-        cards.forEach((c) => {
-          const price = parseFloat(c.dataset.price || 0);
-          const beds = parseInt(c.dataset.beds || 0, 10);
-          const okLocation = !q || (c.dataset.location || "").includes(q);
-          const okType = !activeType || c.dataset.type === activeType;
-          const okBudget = !range || (price >= range[0] && price <= range[1]);
-          const okBeds = beds >= minBeds;
-          const show = okLocation && okType && okBudget && okBeds;
-          c.style.display = show ? "" : "none";
-          if (show) found++;
-        });
-
-        const sorted = sortSel.value
-          ? [...cards].sort((a, b) => {
-              const d =
-                parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-              return sortSel.value === "low" ? d : -d;
-            })
-          : originalOrder;
-        sorted.forEach((c) => grid.insertBefore(c, emptyState));
-
-        countLabel.textContent = `${found} ${found === 1 ? "property" : "properties"} for sale`;
-        if (emptyState) emptyState.hidden = found !== 0;
-      }
-
-      tiles.forEach((t) =>
-        t.addEventListener("click", () => {
-          activeType = activeType === t.dataset.type ? "" : t.dataset.type;
-          tiles.forEach((x) => {
-            const on = x.dataset.type === activeType;
-            x.classList.toggle("on", on);
-            x.setAttribute("aria-pressed", String(on));
           });
-          applyFilters();
-          document
-            .getElementById("properties")
-            .scrollIntoView({ behavior: "smooth" });
-        }),
-      );
 
-      [locationInput, budgetSel, bedSel, sortSel].forEach((el) =>
-        el.addEventListener("input", applyFilters),
-      );
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        applyFilters();
-        document
-          .getElementById("properties")
-          .scrollIntoView({ behavior: "smooth" });
-      });
-      document.getElementById("clearBtn").addEventListener("click", () => {
-        locationInput.value = "";
-        budgetSel.value = "";
-        bedSel.value = "";
-        sortSel.value = "";
-        activeType = "";
-        tiles.forEach((x) => {
-          x.classList.remove("on");
-          x.setAttribute("aria-pressed", "false");
+          document.addEventListener("click", (event) => {
+            if (
+              !menuPanel.hidden &&
+              !menuPanel.contains(event.target) &&
+              !menuBtn.contains(event.target)
+            ) {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.setAttribute("aria-label", "Open menu");
+            }
+          });
+
+          menuPanel.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.focus();
+            }
+          });
+        }
+
+        // SAVED PROPERTIES (kept in this browser)
+        let favorites = [];
+        try {
+          favorites = JSON.parse(
+            localStorage.getItem("civicNestFavorites") || "[]",
+          );
+        } catch (e) {}
+
+        const paint = (btn, on) => {
+          btn.textContent = on ? "♥" : "♡";
+          btn.style.color = on ? "#ef4444" : "";
+          btn.setAttribute("aria-pressed", String(on));
+        };
+
+        document.querySelectorAll(".fav").forEach((btn, i) => {
+          const id = btn.closest(".card")?.dataset.propertyId || String(i);
+          paint(btn, favorites.includes(id));
+
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const on = !favorites.includes(id);
+
+            favorites = on
+              ? [...new Set([...favorites, id])]
+              : favorites.filter((x) => x !== id);
+
+            try {
+              localStorage.setItem(
+                "civicNestFavorites",
+                JSON.stringify(favorites),
+              );
+            } catch (err) {}
+
+            paint(btn, on);
+          });
         });
-        applyFilters();
-      });
 
-      // Monthly payment estimate
-      const cIds = ["cPrice", "cDeposit", "cYears", "cRate"].map((id) =>
-        document.getElementById(id),
-      );
-      const money = (n) => "KSh " + Math.round(n).toLocaleString("en-KE");
-      function estimate() {
-        const [price, depositPct, years, rate] = cIds.map(
-          (el) => parseFloat(el.value) || 0,
+        // SEARCH, TYPE TILES, FILTERS AND SORTING
+        const grid = document.getElementById("propertyGrid");
+        const cards = [...document.querySelectorAll("#propertyGrid .card")];
+        const originalOrder = [...cards];
+        const form = document.getElementById("searchForm");
+        const locationInput = document.getElementById("locationSearch");
+        const budgetSel = document.getElementById("budgetSearch");
+        const bedSel = document.getElementById("bedSearch");
+        const sortSel = document.getElementById("sortSearch");
+        const countLabel = document.getElementById("propertyCount");
+        const emptyState = document.getElementById("searchEmptyState");
+        const tiles = [...document.querySelectorAll("#typeTiles button")];
+        let activeType = "";
+
+        const reduceMotion = () =>
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function applyFilters() {
+          const q = locationInput.value.trim().toLowerCase();
+          const range = budgetSel.value
+            ? budgetSel.value.split("-").map(Number)
+            : null;
+          const minBeds = bedSel.value ? Number(bedSel.value) : 0;
+          let found = 0;
+
+          cards.forEach((c) => {
+            const price = parseFloat(c.dataset.price || 0);
+            const beds = parseInt(c.dataset.beds || 0, 10);
+
+            const okLocation = !q || (c.dataset.location || "").includes(q);
+            const okType = !activeType || c.dataset.type === activeType;
+            const okBudget = !range || (price >= range[0] && price <= range[1]);
+            const okBeds = beds >= minBeds;
+
+            const show = okLocation && okType && okBudget && okBeds;
+
+            c.hidden = !show;
+            if (show) found++;
+          });
+
+          const sorted = sortSel.value
+            ? [...cards].sort((a, b) => {
+                const d =
+                  parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                return sortSel.value === "low" ? d : -d;
+              })
+            : originalOrder;
+
+          sorted.forEach((c) => grid.insertBefore(c, emptyState));
+
+          countLabel.textContent = `${found} ${
+            found === 1 ? "property" : "properties"
+          } for sale`;
+
+          if (emptyState) emptyState.hidden = found !== 0;
+        }
+
+        function scrollToList() {
+          const target = document.getElementById("listingsTitle");
+          if (target) {
+            target.scrollIntoView({
+              behavior: reduceMotion() ? "auto" : "smooth",
+              block: "start",
+            });
+          }
+        }
+
+        tiles.forEach((t) =>
+          t.addEventListener("click", () => {
+            activeType = activeType === t.dataset.type ? "" : t.dataset.type;
+
+            tiles.forEach((x) => {
+              const on = x.dataset.type === activeType;
+              x.classList.toggle("on", on);
+              x.setAttribute("aria-pressed", String(on));
+            });
+
+            applyFilters();
+            scrollToList();
+          }),
         );
-        const loan = Math.max(price * (1 - Math.min(depositPct, 100) / 100), 0);
-        const n = Math.max(years, 1) * 12;
-        const r = rate / 100 / 12;
-        const monthly =
-          r === 0 ? loan / n : (loan * r) / (1 - Math.pow(1 + r, -n));
-        document.getElementById("cMonthly").textContent = money(monthly);
-        document.getElementById("cDetail").textContent =
-          `Deposit ${money(price - loan)} · Loan ${money(loan)} over ${Math.max(years, 1)} years`;
-      }
-      cIds.forEach((el) => el.addEventListener("input", estimate));
-      estimate();
+
+        [locationInput, budgetSel, bedSel, sortSel].forEach((el) => {
+          el.addEventListener("input", applyFilters);
+          el.addEventListener("change", applyFilters);
+        });
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          applyFilters();
+          scrollToList();
+        });
+
+        document.getElementById("clearBtn").addEventListener("click", () => {
+          locationInput.value = "";
+          budgetSel.value = "";
+          bedSel.value = "";
+          sortSel.value = "";
+          activeType = "";
+
+          tiles.forEach((x) => {
+            x.classList.remove("on");
+            x.setAttribute("aria-pressed", "false");
+          });
+
+          applyFilters();
+        });
+
+        // MONTHLY PAYMENT ESTIMATE
+        const cIds = ["cPrice", "cDeposit", "cYears", "cRate"].map((id) =>
+          document.getElementById(id),
+        );
+
+        const money = (n) => "KSh " + Math.round(n).toLocaleString("en-KE");
+
+        function estimate() {
+          const [price, depositPct, years, rate] = cIds.map(
+            (el) => parseFloat(el.value) || 0,
+          );
+
+          const loan = Math.max(
+            price * (1 - Math.min(depositPct, 100) / 100),
+            0,
+          );
+          const n = Math.max(years, 1) * 12;
+          const r = rate / 100 / 12;
+          const monthly =
+            r === 0 ? loan / n : (loan * r) / (1 - Math.pow(1 + r, -n));
+
+          document.getElementById("cMonthly").textContent = money(monthly);
+          document.getElementById("cDetail").textContent =
+            `Deposit ${money(price - loan)} · Loan ${money(loan)} over ${Math.max(
+              years,
+              1,
+            )} years`;
+        }
+
+        cIds.forEach((el) => el.addEventListener("input", estimate));
+        estimate();
+      })();
     </script>
   </body>
 </html>

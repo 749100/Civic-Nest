@@ -1,0 +1,300 @@
+{% extends "admin/travel_base.html" %} {% block title %}Transport availability
+requests{% endblock %} {% block page_head %}
+<style>
+  .ta-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .ta-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .ta-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #d3e0f5;
+    border-radius: 14px;
+    background: #f2f7fd;
+  }
+
+  .ta-detail {
+    min-width: 0;
+  }
+
+  .ta-detail small {
+    display: block;
+    margin-bottom: 4px;
+    color: #405578;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  .ta-detail strong {
+    display: block;
+    color: #001b5e;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .ta-note {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff4d6;
+    color: #8a5a00;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .ta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .ta-actions form {
+    display: grid;
+    flex: 1 1 240px;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .ta-actions textarea {
+    min-height: 70px;
+  }
+
+  @media (max-width: 750px) {
+    .ta-details {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ta-details {
+      grid-template-columns: 1fr;
+    }
+
+    .ta-actions form,
+    .ta-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% set pending_count =
+requests|selectattr('status', 'equalto', 'pending')|list|length %} {% set
+available_count = requests|selectattr('status', 'equalto',
+'availability_confirmed')|list|length %} {% set confirmed_count =
+requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
+
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Transport</p>
+    <h1>Transport availability requests</h1>
+    <p class="sub">
+      Review customer requests, check departure availability and confirm
+      bookings.
+    </p>
+  </div>
+</section>
+
+<section class="stats three" aria-label="Request overview">
+  <div class="stat">
+    <span>Pending requests</span>
+    <strong>{{ pending_count }}</strong>
+  </div>
+
+  <div class="stat">
+    <span>Availability confirmed</span>
+    <strong>{{ available_count }}</strong>
+  </div>
+
+  <div class="stat">
+    <span>Final bookings confirmed</span>
+    <strong>{{ confirmed_count }}</strong>
+  </div>
+</section>
+
+{% if requests %}
+<div class="ta-list">
+  {% for item in requests %} {% set status = item.status|default('pending') %}
+
+  <article class="panel">
+    <div class="panel-body">
+      <div class="ta-top">
+        <div>
+          <h2>{{ item.company_name_snapshot or 'Transport company' }}</h2>
+          <div class="muted">
+            Request #{{ item.id }} · Customer: {{ item.full_name }} · {{
+            item.customer_email }}
+          </div>
+        </div>
+
+        <span class="badge {{ status }}">{{ status|replace('_', ' ') }}</span>
+      </div>
+
+      <div class="ta-details">
+        <div class="ta-detail">
+          <small>Route</small>
+          <strong
+            >{{ item.route_from_snapshot }} → {{ item.route_to_snapshot
+            }}</strong
+          >
+        </div>
+
+        <div class="ta-detail">
+          <small>Travel date</small>
+          <strong>
+            {{ item.travel_date.strftime('%d %b %Y') if
+            item.travel_date.strftime is defined else item.travel_date }}
+          </strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Departure time</small>
+          <strong>{{ item.departure_time_snapshot }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Passengers</small>
+          <strong>{{ item.passenger_count }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Customer phone</small>
+          <strong>{{ item.phone }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>WhatsApp</small>
+          <strong>{{ item.whatsapp_phone or 'Not provided' }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Price per passenger</small>
+          <strong
+            >KSh {{ "{:,.2f}".format(item.price_per_passenger_snapshot|float)
+            }}</strong
+          >
+        </div>
+
+        <div class="ta-detail">
+          <small>Estimated total</small>
+          <strong
+            >KSh {{ "{:,.2f}".format(item.estimated_total|float) }}</strong
+          >
+        </div>
+
+        <div class="ta-detail">
+          <small>Boarding point</small>
+          <strong>{{ item.boarding_point_snapshot or '—' }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Drop-off point</small>
+          <strong>{{ item.dropoff_point_snapshot or '—' }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Vehicle</small>
+          <strong>{{ item.vehicle_type_snapshot or '—' }}</strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Submitted</small>
+          <strong>
+            {{ item.created_at.strftime('%d %b %Y, %H:%M') if
+            item.created_at.strftime is defined else item.created_at }}
+          </strong>
+        </div>
+      </div>
+
+      {% if item.admin_note %}
+      <div class="ta-note">
+        <strong>Admin note:</strong> {{ item.admin_note }}
+      </div>
+      {% endif %}
+
+      <div class="ta-actions">
+        {% if status == 'pending' %}
+
+        <form
+          method="POST"
+          action="{{ url_for('admin_transport_availability', request_id=item.id) }}"
+        >
+          {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          {% endif %}
+          <input type="hidden" name="decision" value="available" />
+          <textarea
+            name="admin_note"
+            placeholder="Optional admin note"
+          ></textarea>
+          <button type="submit" class="btn good">Mark Available</button>
+        </form>
+
+        <form
+          method="POST"
+          action="{{ url_for('admin_transport_availability', request_id=item.id) }}"
+        >
+          {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          {% endif %}
+          <input type="hidden" name="decision" value="unavailable" />
+          <textarea
+            name="admin_note"
+            placeholder="Optional reason for unavailability"
+          ></textarea>
+          <button type="submit" class="btn danger">Mark Unavailable</button>
+        </form>
+
+        {% elif status == 'availability_confirmed' %}
+
+        <form
+          method="POST"
+          action="{{ url_for('admin_transport_confirm_booking', request_id=item.id) }}"
+          onsubmit="
+            return confirm(
+              'Are you sure you want to finally confirm this booking?',
+            );
+          "
+        >
+          {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          {% endif %}
+          <button type="submit" class="btn">Confirm Booking</button>
+        </form>
+
+        {% elif status == 'booking_confirmed' %}
+        <span class="muted"><strong>Final booking confirmed.</strong></span>
+
+        {% elif status == 'unavailable' %}
+        <span class="muted">Customer needs to choose another departure.</span>
+
+        {% elif status == 'cancelled' %}
+        <span class="muted">This request was cancelled.</span>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+{% else %}
+<section class="panel">
+  <div class="empty">
+    <strong>No transport requests yet</strong>
+    <p>New customer availability requests will appear here.</p>
+  </div>
+</section>
+{% endif %} {% endblock %}

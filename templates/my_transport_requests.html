@@ -1,0 +1,380 @@
+{% extends "site_base.html" %} {% set active_page = 'travel' %} {% block title
+%}My Transport Requests{% endblock %} {% block hero_eyebrow %}Your travel{%
+endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
+{% block hero_sub %}
+<p>Track your transport requests and view your confirmed booking receipts.</p>
+{% endblock %} {% block head %}
+<style>
+  .trq-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .trq-card {
+    min-width: 0;
+    padding: 20px;
+  }
+
+  .trq-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .trq-company {
+    margin: 0 0 4px;
+    color: #001b5e;
+    font-size: 17px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  .trq-ref {
+    color: #405578;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .trq-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .trq-status.status-pending {
+    background: #fff4d6;
+    color: #8a5a00;
+  }
+
+  .trq-status.status-availability_confirmed {
+    background: #e6eeff;
+    color: #1456d8;
+  }
+
+  .trq-status.status-unavailable {
+    background: #ffe1e1;
+    color: #b42318;
+  }
+
+  .trq-status.status-booking_confirmed {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .trq-status.status-cancelled {
+    background: #edf0f5;
+    color: #5b6880;
+  }
+
+  .trq-route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 15px;
+    border: 1px solid #d3e0f5;
+    border-radius: 14px;
+    background: #f2f7fd;
+  }
+
+  .trq-place {
+    flex: 1;
+    min-width: 110px;
+  }
+
+  .trq-place small {
+    display: block;
+    margin-bottom: 4px;
+    color: #405578;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .trq-place strong {
+    display: block;
+    color: #001b5e;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .trq-arrow {
+    color: #1456d8;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .trq-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .trq-detail {
+    min-width: 0;
+  }
+
+  .trq-detail small {
+    display: block;
+    margin-bottom: 4px;
+    color: #405578;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .trq-detail strong {
+    display: block;
+    color: #001b5e;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .trq-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #d3e0f5;
+  }
+
+  .trq-total span {
+    color: #405578;
+    font-size: 12px;
+  }
+
+  .trq-total strong {
+    color: #1456d8;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .trq-note {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f2f7fd;
+    color: #405578;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .trq-card .bbtn {
+    margin-top: 12px;
+  }
+
+  .trq-empty {
+    padding: 34px 18px;
+    border: 1px dashed #d3e0f5;
+    border-radius: 18px;
+    background: #f2f7fd;
+    text-align: center;
+  }
+
+  .trq-empty h3 {
+    margin: 0 0 8px;
+    color: #001b5e;
+  }
+
+  .trq-empty p {
+    max-width: 420px;
+    margin: 0 auto 14px;
+    color: #405578;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 650px) {
+    .trq-card {
+      padding: 16px;
+    }
+
+    .trq-details {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .trq-card .bbtn {
+      display: flex;
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div class="eb">Transport</div>
+<h2>Your requests</h2>
+<p class="sub">Every request you have submitted, with its latest status.</p>
+
+{% if requests %}
+<div class="trq-list" style="margin-top: 18px">
+  {% for item in requests %} {% set status = item.status or 'pending' %}
+
+  <article class="card trq-card">
+    <div class="trq-top">
+      <div>
+        <h3 class="trq-company">
+          {{ item.company_name or 'Transport Company' }}
+        </h3>
+        <div class="trq-ref">Reference: CN-{{ item.id }}</div>
+      </div>
+
+      <span class="trq-status status-{{ status }}">
+        {% if status == 'pending' %} Awaiting availability {% elif status ==
+        'availability_confirmed' %} Availability confirmed {% elif status ==
+        'unavailable' %} Unavailable {% elif status == 'booking_confirmed' %}
+        Booking confirmed {% elif status == 'cancelled' %} Cancelled {% else %}
+        {{ status|replace('_', ' ')|title }} {% endif %}
+      </span>
+    </div>
+
+    <div class="trq-route">
+      <div class="trq-place">
+        <small>Departure</small>
+        <strong>{{ item.route_from or 'Not specified' }}</strong>
+      </div>
+
+      <span class="trq-arrow">→</span>
+
+      <div class="trq-place">
+        <small>Destination</small>
+        <strong>{{ item.route_to or 'Not specified' }}</strong>
+      </div>
+    </div>
+
+    <div class="trq-details">
+      <div class="trq-detail">
+        <small>Travel date</small>
+        <strong>
+          {{ item.travel_date.strftime('%d %b %Y') if item.travel_date else '—'
+          }}
+        </strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Departure time</small>
+        <strong>{{ item.departure_time or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Passengers</small>
+        <strong>{{ item.passenger_count or 1 }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Passenger name</small>
+        <strong>{{ item.full_name or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Contact phone</small>
+        <strong>{{ item.phone or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Vehicle</small>
+        <strong>{{ item.vehicle_type or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Boarding point</small>
+        <strong>{{ item.boarding_point or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Drop-off point</small>
+        <strong>{{ item.dropoff_point or '—' }}</strong>
+      </div>
+
+      <div class="trq-detail">
+        <small>Price per passenger</small>
+        <strong>
+          KSh {{ "{:,.2f}".format(item.price_per_passenger or 0) }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="trq-total">
+      <span>Estimated total</span>
+      <strong>KSh {{ "{:,.2f}".format(item.estimated_total or 0) }}</strong>
+    </div>
+
+    {% if status == 'pending' %}
+
+    <div class="trq-note">
+      Your request has been submitted. The CivicNest team is checking
+      availability with the transport company. Your seat is not yet confirmed.
+    </div>
+
+    {% elif status == 'availability_confirmed' %}
+
+    <div class="trq-note">
+      <strong>Availability confirmed.</strong>
+      The transport company has indicated that seats are available. Your booking
+      is waiting for final confirmation by CivicNest.
+    </div>
+
+    {% elif status == 'booking_confirmed' %}
+
+    <div class="trq-note">
+      <strong>Your booking is confirmed.</strong>
+      Keep your booking reference and journey details for your records. This
+      receipt confirms the booking, not payment.
+    </div>
+
+    <a
+      class="bbtn solid"
+      href="{{ url_for('my_transport_receipt', request_id=item.id) }}"
+    >
+      View / Download Receipt
+    </a>
+
+    {% elif status == 'unavailable' %}
+
+    <div class="trq-note">
+      <strong>Seats were not available for this request.</strong>
+      You can search for another departure. This original request remains in
+      your request history.
+    </div>
+
+    <a class="bbtn solid" href="{{ url_for('travel_page') }}">
+      Search Other Departures
+    </a>
+
+    {% elif status == 'cancelled' %}
+
+    <div class="trq-note">This transport request has been cancelled.</div>
+
+    {% endif %} {% if item.admin_note %}
+    <div class="trq-note">
+      <strong>Update from CivicNest:</strong><br />
+      {{ item.admin_note }}
+    </div>
+    {% endif %}
+  </article>
+
+  {% endfor %}
+</div>
+
+{% else %}
+
+<div class="trq-empty" style="margin-top: 18px">
+  <h3>No transport requests yet</h3>
+  <p>
+    You have not submitted any transport requests. Search for a departure to get
+    started.
+  </p>
+
+  <a class="bbtn solid" href="{{ url_for('travel_page') }}">Find Transport</a>
+</div>
+
+{% endif %} {% endblock %}

@@ -9,6 +9,7 @@
 
     <!-- Primary SEO Meta Tags -->
     <title>{% block title %}Welcome{% endblock %} | CivicNest Africa</title>
+    {% block seo %}
     <meta
       name="description"
       content="Find verified rental houses, student hostels, apartments, and plots for sale across Kenya. Explore neighborhood insights, nearby schools, and amenities on CivicNest Africa."
@@ -62,6 +63,7 @@
       property="twitter:image"
       content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
     />
+    {% endblock %}
 
     <!-- Fonts & Styles -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -96,6 +98,14 @@
       <symbol id="i-chat" viewBox="0 0 24 24">
         <path d="M4 5h16v11H9l-5 4z" />
       </symbol>
+      <symbol id="i-plane" viewBox="0 0 24 24">
+        <path d="M21 3L3 10.5l6.5 2.5 2.5 6.5z" />
+        <path d="M9.5 13L21 3" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
     </svg>
 
     <div class="stage {% block stage_class %}{% endblock %}">
@@ -119,8 +129,8 @@
             <a href="{{ url_for('sell_page') }}">List a property</a>
             <a href="{{ url_for('invest_page') }}">Invest</a>
             <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
-            <a href="{{ url_for('schools_page') }}">Schools finder</a>
-            <a href="{{ url_for('hospitals_page') }}">Hospital finder</a>
+            <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+            <a href="{{ url_for('travel_page') }}">Travel With Us</a>
             <hr />
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('dashboard') }}">My dashboard</a>
@@ -210,6 +220,16 @@
         class="tab {{ 'on' if request.path == '/' else '' }}"
         href="{{ url_for('home') }}"
         ><svg class="i"><use href="#i-house" /></svg>Home</a
+      >
+      <a
+        class="tab {{ 'on' if request.path.startswith('/stay-and-dine') else '' }}"
+        href="{{ url_for('hospitality_page') }}"
+        ><svg class="i"><use href="#i-pin" /></svg>Stay</a
+      >
+      <a
+        class="tab {{ 'on' if request.path.startswith('/travel') else '' }}"
+        href="{{ url_for('travel_page') }}"
+        ><svg class="i"><use href="#i-plane" /></svg>Travel</a
       >
       <a class="tab" href="#"
         ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"

@@ -1,0 +1,1272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Travel With Us | Trips Across Kenya | CivicNest Africa</title>
+    <meta
+      name="description"
+      content="Compare registered transport companies, departure times and fares across Kenya with CivicNest Africa."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1456d8" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+
+    <style>
+      .hero.h {
+        padding-bottom: 190px;
+      }
+
+      .search.s4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        bottom: -115px;
+      }
+
+      .search.s4 .field,
+      .search.s4 .go {
+        grid-column: auto;
+      }
+
+      .search.s4 .go {
+        grid-column: 1 / -1;
+      }
+
+      .sec.h {
+        padding-top: 145px;
+      }
+
+      @media (min-width: 600px) {
+        .hero.h {
+          padding-bottom: 145px;
+        }
+        .search.s4 {
+          bottom: -75px;
+        }
+        .sec.h {
+          padding-top: 105px;
+        }
+      }
+
+      @media (min-width: 960px) {
+        .search.s4 {
+          grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+          bottom: -48px;
+        }
+        .search.s4 .go {
+          grid-column: auto;
+        }
+        .sec.h {
+          padding-top: 85px;
+        }
+      }
+
+      .h a:focus-visible,
+      .h button:focus-visible,
+      .h input:focus-visible,
+      .h select:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
+      }
+
+      .tlist {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      @media (min-width: 600px) {
+        .tlist {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 960px) {
+        .tlist {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .tlist .card {
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .tphoto {
+        position: relative;
+        display: flex;
+        min-height: 155px;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 12px;
+        color: white;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .tphoto img.vehicle {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .tphoto .date-badge {
+        position: absolute;
+        z-index: 2;
+        top: 12px;
+        left: 12px;
+        padding: 7px 10px;
+        border-radius: 9px;
+        background: rgba(0, 20, 70, 0.78);
+        color: white;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .tphoto .vehicle-placeholder {
+        font-size: 43px;
+        opacity: 0.9;
+      }
+
+      .company-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        margin-bottom: 12px;
+      }
+
+      .company-logo {
+        display: flex;
+        flex: 0 0 43px;
+        width: 43px;
+        height: 43px;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid #dce7f7;
+        border-radius: 13px;
+        background: #e6eeff;
+        color: #1456d8;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .company-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: white;
+      }
+
+      .company-name {
+        min-width: 0;
+        color: #001b5e;
+        font-size: 14px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      .route-title {
+        margin: 0 0 8px;
+        color: #14213d;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .route-detail {
+        display: grid;
+        gap: 6px;
+        margin: 12px 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .route-detail span {
+        overflow-wrap: anywhere;
+      }
+
+      .departure-price {
+        margin: 8px 0;
+        color: #1456d8;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .departure-price small {
+        color: #66758e;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .departure-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0 8px;
+        padding: 7px 10px;
+        border-radius: 9px;
+        background: #e6eeff;
+        color: #1456d8;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .request-select {
+        display: block;
+        width: 100%;
+        margin-top: 12px;
+        padding: 12px;
+        border: 0;
+        border-radius: 11px;
+        background: #1456d8;
+        color: white;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .request-select:hover {
+        background: #0a2a6b;
+      }
+
+      .trip-empty {
+        padding: 30px 18px;
+        text-align: center;
+      }
+
+      .trip-empty h3 {
+        margin-bottom: 8px;
+        color: #001b5e;
+      }
+
+      .trip-empty p {
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .tflash {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #ffe1e1;
+        color: #b42318;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .tflash.success {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .request-panel {
+        display: none;
+        margin-top: 28px;
+        padding: 22px;
+        border: 1px solid #dce7f7;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 12px 35px rgba(20, 50, 100, 0.08);
+      }
+
+      .request-panel.show {
+        display: block;
+      }
+
+      .request-panel h3 {
+        margin: 0 0 6px;
+        color: #001b5e;
+        font-size: 19px;
+      }
+
+      .request-panel .request-subtitle {
+        margin-bottom: 18px;
+        color: #66758e;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .request-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      @media (min-width: 650px) {
+        .request-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .request-grid label {
+        display: grid;
+        gap: 6px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .request-grid input {
+        width: 100%;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #dce7f7;
+        border-radius: 10px;
+        background: #f8faff;
+        color: #14213d;
+        font: inherit;
+        font-size: 13px;
+      }
+
+      .honesty-notice {
+        margin: 18px 0 12px;
+        padding: 11px 13px;
+        border-left: 3px solid #8caeea;
+        border-radius: 7px;
+        background: #f5f8ff;
+        color: #66758e;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      .request-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 12px;
+      }
+
+      .request-submit,
+      .request-cancel {
+        padding: 12px 17px;
+        border: 0;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .request-submit {
+        background: #1456d8;
+        color: white;
+      }
+
+      .request-cancel {
+        background: #edf2fa;
+        color: #405578;
+      }
+
+      .search-note {
+        grid-column: 1 / -1;
+        margin-top: 3px;
+        color: #66758e;
+        font-size: 10px;
+      }
+
+      .tsteps {
+        display: grid;
+        gap: 12px;
+        margin-top: 34px;
+      }
+
+      @media (min-width: 700px) {
+        .tsteps {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .tstep {
+        padding: 16px;
+      }
+
+      .tstep .ic {
+        display: flex;
+        width: 40px;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        border-radius: 50%;
+        background: #c5dcff;
+        color: #0047ff;
+        font-weight: 800;
+      }
+
+      .tstep b {
+        display: block;
+        margin-bottom: 4px;
+        color: #001b5e;
+        font-size: 13px;
+      }
+
+      .tstep p {
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .t-disclaimer {
+        margin-top: 15px;
+        color: #66758e;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 380px) {
+        .search.s4 {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .search.s4 .field,
+        .search.s4 .go {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_admin_bar.html" %}
+
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M20 20l-4-4" />
+      </symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+      <symbol id="i-plane" viewBox="0 0 24 24">
+        <path d="M2 16l20-8-8 14-2-6z" />
+      </symbol>
+    </svg>
+
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk"
+            ><svg class="i" aria-hidden="true"><use href="#i-house" /></svg
+          ></span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a class="on" href="{{ url_for('travel_page') }}" aria-current="page"
+            >Travel</a
+          >
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true"><use href="#i-heart" /></svg>
+            Saved
+          </a>
+          <a
+            class="t"
+            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+          >
+            <svg class="i" aria-hidden="true"><use href="#i-chat" /></svg> Chats
+          </a>
+          {% if current_user.is_authenticated %}
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          {% else %}
+          <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+          {% endif %}
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        <a href="{{ url_for('register') }}">Create account</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero h">
+        <div class="wrap">
+          <div class="eyebrow">Going somewhere?</div>
+          <h1>Travel with us and <em>go further.</em></h1>
+          <p>
+            Compare registered transport companies and departure options across
+            Kenya.
+          </p>
+        </div>
+
+        <form
+          class="search s4"
+          id="tripSearchForm"
+          role="search"
+          data-search-url="{{ url_for('transport_search') }}"
+        >
+          <label class="field">
+            <svg class="i" aria-hidden="true"><use href="#i-pin" /></svg>
+            <input
+              type="text"
+              id="tripFrom"
+              name="from"
+              placeholder="Travelling from"
+              aria-label="Departure location"
+              required
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="field">
+            <svg class="i" aria-hidden="true"><use href="#i-plane" /></svg>
+            <input
+              type="text"
+              id="tripTo"
+              name="to"
+              placeholder="Travelling to"
+              aria-label="Destination"
+              required
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="field">
+            <input
+              type="date"
+              id="tripDate"
+              name="date"
+              aria-label="Travel date"
+              required
+            />
+          </label>
+
+          <label class="field">
+            <input
+              type="time"
+              id="tripTime"
+              name="time"
+              aria-label="Preferred departure time"
+            />
+          </label>
+
+          <label class="field">
+            <input
+              type="number"
+              id="tripPassengers"
+              name="passengers"
+              min="1"
+              max="10"
+              value="1"
+              aria-label="Number of passengers"
+              required
+            />
+          </label>
+
+          <button class="go" type="submit" id="searchButton">
+            <svg class="i" aria-hidden="true"><use href="#i-search" /></svg>
+            Search
+          </button>
+
+          <p class="search-note">
+            Preferred time helps sort departures. Other registered times will
+            still be shown.
+          </p>
+        </form>
+      </section>
+
+      <section class="sec h">
+        <div class="wrap">
+          <div class="eb">Travel</div>
+          <h2 id="tripHeading">Find your journey</h2>
+          <p
+            class="sub tcount"
+            id="tripCount"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            Enter your journey details above to compare transport companies.
+          </p>
+
+          <div id="searchMessage" role="status" aria-live="polite"></div>
+
+          <div class="tlist" id="tripList"></div>
+
+          <div class="empty trip-empty" id="tripEmpty">
+            <h3>Ready to travel?</h3>
+            <p>
+              Enter your departure, destination and travel date to see
+              registered transport companies and their departure times.
+            </p>
+          </div>
+
+          <section
+            class="request-panel"
+            id="requestPanel"
+            aria-labelledby="requestHeading"
+          >
+            <h3 id="requestHeading">Request availability</h3>
+            <p class="request-subtitle" id="selectedDepartureText">
+              Complete your details to request this departure.
+            </p>
+
+            <form
+              method="POST"
+              action="{{ url_for('transport_submit_request') }}"
+              id="transportRequestForm"
+            >
+              <input
+                type="hidden"
+                name="departure_id"
+                id="selectedDepartureId"
+              />
+              <input type="hidden" name="travel_date" id="requestTravelDate" />
+              <input type="hidden" name="passengers" id="requestPassengers" />
+
+              <div class="request-grid">
+                <label>
+                  Full name
+                  <input
+                    type="text"
+                    name="full_name"
+                    minlength="2"
+                    maxlength="120"
+                    required
+                    autocomplete="name"
+                  />
+                </label>
+
+                <label>
+                  Phone number
+                  <input
+                    type="tel"
+                    name="phone"
+                    maxlength="30"
+                    required
+                    autocomplete="tel"
+                    placeholder="+254..."
+                  />
+                </label>
+
+                <label>
+                  WhatsApp number
+                  <input
+                    type="tel"
+                    name="whatsapp_phone"
+                    maxlength="30"
+                    autocomplete="tel"
+                    placeholder="Same as phone if applicable"
+                  />
+                </label>
+              </div>
+
+              <div class="honesty-notice">
+                <strong>Honesty and Accuracy Notice:</strong>
+                By submitting this request, you confirm that your details are
+                truthful and accurate. Misleading requests are not permitted.
+                CivicNest Africa may reject dishonest requests or restrict
+                repeated misuse. Please respect transport providers and other
+                travellers.
+              </div>
+
+              <div class="request-actions">
+                <button class="request-submit" type="submit">
+                  Submit availability request
+                </button>
+                <button class="request-cancel" type="button" id="cancelRequest">
+                  Cancel
+                </button>
+              </div>
+              <p class="t-disclaimer">
+                This is an availability request, not a confirmed seat or a
+                payment. Our team will check with the transport company and
+                update your account.
+              </p>
+            </form>
+          </section>
+
+          <p class="t-disclaimer">
+            Departure times and fares are provided from company route
+            registrations. They do not represent live seat availability. Your
+            request must be checked before a booking can be confirmed.
+          </p>
+
+          <section class="tsteps" aria-label="How travel works">
+            <div class="card tstep">
+              <div class="ic" aria-hidden="true">1</div>
+              <b>Search your route</b>
+              <p>
+                Enter your departure, destination, travel date and passenger
+                count.
+              </p>
+            </div>
+            <div class="card tstep">
+              <div class="ic" aria-hidden="true">2</div>
+              <b>Compare departures</b>
+              <p>
+                Compare transport companies, registered departure times and
+                fares.
+              </p>
+            </div>
+            <div class="card tstep">
+              <div class="ic" aria-hidden="true">3</div>
+              <b>Request availability</b>
+              <p>
+                Submit your preferred departure. We will check availability and
+                update your account.
+              </p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+          <div class="ci">
+            <svg class="i" aria-hidden="true"><use href="#i-phone" /></svg>
+            <div>+254 768387842 <small>Call or WhatsApp</small></div>
+          </div>
+          <div class="ci">
+            <svg class="i" aria-hidden="true"><use href="#i-mail" /></svg>
+            <div>
+              www.mokuajoshuaongeri@gmail.com<small
+                >We’ll respond within 24 hours</small
+              >
+            </div>
+          </div>
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <span
+          >© {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.</span
+        >
+      </div>
+    </footer>
+
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+      <a class="on" href="{{ url_for('travel_page') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plane" />
+        </svg>
+        Travel
+      </a>
+      <a href="{{ url_for('sell_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List Property
+      </a>
+    </nav>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
+
+        if (menuBtn && menuPanel) {
+          menuBtn.addEventListener("click", () => {
+            const opening = menuPanel.hidden;
+            menuPanel.hidden = !opening;
+            menuBtn.setAttribute("aria-expanded", String(opening));
+            menuBtn.setAttribute(
+              "aria-label",
+              opening ? "Close menu" : "Open menu",
+            );
+          });
+
+          document.addEventListener("click", (e) => {
+            if (
+              !menuPanel.hidden &&
+              !menuPanel.contains(e.target) &&
+              !menuBtn.contains(e.target)
+            ) {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.setAttribute("aria-label", "Open menu");
+            }
+          });
+        }
+
+        const form = document.getElementById("tripSearchForm");
+        const from = document.getElementById("tripFrom");
+        const to = document.getElementById("tripTo");
+        const travelDate = document.getElementById("tripDate");
+        const preferredTime = document.getElementById("tripTime");
+        const passengers = document.getElementById("tripPassengers");
+        const list = document.getElementById("tripList");
+        const count = document.getElementById("tripCount");
+        const empty = document.getElementById("tripEmpty");
+        const message = document.getElementById("searchMessage");
+        const heading = document.getElementById("tripHeading");
+        const searchButton = document.getElementById("searchButton");
+
+        const requestPanel = document.getElementById("requestPanel");
+        const selectedDepartureId = document.getElementById(
+          "selectedDepartureId",
+        );
+        const requestTravelDate = document.getElementById("requestTravelDate");
+        const requestPassengers = document.getElementById("requestPassengers");
+        const selectedDepartureText = document.getElementById(
+          "selectedDepartureText",
+        );
+        const cancelRequest = document.getElementById("cancelRequest");
+
+        let lastResults = [];
+
+        // Use the visitor's local calendar date as the minimum date.
+        const now = new Date();
+        const localToday = [
+          now.getFullYear(),
+          String(now.getMonth() + 1).padStart(2, "0"),
+          String(now.getDate()).padStart(2, "0"),
+        ].join("-");
+        travelDate.min = localToday;
+
+        function make(tag, className, text) {
+          const node = document.createElement(tag);
+          if (className) node.className = className;
+          if (text !== undefined && text !== null) node.textContent = text;
+          return node;
+        }
+
+        function safeImageUrl(value) {
+          if (typeof value !== "string") return "";
+          try {
+            const url = new URL(value, window.location.origin);
+            return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+          } catch (_) {
+            return "";
+          }
+        }
+
+        function initials(name) {
+          const words = String(name || "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+          if (!words.length) return "CN";
+          if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+
+        function formatMoney(value) {
+          return Number(value || 0).toLocaleString("en-KE", {
+            maximumFractionDigits: 2,
+          });
+        }
+
+        function showMessage(text, type) {
+          message.textContent = text || "";
+          message.className = text ? "tflash " + (type || "") : "";
+        }
+
+        function makeCompanyLogo(item) {
+          const logo = make("div", "company-logo");
+          const url = safeImageUrl(item.logo_url);
+
+          if (url) {
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = item.company + " logo";
+            img.loading = "lazy";
+            img.onerror = () => {
+              logo.textContent = initials(item.company);
+            };
+            logo.appendChild(img);
+          } else {
+            logo.textContent = initials(item.company);
+          }
+
+          return logo;
+        }
+
+        function makeResultCard(item) {
+          const card = make("article", "card");
+          const photo = make("div", "photo tphoto");
+          const vehicleUrl = safeImageUrl(item.vehicle_image_url);
+
+          const dateBadge = make("span", "date-badge", travelDate.value);
+          photo.appendChild(dateBadge);
+
+          if (vehicleUrl) {
+            const img = document.createElement("img");
+            img.className = "vehicle";
+            img.src = vehicleUrl;
+            img.alt = "Vehicle used by " + item.company;
+            img.loading = "lazy";
+            img.onerror = () => {
+              img.remove();
+              photo.appendChild(make("span", "vehicle-placeholder", "🚌"));
+            };
+            photo.appendChild(img);
+          } else {
+            photo.appendChild(make("span", "vehicle-placeholder", "🚌"));
+          }
+
+          const info = make("div", "info");
+          info.style.padding = "15px";
+
+          const companyRow = make("div", "company-row");
+          companyRow.appendChild(makeCompanyLogo(item));
+          companyRow.appendChild(make("div", "company-name", item.company));
+          info.appendChild(companyRow);
+
+          info.appendChild(
+            make("h3", "route-title", item.from + " → " + item.to),
+          );
+
+          info.appendChild(
+            make("div", "departure-time", "Departure: " + item.departure_time),
+          );
+
+          info.appendChild(
+            make(
+              "div",
+              "departure-price",
+              "KSh " + formatMoney(item.price) + " ",
+            ),
+          );
+
+          const priceNote = make("small", "", "per passenger");
+          info.lastChild.appendChild(priceNote);
+
+          const details = make("div", "route-detail");
+
+          if (item.boarding_point) {
+            details.appendChild(
+              make("span", "", "Boarding: " + item.boarding_point),
+            );
+          }
+
+          if (item.dropoff_point) {
+            details.appendChild(
+              make("span", "", "Drop-off: " + item.dropoff_point),
+            );
+          }
+
+          if (item.intermediate_stops) {
+            details.appendChild(
+              make("span", "", "Stops: " + item.intermediate_stops),
+            );
+          }
+
+          if (item.vehicle_type) {
+            details.appendChild(
+              make("span", "", "Vehicle: " + item.vehicle_type),
+            );
+          }
+
+          details.appendChild(
+            make(
+              "span",
+              "",
+              "Estimated total for " +
+                passengers.value +
+                ": KSh " +
+                formatMoney(item.estimated_total),
+            ),
+          );
+
+          info.appendChild(details);
+
+          const button = make(
+            "button",
+            "request-select",
+            "Request this departure",
+          );
+          button.type = "button";
+          button.addEventListener("click", () => selectDeparture(item));
+
+          info.appendChild(button);
+          card.appendChild(photo);
+          card.appendChild(info);
+
+          return card;
+        }
+
+        function selectDeparture(item) {
+          selectedDepartureId.value = item.departure_id;
+          requestTravelDate.value = travelDate.value;
+          requestPassengers.value = passengers.value;
+
+          selectedDepartureText.textContent =
+            item.company +
+            " — " +
+            item.from +
+            " to " +
+            item.to +
+            ", departing at " +
+            item.departure_time +
+            " on " +
+            travelDate.value +
+            ". Estimated fare: KSh " +
+            formatMoney(item.estimated_total) +
+            ".";
+
+          requestPanel.classList.add("show");
+          requestPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        cancelRequest.addEventListener("click", () => {
+          requestPanel.classList.remove("show");
+          selectedDepartureId.value = "";
+        });
+
+        function renderResults(items) {
+          list.replaceChildren();
+          requestPanel.classList.remove("show");
+          selectedDepartureId.value = "";
+
+          lastResults = items || [];
+
+          if (!lastResults.length) {
+            empty.hidden = false;
+            count.textContent =
+              "No registered departures were found for this route.";
+            list.appendChild(
+              make(
+                "div",
+                "empty trip-empty t-no-results",
+                "Try checking the spelling of your locations or searching another route.",
+              ),
+            );
+            return;
+          }
+
+          empty.hidden = true;
+
+          lastResults.forEach((item) => {
+            list.appendChild(makeResultCard(item));
+          });
+
+          count.textContent =
+            lastResults.length +
+            " registered departure" +
+            (lastResults.length === 1 ? "" : "s") +
+            " found. All registered times are shown; closest to your preferred time appear first.";
+        }
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          showMessage("");
+
+          if (!from.value.trim() || !to.value.trim() || !travelDate.value) {
+            showMessage(
+              "Enter your departure, destination and travel date.",
+              "error",
+            );
+            return;
+          }
+
+          if (
+            from.value.trim().toLowerCase() === to.value.trim().toLowerCase()
+          ) {
+            showMessage(
+              "Your departure and destination must be different.",
+              "error",
+            );
+            return;
+          }
+
+          const passengerCount = Number(passengers.value);
+          if (
+            !Number.isInteger(passengerCount) ||
+            passengerCount < 1 ||
+            passengerCount > 10
+          ) {
+            showMessage("Choose between 1 and 10 passengers.", "error");
+            return;
+          }
+
+          const params = new URLSearchParams({
+            from: from.value.trim(),
+            to: to.value.trim(),
+            date: travelDate.value,
+            time: preferredTime.value,
+            passengers: String(passengerCount),
+          });
+
+          searchButton.disabled = true;
+          searchButton.textContent = "Searching...";
+          count.textContent = "Searching registered transport companies...";
+          list.replaceChildren();
+          empty.hidden = true;
+
+          try {
+            const response = await fetch(
+              form.dataset.searchUrl + "?" + params.toString(),
+              {
+                method: "GET",
+                headers: { Accept: "application/json" },
+              },
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+              throw new Error(data.message || "Search could not be completed.");
+            }
+
+            renderResults(data.departures || []);
+
+            if (heading) {
+              heading.textContent =
+                from.value.trim() + " to " + to.value.trim();
+              heading.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+
+            if (!data.departures || !data.departures.length) {
+              showMessage(
+                "No companies have registered this route yet.",
+                "error",
+              );
+            }
+          } catch (error) {
+            showMessage(
+              error.message || "Something went wrong. Please try again.",
+              "error",
+            );
+            count.textContent = "We could not complete your search.";
+            empty.hidden = false;
+            empty.querySelector("h3").textContent = "Search unavailable";
+            empty.querySelector("p").textContent = "Please try again shortly.";
+          } finally {
+            searchButton.disabled = false;
+            searchButton.innerHTML =
+              '<svg class="i" aria-hidden="true"><use href="#i-search"></use></svg> Search';
+          }
+        });
+
+        // Keep the selected request's passenger count in sync if the user
+        // changes the search after choosing a departure.
+        passengers.addEventListener("change", () => {
+          if (selectedDepartureId.value) {
+            requestPassengers.value = passengers.value;
+          }
+        });
+
+        travelDate.addEventListener("change", () => {
+          if (selectedDepartureId.value) {
+            requestTravelDate.value = travelDate.value;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

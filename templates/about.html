@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <title>About Us | CivicNest Africa</title>
+
+    <meta
+      name="description"
+      content="CivicNest Africa helps people find homes, land, places to stay and travel experiences across Kenya. Learn who we are and what we do."
+    />
+    <meta name="author" content="CivicNest Africa" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1456d8" />
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('about_page') }}"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CivicNest Africa" />
+    <meta property="og:title" content="About Us | CivicNest Africa" />
+    <meta
+      property="og:description"
+      content="Find homes, land, places to stay and travel experiences across Kenya."
+    />
+    <meta
+      property="og:url"
+      content="https://civic-nest.onrender.com{{ url_for('about_page') }}"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+
+    <style>
+      /* CIVICNEST AFRICA — ABOUT PAGE */
+
+      .hero.h.ab {
+        padding-bottom: 56px;
+      }
+
+      .sec.h.ab {
+        padding-top: 40px;
+      }
+
+      .h a:focus-visible,
+      .h button:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
+      }
+
+      .abblock + .abblock {
+        margin-top: 38px;
+      }
+
+      .abstory {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 860px) {
+        .abstory {
+          grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        }
+      }
+
+      .abcard {
+        min-width: 0;
+        padding: 20px;
+      }
+
+      .abcard h3 {
+        margin: 0 0 8px;
+        color: #001b5e;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .abcard p {
+        margin: 0 0 10px;
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.9;
+      }
+
+      .abcard p:last-child {
+        margin-bottom: 0;
+      }
+
+      .abmission {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 22px;
+        border-radius: 18px;
+        color: #fff;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .abmission small {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .abmission h3 {
+        margin: 8px 0;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.4;
+      }
+
+      .abmission p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        line-height: 1.8;
+      }
+
+      .abgrid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 600px) {
+        .abgrid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 960px) {
+        .abgrid.three {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .abitem {
+        min-width: 0;
+        padding: 18px;
+      }
+
+      .abitem .ic {
+        display: flex;
+        width: 42px;
+        height: 42px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        border-radius: 50%;
+        background: #c5dcff;
+        color: #0047ff;
+        font-weight: 800;
+      }
+
+      .abitem .ic .i {
+        width: 20px;
+        height: 20px;
+      }
+
+      .abitem b {
+        display: block;
+        margin-bottom: 5px;
+        color: #001b5e;
+        font-size: 14px;
+      }
+
+      .abitem p {
+        margin: 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.8;
+      }
+
+      .abitem a.more {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        color: #1456d8;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .abitem a.more:hover {
+        opacity: 0.75;
+      }
+
+      .absteps {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 700px) {
+        .absteps {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .abnote {
+        margin-top: 38px;
+        padding: 16px;
+      }
+
+      .abnote b {
+        color: #001b5e;
+        font-size: 13px;
+      }
+
+      .abnote p {
+        margin-top: 4px;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .abcta {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 14px;
+        padding: 22px;
+        border-radius: 18px;
+        color: #fff;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .abcta h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .abcta p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .abcta .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .bbtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 9px 16px;
+        border: 1px solid #fff;
+        border-radius: 10px;
+        background: #fff;
+        color: #0047ff;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .bbtn:hover {
+        background: #e6eeff;
+      }
+
+      .bbtn.line {
+        background: transparent;
+        color: #fff;
+      }
+
+      .bbtn.line:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      @media (min-width: 700px) {
+        .abcta {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .h *,
+        .h *::before,
+        .h *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_admin_bar.html" %}
+
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+      <symbol id="i-land" viewBox="0 0 24 24">
+        <path d="M3 20l5-9 4 6 3-4 6 7z" />
+        <circle cx="17" cy="6" r="2" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24">
+        <path d="M3 12V4h8l10 10-8 8z" />
+        <circle cx="7.5" cy="8.5" r="1.5" />
+      </symbol>
+    </svg>
+
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('buy_page') }}">Buy</a>
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a class="on" href="{{ url_for('about_page') }}" aria-current="page"
+            >About</a
+          >
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a
+            class="t"
+            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          {% if current_user.is_authenticated %}
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          {% else %}
+          <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+          {% endif %}
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('about_page') }}">About us</a>
+        <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        <a href="{{ url_for('register') }}">Create account</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero h ab">
+        <div class="wrap">
+          <div class="eyebrow">About CivicNest Africa</div>
+
+          <h1>Finding a place <em>made simpler.</em></h1>
+
+          <p>
+            We connect people with homes, land, places to stay and travel
+            experiences across Kenya, all in one trusted place.
+          </p>
+        </div>
+      </section>
+
+      <section class="sec h ab">
+        <div class="wrap">
+          <!-- OUR STORY -->
+          <div class="abblock">
+            <div class="eb">Our story</div>
+            <h2>Who we are</h2>
+            <p class="sub">
+              A Kenyan platform built to make searching for a place easier.
+            </p>
+
+            <div class="abstory">
+              <div class="card abcard">
+                <h3>Why CivicNest exists</h3>
+                <p>
+                  Looking for a house, a plot, a hostel or a place to stay can
+                  be slow and stressful. Information is scattered, photos are
+                  unclear and it is hard to know who to trust.
+                </p>
+                <p>
+                  CivicNest Africa brings listings together in one clear place.
+                  Tenants, students, buyers and travellers can search, compare
+                  and contact owners and providers directly, while landlords and
+                  sellers can reach the right people.
+                </p>
+              </div>
+
+              <div class="abmission">
+                <small>Our mission</small>
+                <h3>
+                  Make finding a home, a stay or a trip simple and honest.
+                </h3>
+                <p>
+                  Clear listings, direct contact and tools that help you decide
+                  with confidence.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- WHAT WE DO -->
+          <div class="abblock">
+            <div class="eb">What we do</div>
+            <h2>Everything in one place</h2>
+            <p class="sub">Explore what you can do on CivicNest Africa.</p>
+
+            <div class="abgrid three">
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-house" /></svg>
+                </div>
+                <b>Rent</b>
+                <p>
+                  Find houses, apartments and student hostels, with the price,
+                  location and details shown clearly.
+                </p>
+                <a class="more" href="{{ url_for('rent_page') }}">
+                  Browse rentals
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-land" /></svg>
+                </div>
+                <b>Buy</b>
+                <p>
+                  Browse homes and plots of land for sale and estimate your
+                  monthly payment before you talk to a lender.
+                </p>
+                <a class="more" href="{{ url_for('buy_page') }}">
+                  Browse for sale
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-plus" /></svg>
+                </div>
+                <b>List a property</b>
+                <p>
+                  Landlords and sellers can list a house or plot in a few
+                  minutes and receive enquiries directly.
+                </p>
+                <a class="more" href="{{ url_for('sell_page') }}">
+                  List yours
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-bed" /></svg>
+                </div>
+                <b>Stay &amp; Dine</b>
+                <p>
+                  Discover guest houses, hotels and restaurants, and contact the
+                  provider directly.
+                </p>
+                <a class="more" href="{{ url_for('hospitality_page') }}">
+                  Explore places
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-pin" /></svg>
+                </div>
+                <b>Travel With Us</b>
+                <p>
+                  Find travel experiences and trips across Kenya and plan your
+                  next getaway.
+                </p>
+                <a class="more" href="{{ url_for('travel_page') }}">
+                  See travel
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">
+                  <svg class="i"><use href="#i-chat" /></svg>
+                </div>
+                <b>Roommate finder</b>
+                <p>
+                  Looking to share? Find people to live with and split the cost
+                  of a home.
+                </p>
+                <a class="more" href="{{ url_for('roommate_finder') }}">
+                  Find a roommate
+                  <svg
+                    class="i"
+                    style="width: 13px; height: 13px"
+                    aria-hidden="true"
+                  >
+                    <use href="#i-arrow" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- HOW IT WORKS -->
+          <div class="abblock">
+            <div class="eb">How it works</div>
+            <h2>Three simple steps</h2>
+            <p class="sub">From searching to getting in touch.</p>
+
+            <div class="absteps">
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">1</div>
+                <b>Search</b>
+                <p>
+                  Use the filters for location, price and type to find options
+                  that suit you.
+                </p>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">2</div>
+                <b>Compare</b>
+                <p>
+                  Check the photos, details and prices, and save the ones you
+                  like.
+                </p>
+              </div>
+
+              <div class="card abitem">
+                <div class="ic" aria-hidden="true">3</div>
+                <b>Get in touch</b>
+                <p>
+                  Call, WhatsApp or send an enquiry straight to the landlord,
+                  seller or provider.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- VALUES -->
+          <div class="abblock">
+            <div class="eb">Our values</div>
+            <h2>What we stand for</h2>
+            <p class="sub">The principles behind how we build CivicNest.</p>
+
+            <div class="abgrid three">
+              <div class="card abitem">
+                <b>Trust</b>
+                <p>
+                  We encourage verified listings so you can search with more
+                  confidence.
+                </p>
+              </div>
+
+              <div class="card abitem">
+                <b>Clarity</b>
+                <p>
+                  Prices, locations and details are shown plainly, with no
+                  guesswork.
+                </p>
+              </div>
+
+              <div class="card abitem">
+                <b>Access</b>
+                <p>
+                  A simple, mobile-friendly experience that works for students,
+                  families and businesses.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTE -->
+          <section class="card abnote">
+            <b>A note on listings</b>
+            <p>
+              Listing details and prices are provided by landlords, sellers and
+              providers. Please contact them to confirm availability, current
+              prices and any requirements before you make payments or
+              arrangements.
+            </p>
+          </section>
+
+          <!-- CALL TO ACTION -->
+          <section class="abcta">
+            <div>
+              <h2>Ready to get started?</h2>
+              <p>
+                Search for your next place, or list a property and reach people
+                looking right now.
+              </p>
+            </div>
+
+            <div class="btns">
+              <a class="bbtn" href="{{ url_for('rent_page') }}">Find a place</a>
+              <a class="bbtn line" href="{{ url_for('sell_page') }}"
+                >List a property</a
+              >
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+
+          <a
+            class="ci"
+            href="tel:+254768387842"
+            style="text-decoration: none; color: inherit"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
+            <div>
+              0768 387 842
+              <small>Call or WhatsApp</small>
+            </div>
+          </a>
+
+          <a
+            class="ci"
+            href="mailto:mokuajoshuaongeri@gmail.com"
+            style="text-decoration: none; color: inherit"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </a>
+
+          <div class="soc" aria-label="Social links">
+            <a
+              href="https://wa.me/254768387842"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              >wa</a
+            >
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a href="{{ url_for('buy_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-tag" />
+        </svg>
+        Buy
+      </a>
+
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+      >
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Chats
+      </a>
+
+      <a href="{{ url_for('sell_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List
+      </a>
+    </nav>
+
+    <!-- JAVASCRIPT -->
+    <script>
+      (() => {
+        "use strict";
+
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
+
+        if (menuBtn && menuPanel) {
+          menuBtn.addEventListener("click", () => {
+            const isOpening = menuPanel.hidden;
+
+            menuPanel.hidden = !isOpening;
+            menuBtn.setAttribute("aria-expanded", String(isOpening));
+            menuBtn.setAttribute(
+              "aria-label",
+              isOpening ? "Close menu" : "Open menu",
+            );
+          });
+
+          document.addEventListener("click", (event) => {
+            if (
+              !menuPanel.hidden &&
+              !menuPanel.contains(event.target) &&
+              !menuBtn.contains(event.target)
+            ) {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.setAttribute("aria-label", "Open menu");
+            }
+          });
+
+          menuPanel.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.focus();
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

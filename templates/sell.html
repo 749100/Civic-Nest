@@ -1,663 +1,1172 @@
-{% extends "base.html" %} {% block title %}List a Property | CivicNest Africa{%
-endblock %} {% block stage_class %}compact{% endblock %} {% block page_title
-%}List your property.{% endblock %} {% block page_sub %}
-<p class="page-sub">
-  Choose how you want to list it, fill in the details, and send it for review.
-  Every listing is checked before it goes live.
-</p>
-{% endblock %} {% block head %}
-<!-- Primary SEO Meta Tags -->
-<meta
-  name="title"
-  content="List Your Property | Rent or Sell Homes & Hostels - CivicNest Africa"
-/>
-<meta
-  name="description"
-  content="List your property for rent or sale in Kenya. Reach thousands of verified tenants, students, and home buyers easily on CivicNest Africa."
-/>
-<meta
-  name="keywords"
-  content="list property kenya, landlord registration, rent out house, sell land kenya, post student hostel, civicnest landlord"
-/>
-<meta name="robots" content="index, follow" />
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
-<!-- Canonical URL -->
-<link
-  rel="canonical"
-  href="https://civic-nest.onrender.com{{ url_for('add_property') }}"
-/>
+    <title>List a Property | CivicNest Africa</title>
 
-<!-- Open Graph / Facebook / WhatsApp -->
-<meta property="og:type" content="website" />
-<meta
-  property="og:url"
-  content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
-/>
-<meta
-  property="og:title"
-  content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
-/>
-<meta
-  property="og:description"
-  content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
-/>
-<meta
-  property="og:image"
-  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-/>
+    <meta
+      name="title"
+      content="List Your Property | Rent or Sell Homes & Hostels - CivicNest Africa"
+    />
+    <meta
+      name="description"
+      content="List your property for rent or sale in Kenya. Reach thousands of verified tenants, students, and home buyers easily on CivicNest Africa."
+    />
+    <meta
+      name="keywords"
+      content="list property kenya, landlord registration, rent out house, sell land kenya, post student hostel, civicnest landlord"
+    />
+    <meta name="author" content="CivicNest Africa" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1456d8" />
+    <link
+      rel="canonical"
+      href="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+    />
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta
-  property="twitter:url"
-  content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
-/>
-<meta
-  property="twitter:title"
-  content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
-/>
-<meta
-  property="twitter:description"
-  content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
-/>
-<meta
-  property="twitter:image"
-  content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-/>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CivicNest Africa" />
+    <meta
+      property="og:url"
+      content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+    />
+    <meta
+      property="og:title"
+      content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
+    />
+    <meta
+      property="og:description"
+      content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
+    />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://civic-nest.onrender.com{{ url_for('add_property') }}"
+    />
+    <meta
+      property="twitter:title"
+      content="List Your Property | Rent or Sell Homes & Hostels on CivicNest Africa"
+    />
+    <meta
+      property="twitter:description"
+      content="Reach verified tenants, students, and buyers across Kenya. Submit your rental or for-sale listing in minutes."
+    />
+    <meta
+      property="twitter:image"
+      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+    />
 
-<style>
-  .opt-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 26px 0 12px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.82);
-  }
-  .opt-label::before {
-    content: "";
-    width: 26px;
-    height: 3px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.2));
-  }
-  .opt-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    max-width: 640px;
-  }
-  .opt {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 15px 16px;
-    color: #fff;
-    text-align: left;
-    font: inherit;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.11);
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    border-radius: 20px;
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    box-shadow:
-      0 14px 34px rgba(3, 12, 40, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    transition:
-      transform 0.2s,
-      background 0.2s,
-      border-color 0.2s;
-  }
-  .opt:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.2);
-  }
-  .opt.on {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: #fff;
-  }
-  .opt .ico {
-    width: 40px;
-    height: 40px;
-    border-radius: 13px;
-    background: #fff;
-    color: var(--blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 18px rgba(3, 12, 40, 0.28);
-  }
-  .opt strong {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .opt small {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.82);
-  }
-  .where {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 10px 16px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    font-size: 14px;
-  }
-  .where a {
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
-  .form-wrap {
-    max-width: 860px;
-    margin: 0 auto;
-  }
-  .form-wrap .card {
-    margin-bottom: 18px;
-  }
-  .form-wrap .card > h2 {
-    font-family: "Fraunces", serif;
-    font-weight: 600;
-    font-size: 22px;
-    color: var(--navy);
-  }
-  .form-wrap .card > p.muted {
-    margin-top: 2px;
-  }
-  .row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 16px;
-  }
-  .hint {
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 48px;
-    font-size: 15px;
-    font-weight: 500;
-  }
-  .check input {
-    width: 22px;
-    height: 22px;
-    accent-color: var(--blue);
-  }
-  .f input[type="file"] {
-    padding: 10px;
-    border-style: dashed;
-    background: #f7fafe;
-  }
-  [hidden] {
-    display: none !important;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .chip {
-    position: relative;
-  }
-  .chip input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .chip span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid #c9d6ec;
-    border-radius: 22px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    background: #fff;
-  }
-  .chip input:checked + span {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-  .chip input:focus-visible + span {
-    outline: 3px solid #9dc0ff;
-    outline-offset: 2px;
-  }
-  .fine {
-    margin-top: 12px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  @media (min-width: 700px) {
-    .row.two {
-      grid-template-columns: 1fr 1fr;
-    }
-    .row.three {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-</style>
-{% endblock %} {% block hero_extra %}
-<div class="opt-label">I want to</div>
-<div class="opt-grid" id="typeTiles">
-  <button class="opt" type="button" data-type="rent" aria-pressed="false">
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+
+    <style>
+      /* =====================================================
+         CIVICNEST AFRICA — LIST A PROPERTY
+         Design matched to the Travel and Stay & Dine pages.
+         ===================================================== */
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .hero.a {
+        padding-bottom: 56px;
+      }
+
+      .sec.a {
+        padding-top: 34px;
+      }
+
+      .a a:focus-visible,
+      .a button:focus-visible,
+      .a input:focus-visible,
+      .a select:focus-visible,
+      .a textarea:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 2px;
+      }
+
+      /* Rent / Sell toggle in hero */
+      .aoptlabel {
+        margin: 22px 0 10px;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .aoptgrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        max-width: 560px;
+      }
+
+      .aopt {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.13);
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        text-align: left;
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+      }
+
+      .aopt:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+
+      .aopt.on {
+        border-color: #fff;
+        background: rgba(255, 255, 255, 0.32);
+      }
+
+      .aopt .aico {
+        display: flex;
+        width: 38px;
+        height: 38px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+        border-radius: 12px;
+        background: #fff;
+        color: #1456d8;
+      }
+
+      .aopt strong {
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .aopt small {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 11px;
+      }
+
+      .awhere {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 10px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.13);
+        color: #fff;
+        font-size: 12px;
+      }
+
+      .awhere a {
+        color: #fff;
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      /* Form */
+      .aform {
+        display: grid;
+        gap: 14px;
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      .asection {
+        min-width: 0;
+        padding: 20px;
+      }
+
+      .ahead h2 {
+        margin: 0;
+        color: #001b5e;
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .ahead p {
+        margin: 4px 0 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .arow {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 16px;
+      }
+
+      @media (min-width: 700px) {
+        .arow.two {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .arow.three {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .afield {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .afield > span {
+        color: #001b5e;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .afield input,
+      .afield select,
+      .afield textarea {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
+        background: #fff;
+        color: #001b5e;
+        font-family: inherit;
+        font-size: 13px;
+      }
+
+      .afield textarea {
+        min-height: 140px;
+        line-height: 1.6;
+        resize: vertical;
+      }
+
+      .afield input[type="file"] {
+        padding: 10px;
+        border-style: dashed;
+        background: #f2f7fd;
+      }
+
+      .afield input:focus,
+      .afield select:focus,
+      .afield textarea:focus {
+        border-color: #1456d8;
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(20, 86, 216, 0.12);
+      }
+
+      .ahint {
+        color: #405578;
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 1.6;
+      }
+
+      p.ahint {
+        margin: 0;
+      }
+
+      .acheck {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        gap: 9px;
+        color: #405578;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .acheck input {
+        width: 18px;
+        height: 18px;
+        accent-color: #1456d8;
+      }
+
+      /* Amenity chips */
+      .achips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .achip {
+        position: relative;
+      }
+
+      .achip input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .achip span {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        padding: 0 14px;
+        border: 1px solid #d3e0f5;
+        border-radius: 999px;
+        background: #fff;
+        color: #405578;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .achip input:checked + span {
+        border-color: #1456d8;
+        background: #1456d8;
+        color: #fff;
+      }
+
+      .achip input:focus-visible + span {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 2px;
+      }
+
+      /* Submit */
+      .abtn {
+        display: inline-flex;
+        width: 100%;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        border: 1px solid #1456d8;
+        border-radius: 12px;
+        background: #1456d8;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .abtn:hover {
+        border-color: #001b5e;
+        background: #001b5e;
+      }
+
+      .afine {
+        margin: 0;
+        color: #405578;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .a *,
+        .a *::before,
+        .a *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_admin_bar.html" %}
+
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
+
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
+
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+
+      <symbol id="i-key" viewBox="0 0 24 24">
         <circle cx="8" cy="15" r="4" />
-        <path d="M11 12l9-9M16 7l3 3" /></svg
-    ></span>
-    <strong>Rent it out</strong><small>Houses, bedsitters, hostels</small>
-  </button>
-  <button class="opt" type="button" data-type="sale" aria-pressed="false">
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
+        <path d="M11 12l9-9M16 7l3 3" />
+      </symbol>
+
+      <symbol id="i-tag" viewBox="0 0 24 24">
         <path d="M20 12l-8 8-9-9V3h8z" />
-        <circle cx="7.5" cy="7.5" r="1.2" /></svg
-    ></span>
-    <strong>Sell it</strong><small>Houses and plots</small>
-  </button>
-</div>
-<div class="where">
-  <span id="whereText"
-    >After review, your listing will appear on the Rent page.</span
-  >
-  <a
-    id="whereLink"
-    href="{{ url_for('rent_page') }}"
-    data-rent="{{ url_for('rent_page') }}"
-    data-sale="{{ url_for('buy_page') }}"
-    >View it</a
-  >
-</div>
-{% endblock %} {% block content %}
-<div class="form-wrap">
-  <form
-    id="listForm"
-    method="post"
-    action="{{ url_for('add_property') }}"
-    enctype="multipart/form-data"
-  >
-    <input type="hidden" name="listing_type" id="listingType" value="rent" />
+        <circle cx="7.5" cy="7.5" r="1.2" />
+      </symbol>
+    </svg>
 
-    <div class="card">
-      <h2>The basics</h2>
-      <p class="muted">
-        A clear title and the right type help people find your listing.
-      </p>
-      <div class="row two">
-        <label class="f"
-          ><span>Listing title</span>
-          <input
-            type="text"
-            name="title"
-            maxlength="120"
-            required
-            placeholder="e.g. Bright bedsitter near Kibabii University"
-          />
-        </label>
-        <label class="f"
-          ><span>Property type</span>
-          <select name="property_type" id="propertyType" required></select>
-        </label>
-      </div>
-      <div class="row two">
-        <label class="f"
-          ><span>Town or county</span>
-          <select name="location" id="location" required>
-            <option value="" disabled selected>-- Select a town --</option>
-            {% for town in towns %}
-            <option value="{{ town }}">{{ town }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label class="f" data-only="rent"
-          ><span>Nearest campus <small class="hint">(optional)</small></span>
-          <input
-            type="text"
-            name="campus"
-            placeholder="e.g. Kibabii University"
-          />
-        </label>
-      </div>
-      <div class="row" id="otherTownRow" hidden>
-        <label class="f"
-          ><span
-            >Town and country
-            <small class="hint">(for places outside Kenya)</small></span
-          >
-          <input
-            type="text"
-            name="location_other"
-            id="locationOther"
-            maxlength="120"
-            placeholder="e.g. Kampala, Uganda"
-          />
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Price and details</h2>
-      <p class="muted" id="priceHelp">
-        Set the monthly rent you want to charge.
-      </p>
-      <div class="row three">
-        <label class="f"
-          ><span id="priceLabel">Monthly rent (KSh)</span>
-          <input
-            type="number"
-            name="price"
-            id="price"
-            min="1"
-            step="any"
-            inputmode="numeric"
-            required
-            placeholder="e.g. 4500"
-          />
-        </label>
-        <label class="f" data-only="rent"
-          ><span>Deposit (KSh) <small class="hint">(optional)</small></span>
-          <input
-            type="number"
-            name="deposit"
-            min="0"
-            step="any"
-            inputmode="numeric"
-            placeholder="e.g. 4500"
-          />
-        </label>
-        <label class="f" data-only="rent"
-          ><span
-            >Distance from campus (km)
-            <small class="hint">(optional)</small></span
-          >
-          <input
-            type="number"
-            name="distance_from_campus"
-            min="0"
-            step="0.1"
-            inputmode="decimal"
-            placeholder="e.g. 1.5"
-          />
-        </label>
-      </div>
-      <div class="row three">
-        <label class="f" data-only="rent"
-          ><span>Total units</span>
-          <input
-            type="number"
-            name="total_units"
-            min="1"
-            value="1"
-            inputmode="numeric"
-          />
-        </label>
-        <label class="f" data-only="rent"
-          ><span>Vacant units</span>
-          <input
-            type="number"
-            name="vacant_units"
-            min="0"
-            value="1"
-            inputmode="numeric"
-          />
-        </label>
-        <label class="check" data-only="rent"
-          ><input type="checkbox" name="furnished" /> Furnished</label
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
         >
-      </div>
-      <div class="row three">
-        <label class="f" data-only="built"
-          ><span>Bedrooms <small class="hint">(optional)</small></span>
-          <input
-            type="number"
-            name="bedrooms"
-            min="0"
-            max="50"
-            inputmode="numeric"
-            placeholder="0 for a single room"
-          />
-        </label>
-        <label class="f" data-only="built"
-          ><span>Bathrooms <small class="hint">(optional)</small></span>
-          <input
-            type="number"
-            name="bathrooms"
-            min="0"
-            max="50"
-            inputmode="numeric"
-            placeholder="e.g. 1"
-          />
-        </label>
-        <label class="f" data-only="sale"
-          ><span>Size (sqm) <small class="hint">(optional)</small></span>
-          <input
-            type="number"
-            name="size_sqm"
-            min="0"
-            step="any"
-            inputmode="decimal"
-            placeholder="e.g. 450"
-          />
-        </label>
-      </div>
-    </div>
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
 
-    {% if amenities %}
-    <div class="card" data-only="built">
-      <h2>Amenities</h2>
-      <p class="muted">Tick everything that applies.</p>
-      <div class="chips">
-        {% for a in amenities %}
-        <label class="chip"
-          ><input type="checkbox" name="amenities" value="{{ a.name }}" /><span
-            >{{ a.name }}</span
-          ></label
-        >
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <div class="card">
-      <h2>Description</h2>
-      <p class="muted">Mention water, security, power, and what is close by.</p>
-      <div class="row">
-        <label class="f"
-          ><span>Tell people about the property</span>
-          <textarea
-            name="description"
-            required
-            minlength="30"
-            placeholder="Describe the property, its condition and what makes it a good choice."
-          ></textarea>
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Photos</h2>
-      <p class="muted">
-        Up to 10 clear, bright photos. The first one is the cover. Large photos
-        are shrunk automatically before they upload.
-      </p>
-      <div class="row">
-        <label class="f"
-          ><span>Choose photos</span>
-          <input
-            type="file"
-            id="photos"
-            name="photos"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            required
-          />
-        </label>
-        <p class="hint" id="photoMsg" role="status" aria-live="polite"></p>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Ownership</h2>
-      <p class="muted">
-        Every listing is reviewed before it goes live. This helps keep CivicNest
-        scam-free.
-      </p>
-      <div class="row two">
-        <label class="f"
-          ><span>You are listing as</span>
-          <select name="ownership_role" required>
-            <option value="">Choose one</option>
-            <option value="owner">The owner</option>
-            <option value="agent">An authorized agent or caretaker</option>
-          </select>
-        </label>
-        <label class="f" data-only="sale"
-          ><span>Proof of ownership</span>
-          <input
-            type="file"
-            name="proof_doc"
-            accept=".pdf,.jpg,.jpeg,.png"
-            required
-          />
-          <small class="hint"
-            >Title deed copy, allotment letter or authority to sell. PDF, JPG or
-            PNG, up to 5 MB. Only our review team can open it.</small
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a class="on" href="{{ url_for('add_property') }}" aria-current="page"
+            >List Property</a
           >
-        </label>
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a
+            class="t"
+            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+          >
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          {% if current_user.is_authenticated %}
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          {% else %}
+          <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+          {% endif %}
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <button class="btn block" type="submit" id="publishBtn">
-      Submit rental listing for review
-    </button>
-    <p class="fine">
-      Your listing goes live after it is approved. You can follow it on your
-      dashboard.
-    </p>
-  </form>
-</div>
-{% endblock %} {% block scripts %}
-<script>
-  var SAVED = {{ (saved or {})|tojson }};
-  var TYPES = {
-    rent: [["house", "House"], ["bedsitter", "Bedsitter"], ["single_room", "Single room"], ["apartment", "Apartment"], ["hostel", "Hostel"]],
-    sale: [["house", "House"], ["plot", "Plot of land"]]
-  };
-  var tiles = Array.prototype.slice.call(document.querySelectorAll("#typeTiles .opt"));
-  var hiddenType = document.getElementById("listingType");
-  var typeSelect = document.getElementById("propertyType");
-  var whereLink = document.getElementById("whereLink");
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('add_property') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+        <a href="{{ url_for('register') }}">Create account</a>
+      </nav>
+    </header>
 
-  // "Other" town: show the "town and country" box only when needed
-  var townSelect = document.getElementById("location");
-  var otherRow = document.getElementById("otherTownRow");
-  var otherInput = document.getElementById("locationOther");
+    <main>
+      <!-- HERO -->
+      <section class="hero a">
+        <div class="wrap">
+          <div class="eyebrow">List a property</div>
 
-  function syncOther() {
-    var isOther = townSelect.value === "Other";
-    otherRow.hidden = !isOther;
-    otherInput.required = isOther;
-    if (!isOther) otherInput.value = "";
-  }
-  townSelect.addEventListener("change", syncOther);
+          <h1>List your <em>property.</em></h1>
 
-  function refresh() {
-    var ctx = [hiddenType.value, typeSelect.value === "plot" ? "plot" : "built"];
-    document.querySelectorAll("[data-only]").forEach(function (el) {
-      var show = el.dataset.only.split(" ").some(function (t) { return ctx.indexOf(t) !== -1; });
-      el.hidden = !show;
-      el.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = !show; });
-    });
-  }
+          <p>
+            Choose how you want to list it, fill in the details, and send it for
+            review. Every listing is checked before it goes live.
+          </p>
 
-  function setType(type) {
-    if (!TYPES[type]) type = "rent";
-    var isRent = type === "rent";
-    hiddenType.value = type;
-    tiles.forEach(function (t) {
-      var on = t.dataset.type === type;
-      t.classList.toggle("on", on);
-      t.setAttribute("aria-pressed", String(on));
-    });
-    var keep = typeSelect.value;
-    typeSelect.innerHTML = '<option value="">Choose a type</option>' +
-      TYPES[type].map(function (p) { return '<option value="' + p[0] + '">' + p[1] + "</option>"; }).join("");
-    if (TYPES[type].some(function (p) { return p[0] === keep; })) typeSelect.value = keep;
+          <div class="aoptlabel">I want to</div>
 
-    document.getElementById("priceLabel").textContent = isRent ? "Monthly rent (KSh)" : "Sale price (KSh)";
-    document.getElementById("priceHelp").textContent = isRent
-      ? "Set the monthly rent you want to charge."
-      : "Set the full price you are asking for the property.";
-    document.getElementById("price").placeholder = isRent ? "e.g. 4500" : "e.g. 5000000";
-    document.getElementById("publishBtn").textContent = isRent ? "Submit rental listing for review" : "Submit for-sale listing for review";
-    document.getElementById("whereText").textContent = isRent
-      ? "After review, your listing will appear on the Rent page."
-      : "After review, your listing will appear on the Buy page.";
-    whereLink.href = isRent ? whereLink.dataset.rent : whereLink.dataset.sale;
-    refresh();
-  }
+          <div class="aoptgrid" id="typeTiles">
+            <button
+              class="aopt"
+              type="button"
+              data-type="rent"
+              aria-pressed="false"
+            >
+              <span class="aico">
+                <svg class="i" aria-hidden="true">
+                  <use href="#i-key" />
+                </svg>
+              </span>
+              <strong>Rent it out</strong>
+              <small>Houses, bedsitters, hostels</small>
+            </button>
 
-  tiles.forEach(function (t) { t.addEventListener("click", function () { setType(t.dataset.type); }); });
-  typeSelect.addEventListener("change", refresh);
+            <button
+              class="aopt"
+              type="button"
+              data-type="sale"
+              aria-pressed="false"
+            >
+              <span class="aico">
+                <svg class="i" aria-hidden="true">
+                  <use href="#i-tag" />
+                </svg>
+              </span>
+              <strong>Sell it</strong>
+              <small>Houses and plots</small>
+            </button>
+          </div>
 
-  var startType = (SAVED.listing_type && SAVED.listing_type[0]) || new URLSearchParams(window.location.search).get("type") || "rent";
-  setType(startType);
-  if (SAVED.property_type) { typeSelect.value = SAVED.property_type[0]; refresh(); }
-  Object.keys(SAVED).forEach(function (name) {
-    if (name === "listing_type" || name === "property_type") return;
-    var vals = SAVED[name];
-    document.querySelectorAll('#listForm [name="' + name + '"]').forEach(function (el) {
-      if (el.type === "file") return;
-      if (el.type === "checkbox") el.checked = vals.indexOf(el.value || "on") !== -1;
-      else el.value = vals[0];
-    });
-  });
+          <div class="awhere">
+            <span id="whereText"
+              >After review, your listing will appear on the Rent page.</span
+            >
+            <a
+              id="whereLink"
+              href="{{ url_for('rent_page') }}"
+              data-rent="{{ url_for('rent_page') }}"
+              data-sale="{{ url_for('buy_page') }}"
+              >View it</a
+            >
+          </div>
+        </div>
+      </section>
 
-  // After restoring any saved values, show the "Other" box if it applies
-  syncOther();
+      <!-- FORM -->
+      <section class="sec a">
+        <div class="wrap">
+          <form
+            class="aform"
+            id="listForm"
+            method="post"
+            action="{{ url_for('add_property') }}"
+            enctype="multipart/form-data"
+          >
+            <input
+              type="hidden"
+              name="listing_type"
+              id="listingType"
+              value="rent"
+            />
 
-  // Shrink photos in the browser before upload (saves mobile data)
-  var photos = document.getElementById("photos");
-  var photoMsg = document.getElementById("photoMsg");
-  async function shrink(file) {
-    try {
-      var bmp = await createImageBitmap(file);
-      var s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-      var c = document.createElement("canvas");
-      c.width = Math.round(bmp.width * s);
-      c.height = Math.round(bmp.height * s);
-      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-      var blob = await new Promise(function (r) { c.toBlob(r, "image/jpeg", 0.82); });
-      return blob ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
-    } catch (e) { return file; }
-  }
-  photos.addEventListener("change", async function () {
-    var files = Array.prototype.slice.call(photos.files);
-    if (files.length > 10) { photoMsg.textContent = "Please choose at most 10 photos."; photos.value = ""; return; }
-    photoMsg.textContent = "Preparing photos...";
-    var dt = new DataTransfer();
-    for (var i = 0; i < files.length; i++) dt.items.add(await shrink(files[i]));
-    photos.files = dt.files;
-    photoMsg.textContent = dt.files.length + " photo(s) ready. The first one is the cover.";
-  });
-</script>
-{% endblock %}
+            <!-- THE BASICS -->
+            <div class="card asection">
+              <div class="ahead">
+                <h2>The basics</h2>
+                <p>
+                  A clear title and the right type help people find your
+                  listing.
+                </p>
+              </div>
+
+              <div class="arow two">
+                <label class="afield"
+                  ><span>Listing title</span>
+                  <input
+                    type="text"
+                    name="title"
+                    maxlength="120"
+                    required
+                    placeholder="e.g. Bright bedsitter near Kibabii University"
+                  />
+                </label>
+
+                <label class="afield"
+                  ><span>Property type</span>
+                  <select
+                    name="property_type"
+                    id="propertyType"
+                    required
+                  ></select>
+                </label>
+              </div>
+
+              <div class="arow two">
+                <label class="afield"
+                  ><span>Town or county</span>
+                  <select name="location" id="location" required>
+                    <option value="" disabled selected>
+                      -- Select a town --
+                    </option>
+                    {% for town in towns %}
+                    <option value="{{ town }}">{{ town }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+
+                <label class="afield" data-only="rent"
+                  ><span
+                    >Nearest campus
+                    <small class="ahint">(optional)</small></span
+                  >
+                  <input
+                    type="text"
+                    name="campus"
+                    placeholder="e.g. Kibabii University"
+                  />
+                </label>
+              </div>
+
+              <div class="arow" id="otherTownRow" hidden>
+                <label class="afield"
+                  ><span
+                    >Town and country
+                    <small class="ahint"
+                      >(for places outside Kenya)</small
+                    ></span
+                  >
+                  <input
+                    type="text"
+                    name="location_other"
+                    id="locationOther"
+                    maxlength="120"
+                    placeholder="e.g. Kampala, Uganda"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <!-- PRICE AND DETAILS -->
+            <div class="card asection">
+              <div class="ahead">
+                <h2>Price and details</h2>
+                <p id="priceHelp">Set the monthly rent you want to charge.</p>
+              </div>
+
+              <div class="arow three">
+                <label class="afield"
+                  ><span id="priceLabel">Monthly rent (KSh)</span>
+                  <input
+                    type="number"
+                    name="price"
+                    id="price"
+                    min="1"
+                    step="any"
+                    inputmode="numeric"
+                    required
+                    placeholder="e.g. 4500"
+                  />
+                </label>
+
+                <label class="afield" data-only="rent"
+                  ><span
+                    >Deposit (KSh) <small class="ahint">(optional)</small></span
+                  >
+                  <input
+                    type="number"
+                    name="deposit"
+                    min="0"
+                    step="any"
+                    inputmode="numeric"
+                    placeholder="e.g. 4500"
+                  />
+                </label>
+
+                <label class="afield" data-only="rent"
+                  ><span
+                    >Distance from campus (km)
+                    <small class="ahint">(optional)</small></span
+                  >
+                  <input
+                    type="number"
+                    name="distance_from_campus"
+                    min="0"
+                    step="0.1"
+                    inputmode="decimal"
+                    placeholder="e.g. 1.5"
+                  />
+                </label>
+              </div>
+
+              <div class="arow three">
+                <label class="afield" data-only="rent"
+                  ><span>Total units</span>
+                  <input
+                    type="number"
+                    name="total_units"
+                    min="1"
+                    value="1"
+                    inputmode="numeric"
+                  />
+                </label>
+
+                <label class="afield" data-only="rent"
+                  ><span>Vacant units</span>
+                  <input
+                    type="number"
+                    name="vacant_units"
+                    min="0"
+                    value="1"
+                    inputmode="numeric"
+                  />
+                </label>
+
+                <label class="acheck" data-only="rent"
+                  ><input type="checkbox" name="furnished" /> Furnished</label
+                >
+              </div>
+
+              <div class="arow three">
+                <label class="afield" data-only="built"
+                  ><span>Bedrooms <small class="ahint">(optional)</small></span>
+                  <input
+                    type="number"
+                    name="bedrooms"
+                    min="0"
+                    max="50"
+                    inputmode="numeric"
+                    placeholder="0 for a single room"
+                  />
+                </label>
+
+                <label class="afield" data-only="built"
+                  ><span
+                    >Bathrooms <small class="ahint">(optional)</small></span
+                  >
+                  <input
+                    type="number"
+                    name="bathrooms"
+                    min="0"
+                    max="50"
+                    inputmode="numeric"
+                    placeholder="e.g. 1"
+                  />
+                </label>
+
+                <label class="afield" data-only="sale"
+                  ><span
+                    >Size (sqm) <small class="ahint">(optional)</small></span
+                  >
+                  <input
+                    type="number"
+                    name="size_sqm"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="e.g. 450"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {% if amenities %}
+            <!-- AMENITIES -->
+            <div class="card asection" data-only="built">
+              <div class="ahead">
+                <h2>Amenities</h2>
+                <p>Tick everything that applies.</p>
+              </div>
+
+              <div class="achips">
+                {% for a in amenities %}
+                <label class="achip"
+                  ><input
+                    type="checkbox"
+                    name="amenities"
+                    value="{{ a.name }}"
+                  /><span>{{ a.name }}</span></label
+                >
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- DESCRIPTION -->
+            <div class="card asection">
+              <div class="ahead">
+                <h2>Description</h2>
+                <p>Mention water, security, power, and what is close by.</p>
+              </div>
+
+              <div class="arow">
+                <label class="afield"
+                  ><span>Tell people about the property</span>
+                  <textarea
+                    name="description"
+                    required
+                    minlength="30"
+                    placeholder="Describe the property, its condition and what makes it a good choice."
+                  ></textarea>
+                </label>
+              </div>
+            </div>
+
+            <!-- PHOTOS -->
+            <div class="card asection">
+              <div class="ahead">
+                <h2>Photos</h2>
+                <p>
+                  Up to 10 clear, bright photos. The first one is the cover.
+                  Large photos are shrunk automatically before they upload.
+                </p>
+              </div>
+
+              <div class="arow">
+                <label class="afield"
+                  ><span>Choose photos</span>
+                  <input
+                    type="file"
+                    id="photos"
+                    name="photos"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    required
+                  />
+                </label>
+
+                <p
+                  class="ahint"
+                  id="photoMsg"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </div>
+            </div>
+
+            <!-- OWNERSHIP -->
+            <div class="card asection">
+              <div class="ahead">
+                <h2>Ownership</h2>
+                <p>
+                  Every listing is reviewed before it goes live. This helps keep
+                  CivicNest scam-free.
+                </p>
+              </div>
+
+              <div class="arow two">
+                <label class="afield"
+                  ><span>You are listing as</span>
+                  <select name="ownership_role" required>
+                    <option value="">Choose one</option>
+                    <option value="owner">The owner</option>
+                    <option value="agent">
+                      An authorized agent or caretaker
+                    </option>
+                  </select>
+                </label>
+
+                <label class="afield" data-only="sale"
+                  ><span>Proof of ownership</span>
+                  <input
+                    type="file"
+                    name="proof_doc"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    required
+                  />
+                  <small class="ahint"
+                    >Title deed copy, allotment letter or authority to sell.
+                    PDF, JPG or PNG, up to 5 MB. Only our review team can open
+                    it.</small
+                  >
+                </label>
+              </div>
+            </div>
+
+            <button class="abtn" type="submit" id="publishBtn">
+              Submit rental listing for review
+            </button>
+
+            <p class="afine">
+              Your listing goes live after it is approved. You can follow it on
+              your dashboard.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
+            <div>
+              +254 768387842
+              <small>Call or WhatsApp</small>
+            </div>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </div>
+
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+      >
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Chats
+      </a>
+
+      <a class="on" href="{{ url_for('add_property') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List Property
+      </a>
+    </nav>
+
+    <!-- JAVASCRIPT -->
+    <script>
+      // MOBILE NAVIGATION
+      (function () {
+        var menuBtn = document.getElementById("menuBtn");
+        var menuPanel = document.getElementById("menuPanel");
+
+        if (!menuBtn || !menuPanel) return;
+
+        menuBtn.addEventListener("click", function () {
+          var isOpening = menuPanel.hidden;
+
+          menuPanel.hidden = !isOpening;
+          menuBtn.setAttribute("aria-expanded", String(isOpening));
+          menuBtn.setAttribute(
+            "aria-label",
+            isOpening ? "Close menu" : "Open menu",
+          );
+        });
+
+        document.addEventListener("click", function (event) {
+          if (
+            !menuPanel.hidden &&
+            !menuPanel.contains(event.target) &&
+            !menuBtn.contains(event.target)
+          ) {
+            menuPanel.hidden = true;
+            menuBtn.setAttribute("aria-expanded", "false");
+            menuBtn.setAttribute("aria-label", "Open menu");
+          }
+        });
+
+        menuPanel.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            menuPanel.hidden = true;
+            menuBtn.setAttribute("aria-expanded", "false");
+            menuBtn.focus();
+          }
+        });
+      })();
+    </script>
+
+    <script>
+      var SAVED = {{ (saved or {})|tojson }};
+      var TYPES = {
+        rent: [["house", "House"], ["bedsitter", "Bedsitter"], ["single_room", "Single room"], ["apartment", "Apartment"], ["hostel", "Hostel"]],
+        sale: [["house", "House"], ["plot", "Plot of land"]]
+      };
+      var tiles = Array.prototype.slice.call(document.querySelectorAll("#typeTiles .aopt"));
+      var hiddenType = document.getElementById("listingType");
+      var typeSelect = document.getElementById("propertyType");
+      var whereLink = document.getElementById("whereLink");
+
+      // "Other" town: show the "town and country" box only when needed
+      var townSelect = document.getElementById("location");
+      var otherRow = document.getElementById("otherTownRow");
+      var otherInput = document.getElementById("locationOther");
+
+      function syncOther() {
+        var isOther = townSelect.value === "Other";
+        otherRow.hidden = !isOther;
+        otherInput.required = isOther;
+        if (!isOther) otherInput.value = "";
+      }
+      townSelect.addEventListener("change", syncOther);
+
+      function refresh() {
+        var ctx = [hiddenType.value, typeSelect.value === "plot" ? "plot" : "built"];
+        document.querySelectorAll("[data-only]").forEach(function (el) {
+          var show = el.dataset.only.split(" ").some(function (t) { return ctx.indexOf(t) !== -1; });
+          el.hidden = !show;
+          el.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = !show; });
+        });
+      }
+
+      function setType(type) {
+        if (!TYPES[type]) type = "rent";
+        var isRent = type === "rent";
+        hiddenType.value = type;
+        tiles.forEach(function (t) {
+          var on = t.dataset.type === type;
+          t.classList.toggle("on", on);
+          t.setAttribute("aria-pressed", String(on));
+        });
+        var keep = typeSelect.value;
+        typeSelect.innerHTML = '<option value="">Choose a type</option>' +
+          TYPES[type].map(function (p) { return '<option value="' + p[0] + '">' + p[1] + "</option>"; }).join("");
+        if (TYPES[type].some(function (p) { return p[0] === keep; })) typeSelect.value = keep;
+
+        document.getElementById("priceLabel").textContent = isRent ? "Monthly rent (KSh)" : "Sale price (KSh)";
+        document.getElementById("priceHelp").textContent = isRent
+          ? "Set the monthly rent you want to charge."
+          : "Set the full price you are asking for the property.";
+        document.getElementById("price").placeholder = isRent ? "e.g. 4500" : "e.g. 5000000";
+        document.getElementById("publishBtn").textContent = isRent ? "Submit rental listing for review" : "Submit for-sale listing for review";
+        document.getElementById("whereText").textContent = isRent
+          ? "After review, your listing will appear on the Rent page."
+          : "After review, your listing will appear on the Buy page.";
+        whereLink.href = isRent ? whereLink.dataset.rent : whereLink.dataset.sale;
+        refresh();
+      }
+
+      tiles.forEach(function (t) { t.addEventListener("click", function () { setType(t.dataset.type); }); });
+      typeSelect.addEventListener("change", refresh);
+
+      var startType = (SAVED.listing_type && SAVED.listing_type[0]) || new URLSearchParams(window.location.search).get("type") || "rent";
+      setType(startType);
+      if (SAVED.property_type) { typeSelect.value = SAVED.property_type[0]; refresh(); }
+      Object.keys(SAVED).forEach(function (name) {
+        if (name === "listing_type" || name === "property_type") return;
+        var vals = SAVED[name];
+        document.querySelectorAll('#listForm [name="' + name + '"]').forEach(function (el) {
+          if (el.type === "file") return;
+          if (el.type === "checkbox") el.checked = vals.indexOf(el.value || "on") !== -1;
+          else el.value = vals[0];
+        });
+      });
+
+      // After restoring any saved values, show the "Other" box if it applies
+      syncOther();
+
+      // Shrink photos in the browser before upload (saves mobile data)
+      var photos = document.getElementById("photos");
+      var photoMsg = document.getElementById("photoMsg");
+      async function shrink(file) {
+        try {
+          var bmp = await createImageBitmap(file);
+          var s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+          var c = document.createElement("canvas");
+          c.width = Math.round(bmp.width * s);
+          c.height = Math.round(bmp.height * s);
+          c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+          var blob = await new Promise(function (r) { c.toBlob(r, "image/jpeg", 0.82); });
+          return blob ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
+        } catch (e) { return file; }
+      }
+      photos.addEventListener("change", async function () {
+        var files = Array.prototype.slice.call(photos.files);
+        if (files.length > 10) { photoMsg.textContent = "Please choose at most 10 photos."; photos.value = ""; return; }
+        photoMsg.textContent = "Preparing photos...";
+        var dt = new DataTransfer();
+        for (var i = 0; i < files.length; i++) dt.items.add(await shrink(files[i]));
+        photos.files = dt.files;
+        photoMsg.textContent = dt.files.length + " photo(s) ready. The first one is the cover.";
+      });
+    </script>
+  </body>
+</html>

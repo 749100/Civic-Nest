@@ -1,546 +1,442 @@
-{% extends "base.html" %} {% block title %}List a Place | Stay &amp; Dine -
-CivicNest Africa{% endblock %} {% block stage_class %}compact{% endblock %} {%
-block page_title %}List your place.{% endblock %} {% block page_sub %}
-<p class="page-sub">
-  Guest house, motel, resort or restaurant? Tell us about it and send it for
-  review. Every listing is checked before it goes live.
-</p>
-{% endblock %} {% block head %}
+{% block head %}
 <meta name="robots" content="noindex, follow" />
 <style>
+  /* Stay & Dine — CivicNest form design */
+
   .opt-label {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 26px 0 12px;
+    margin: 24px 0 14px;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+    font-weight: 800;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.82);
   }
+
   .opt-label::before {
     content: "";
-    width: 26px;
+    width: 25px;
     height: 3px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.2));
+    border-radius: 9px;
+    background: #8fc2ff;
   }
+
   .opt-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    max-width: 640px;
+    max-width: 680px;
   }
+
   .opt {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
-    padding: 15px 16px;
+    gap: 7px;
+    min-width: 0;
+    padding: 17px;
     color: #fff;
     text-align: left;
     font: inherit;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.11);
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    border-radius: 20px;
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    box-shadow:
-      0 14px 34px rgba(3, 12, 40, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.23);
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 20, 70, 0.12);
     transition:
       transform 0.2s,
       background 0.2s,
       border-color 0.2s;
   }
+
   .opt:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.18);
   }
+
   .opt.on {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: #fff;
+    background: rgba(255, 255, 255, 0.23);
+    border: 2px solid #fff;
+    padding: 16px;
+    box-shadow: 0 0 0 3px rgba(143, 194, 255, 0.2);
   }
+
+  .opt:focus-visible {
+    outline: 3px solid #a9d0ff;
+    outline-offset: 3px;
+  }
+
   .opt .ico {
-    width: 40px;
-    height: 40px;
-    border-radius: 13px;
-    background: #fff;
-    color: var(--blue);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 18px rgba(3, 12, 40, 0.28);
+    width: 42px;
+    height: 42px;
+    margin-bottom: 3px;
+    color: var(--blue, #0047ff);
+    background: #fff;
+    border-radius: 14px;
   }
+
+  .opt .i {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
   .opt strong {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 800;
   }
+
   .opt small {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.82);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
   }
+
   .where {
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
     margin-top: 16px;
-    padding: 10px 16px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    font-size: 14px;
+    padding: 11px 15px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 13px;
   }
+
   .where a {
-    font-weight: 700;
+    color: #fff;
+    font-weight: 800;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
+  .where a:hover {
+    color: #b9d8ff;
+  }
+
+  /* Form layout */
+
   .form-wrap {
+    width: 100%;
     max-width: 860px;
     margin: 0 auto;
   }
+
   .form-wrap .card {
     margin-bottom: 18px;
+    padding: 24px;
+    overflow: hidden;
+    color: var(--ink, #071a42);
+    background: #fff;
+    border: 1px solid var(--line, #dce7f8);
+    border-radius: 22px;
+    box-shadow: 0 8px 28px rgba(14, 49, 105, 0.055);
   }
+
   .form-wrap .card > h2 {
-    font-family: "Fraunces", serif;
-    font-weight: 600;
-    font-size: 22px;
-    color: var(--navy);
+    margin: 0;
+    color: var(--navy, #001b5e);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
   }
+
   .form-wrap .card > p.muted {
-    margin-top: 2px;
+    margin: 6px 0 0;
+    color: var(--muted, #405578);
+    font-size: 13px;
+    line-height: 1.65;
   }
+
   .row {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+    margin-top: 17px;
   }
-  .hint {
-    font-size: 12px;
-    color: var(--muted);
+
+  .row.two,
+  .row.three {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .check {
+
+  .form-wrap .f {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 48px;
-    font-size: 15px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    color: var(--ink, #071a42);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .form-wrap .f > span {
+    line-height: 1.5;
+  }
+
+  .hint {
+    color: var(--muted, #405578);
+    font-size: 11px;
     font-weight: 500;
   }
-  .check input {
-    width: 22px;
-    height: 22px;
-    accent-color: var(--blue);
+
+  .form-wrap .f input:not([type="checkbox"]):not([type="file"]),
+  .form-wrap .f select,
+  .form-wrap .f textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 12px 14px;
+    color: var(--ink, #071a42);
+    background: #f7faff;
+    border: 1px solid #d8e3f3;
+    border-radius: 12px;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s,
+      background 0.2s;
   }
-  .f input[type="file"] {
-    padding: 10px;
-    border-style: dashed;
-    background: #f7fafe;
+
+  .form-wrap .f textarea {
+    min-height: 135px;
+    resize: vertical;
+    line-height: 1.7;
   }
-  [hidden] {
-    display: none !important;
+
+  .form-wrap .f input::placeholder,
+  .form-wrap .f textarea::placeholder {
+    color: #8796ae;
+    font-weight: 400;
   }
+
+  .form-wrap .f input:focus,
+  .form-wrap .f select:focus,
+  .form-wrap .f textarea:focus {
+    background: #fff;
+    border-color: var(--blue, #0047ff);
+    box-shadow: 0 0 0 3px rgba(0, 71, 255, 0.09);
+  }
+
+  .form-wrap .f input[type="file"] {
+    width: 100%;
+    min-height: 100px;
+    padding: 20px 14px;
+    color: var(--muted, #405578);
+    background: #f5f8ff;
+    border: 1.5px dashed #a9c4ed;
+    border-radius: 14px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .form-wrap .f input[type="file"]:focus-visible {
+    outline: 3px solid #a9c4ff;
+    outline-offset: 2px;
+  }
+
+  .form-wrap .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    min-height: 42px;
+    padding: 12px 14px;
+    color: var(--ink, #071a42);
+    background: #f5f8ff;
+    border: 1px solid #e1e9f6;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.65;
+    cursor: pointer;
+  }
+
+  .form-wrap .check input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--blue, #0047ff);
+  }
+
+  /* Amenity selection */
+
   .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 9px;
+    margin-top: 16px;
   }
+
   .chip {
     position: relative;
   }
+
   .chip input {
     position: absolute;
+    width: 1px;
+    height: 1px;
     opacity: 0;
     pointer-events: none;
   }
+
   .chip span {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid #c9d6ec;
-    border-radius: 22px;
-    font-size: 14px;
-    font-weight: 500;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    color: var(--muted, #405578);
+    background: #f7faff;
+    border: 1px solid #d8e3f3;
+    border-radius: 24px;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
-    background: #fff;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      border-color 0.2s;
   }
+
   .chip input:checked + span {
-    background: var(--blue);
-    border-color: var(--blue);
     color: #fff;
+    background: var(--blue, #0047ff);
+    border-color: var(--blue, #0047ff);
   }
+
   .chip input:focus-visible + span {
-    outline: 3px solid #9dc0ff;
-    outline-offset: 2px;
+    outline: 3px solid #a9c4ff;
+    outline-offset: 3px;
   }
+
+  /* Submit and photo feedback */
+
+  #photoMsg {
+    padding: 10px 12px;
+    color: var(--muted, #405578);
+    background: #f1f6ff;
+    border-radius: 10px;
+    line-height: 1.6;
+  }
+
+  .form-wrap #listForm > button.btn.block {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    margin-top: 8px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(0, 71, 255, 0.17);
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .form-wrap #listForm > button.btn.block:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 25px rgba(0, 71, 255, 0.23);
+  }
+
   .fine {
-    margin-top: 12px;
+    margin: 13px 0 0;
+    color: var(--muted, #405578);
     text-align: center;
-    font-size: 13px;
-    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
   }
+
+  [hidden] {
+    display: none !important;
+  }
+
   @media (min-width: 700px) {
     .row.two {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
     .row.three {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .form-wrap .card {
+      padding: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .opt-grid {
+      gap: 9px;
+    }
+
+    .opt {
+      padding: 13px;
+      border-radius: 15px;
+    }
+
+    .opt.on {
+      padding: 12px;
+    }
+
+    .opt strong {
+      font-size: 13px;
+    }
+
+    .opt small {
+      font-size: 11px;
+    }
+
+    .opt .ico {
+      width: 37px;
+      height: 37px;
+    }
+
+    .form-wrap .card {
+      padding: 18px 15px;
+      margin-bottom: 14px;
+      border-radius: 18px;
+    }
+
+    .form-wrap .card > h2 {
+      font-size: 17px;
+    }
+
+    .chips {
+      gap: 7px;
+    }
+
+    .chip span {
+      min-height: 38px;
+      padding: 0 11px;
+      font-size: 11px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .opt,
+    .form-wrap .f input,
+    .form-wrap .f select,
+    .form-wrap .f textarea,
+    .chip span {
+      transition: none;
     }
   }
 </style>
-{% endblock %} {% block hero_extra %}
-<div class="opt-label">What are you listing?</div>
-<div class="opt-grid" id="typeTiles">
-  <button
-    class="opt"
-    type="button"
-    data-type="guest_house"
-    aria-pressed="false"
-  >
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
-        <path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />
-        <circle cx="7" cy="11" r="1.5" /></svg
-    ></span>
-    <strong>Guest house</strong><small>Homely stays</small>
-  </button>
-  <button class="opt" type="button" data-type="motel" aria-pressed="false">
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
-        <path
-          d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"
-        /></svg
-    ></span>
-    <strong>Motel</strong><small>Quick overnight</small>
-  </button>
-  <button class="opt" type="button" data-type="resort" aria-pressed="false">
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="4" />
-        <path
-          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
-        /></svg
-    ></span>
-    <strong>Resort</strong><small>Getaways</small>
-  </button>
-  <button class="opt" type="button" data-type="restaurant" aria-pressed="false">
-    <span class="ico"
-      ><svg class="i" viewBox="0 0 24 24">
-        <path
-          d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 1-3 4-3 7v3h3"
-        /></svg
-    ></span>
-    <strong>Restaurant</strong><small>Eat out</small>
-  </button>
-</div>
-<div class="where">
-  <span
-    >After review, your listing will appear on the Stay &amp; Dine page.</span
-  >
-  <a href="{{ url_for('hospitality_page') }}">View page</a>
-</div>
-{% endblock %} {% block content %}
-<div class="form-wrap">
-  <form
-    id="listForm"
-    method="post"
-    action="{{ url_for('list_place') }}"
-    enctype="multipart/form-data"
-  >
-    <input type="hidden" name="category" id="category" value="guest_house" />
-
-    <div class="card">
-      <h2>The basics</h2>
-      <p class="muted">The name and town people will search for.</p>
-      <div class="row two">
-        <label class="f"
-          ><span>Name</span>
-          <input
-            type="text"
-            name="name"
-            maxlength="120"
-            required
-            placeholder="e.g. Lakeview Guest House"
-          />
-        </label>
-        <label class="f"
-          ><span>Town or county</span>
-          <select name="location" id="location" required>
-            <option value="" disabled selected>-- Select a town --</option>
-            {% for town in towns %}
-            <option value="{{ town }}">{{ town }}</option>
-            {% endfor %}
-          </select>
-        </label>
-      </div>
-      <div class="row" id="otherTownRow" hidden>
-        <label class="f"
-          ><span
-            >Town and country
-            <small class="hint">(for places outside Kenya)</small></span
-          >
-          <input
-            type="text"
-            name="location_other"
-            id="locationOther"
-            maxlength="120"
-            placeholder="e.g. Kampala, Uganda"
-          />
-        </label>
-      </div>
-      <div class="row two">
-        <label class="f"
-          ><span>Phone number</span>
-          <input
-            type="text"
-            name="phone"
-            inputmode="tel"
-            required
-            placeholder="e.g. 0712 345 678"
-          />
-        </label>
-        <label class="f"
-          ><span>Website <small class="hint">(optional)</small></span>
-          <input type="url" name="website" placeholder="https://" />
-        </label>
-      </div>
-      <div class="row">
-        <label class="check"
-          ><input type="checkbox" name="wants_website" /> I don't have a website
-          yet. I'd like to hear about getting one built for my business.</label
-        >
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Price and details</h2>
-      <p class="muted" id="priceHelp">Set the usual price for one night.</p>
-      <div class="row three">
-        <label class="f"
-          ><span id="priceLabel">Price per night (KSh)</span>
-          <input
-            type="number"
-            name="price"
-            id="price"
-            min="1"
-            step="any"
-            inputmode="numeric"
-            required
-            placeholder="e.g. 2500"
-          />
-        </label>
-        <label class="f" data-only="lodging"
-          ><span>Number of rooms</span>
-          <input
-            type="number"
-            name="rooms"
-            min="1"
-            inputmode="numeric"
-            placeholder="e.g. 10"
-          />
-        </label>
-        <label class="f" data-only="lodging"
-          ><span>Check-in time <small class="hint">(optional)</small></span>
-          <input
-            type="text"
-            name="check_in_time"
-            placeholder="e.g. From 2 pm"
-          />
-        </label>
-      </div>
-      <div class="row two">
-        <label class="f" data-only="restaurant"
-          ><span>Cuisine</span>
-          <input
-            type="text"
-            name="cuisine"
-            placeholder="e.g. Kenyan, grills, fast food"
-          />
-        </label>
-        <label class="f" data-only="restaurant"
-          ><span>Opening hours</span>
-          <input
-            type="text"
-            name="opening_hours"
-            placeholder="e.g. Mon-Sun, 7 am - 10 pm"
-          />
-        </label>
-      </div>
-      <div class="row">
-        <label class="check" data-only="restaurant"
-          ><input type="checkbox" name="delivery" /> We offer delivery</label
-        >
-      </div>
-    </div>
-
-    <div class="card" data-only="lodging">
-      <h2>Amenities</h2>
-      <p class="muted">Tick everything that applies.</p>
-      <div class="chips">
-        {% for a in ['Wi-Fi', 'Parking', 'Breakfast included', 'Restaurant on
-        site', 'Swimming pool', 'Hot water', 'Security', 'Conference space'] %}
-        <label class="chip"
-          ><input type="checkbox" name="amenities" value="{{ a }}" /><span
-            >{{ a }}</span
-          ></label
-        >
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Description</h2>
-      <p class="muted">
-        Mention what makes it special and what is close by (menu highlights,
-        views, transport, security).
-      </p>
-      <div class="row">
-        <label class="f"
-          ><span>Tell people about your place</span>
-          <textarea
-            name="description"
-            required
-            minlength="30"
-            placeholder="Describe the place, the service and what guests can expect."
-          ></textarea>
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Photos</h2>
-      <p class="muted">
-        Up to 5 clear, bright photos. The first one is the cover. Large photos
-        are shrunk automatically before they upload.
-      </p>
-      <div class="row">
-        <label class="f"
-          ><span>Choose photos</span>
-          <input
-            type="file"
-            id="photos"
-            name="photos"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            required
-          />
-        </label>
-        <p class="hint" id="photoMsg" role="status" aria-live="polite"></p>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Ownership</h2>
-      <p class="muted">
-        Every listing is reviewed before it goes live. This helps keep CivicNest
-        scam-free.
-      </p>
-      <div class="row">
-        <label class="f"
-          ><span>You are listing as</span>
-          <select name="ownership_role" required>
-            <option value="">Choose one</option>
-            <option value="owner">The owner</option>
-            <option value="agent">An authorized manager or agent</option>
-          </select>
-        </label>
-      </div>
-    </div>
-
-    <button class="btn block" type="submit">Submit for review</button>
-    <p class="fine">Your listing goes live after it is approved.</p>
-  </form>
-</div>
-{% endblock %} {% block scripts %}
-<script>
-  var SAVED = {{ (saved or {})|tojson }};
-  var GROUP = { guest_house: "lodging", motel: "lodging", resort: "lodging", restaurant: "restaurant" };
-  var tiles = Array.prototype.slice.call(document.querySelectorAll("#typeTiles .opt"));
-  var hiddenCat = document.getElementById("category");
-
-  var townSelect = document.getElementById("location");
-  var otherRow = document.getElementById("otherTownRow");
-  var otherInput = document.getElementById("locationOther");
-  function syncOther() {
-    var isOther = townSelect.value === "Other";
-    otherRow.hidden = !isOther;
-    otherInput.required = isOther;
-    if (!isOther) otherInput.value = "";
-  }
-  townSelect.addEventListener("change", syncOther);
-
-  function refresh() {
-    var g = GROUP[hiddenCat.value] || "lodging";
-    document.querySelectorAll("[data-only]").forEach(function (el) {
-      var show = el.dataset.only.split(" ").indexOf(g) !== -1;
-      el.hidden = !show;
-      el.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = !show; });
-    });
-  }
-
-  function setCategory(cat) {
-    if (!GROUP[cat]) cat = "guest_house";
-    hiddenCat.value = cat;
-    tiles.forEach(function (t) {
-      var on = t.dataset.type === cat;
-      t.classList.toggle("on", on);
-      t.setAttribute("aria-pressed", String(on));
-    });
-    var lodging = GROUP[cat] === "lodging";
-    document.getElementById("priceLabel").textContent = lodging ? "Price per night (KSh)" : "Average price per meal (KSh)";
-    document.getElementById("priceHelp").textContent = lodging
-      ? "Set the usual price for one night."
-      : "Set the average amount one person spends on a meal.";
-    document.getElementById("price").placeholder = lodging ? "e.g. 2500" : "e.g. 600";
-    refresh();
-  }
-  tiles.forEach(function (t) { t.addEventListener("click", function () { setCategory(t.dataset.type); }); });
-
-  var start = (SAVED.category && SAVED.category[0]) || new URLSearchParams(window.location.search).get("category") || "guest_house";
-  setCategory(start);
-  Object.keys(SAVED).forEach(function (name) {
-    if (name === "category") return;
-    var vals = SAVED[name];
-    document.querySelectorAll('#listForm [name="' + name + '"]').forEach(function (el) {
-      if (el.type === "file") return;
-      if (el.type === "checkbox") el.checked = vals.indexOf(el.value || "on") !== -1;
-      else el.value = vals[0];
-    });
-  });
-  syncOther();
-
-  // Shrink photos in the browser before upload (saves mobile data)
-  var photos = document.getElementById("photos");
-  var photoMsg = document.getElementById("photoMsg");
-  async function shrink(file) {
-    try {
-      var bmp = await createImageBitmap(file);
-      var s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-      var c = document.createElement("canvas");
-      c.width = Math.round(bmp.width * s);
-      c.height = Math.round(bmp.height * s);
-      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-      var blob = await new Promise(function (r) { c.toBlob(r, "image/jpeg", 0.82); });
-      return blob ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
-    } catch (e) { return file; }
-  }
-  photos.addEventListener("change", async function () {
-    var files = Array.prototype.slice.call(photos.files);
-    if (files.length > 5) { photoMsg.textContent = "Please choose at most 5 photos."; photos.value = ""; return; }
-    photoMsg.textContent = "Preparing photos...";
-    var dt = new DataTransfer();
-    for (var i = 0; i < files.length; i++) dt.items.add(await shrink(files[i]));
-    photos.files = dt.files;
-    photoMsg.textContent = dt.files.length + " photo(s) ready. The first one is the cover.";
-  });
-</script>
 {% endblock %}

@@ -1,9 +1,10 @@
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
-    abort, send_from_directory, Response
+    abort, jsonify, send_from_directory, Response
 )
 import io
 from PIL import Image, ImageOps
+from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
 import html
 
@@ -11,12 +12,13 @@ load_dotenv()  # Ensure .env is loaded and overrides any existing environment va
 
 import os
 import re
+import json
 import requests
 import psycopg
 from functools import wraps
 from psycopg.rows import dict_row, tuple_row
 import uuid
-from datetime import date
+from datetime import date, datetime, timezone, timedelta 
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from urllib.parse import urlsplit, quote
@@ -204,8 +206,7 @@ def sitemap():
         ("rent_page", "daily", "0.8"),
         ("buy_page", "daily", "0.8"),
         ("sell_page", "weekly", "0.7"),
-        ("schools_page", "weekly", "0.7"),
-        ("hospitals_page", "weekly", "0.7"),
+        ("travel_page", "weekly", "0.7"),
     ]
 
     for endpoint, frequency, priority in static_pages:
@@ -500,10 +501,33 @@ def get_db_connection():
     url = os.getenv("SUPABASE_DB_URL", "").strip().strip('"').strip("'")
     if not url:
         raise RuntimeError("SUPABASE_DB_URL is missing. Check your .env file.")
+
     connection = CompatConnection.connect(url, connect_timeout=15)
     connection.execute("SET search_path TO civicnest")
     connection.commit()
     return connection
+
+
+def _transport_row_to_dict(cursor, row):
+    if row is None:
+        return None
+
+    if isinstance(row, dict):
+        return row
+
+    columns = [column.name for column in cursor.description]
+    return dict(zip(columns, row))
+
+
+def _transport_fetchone(cursor):
+    return _transport_row_to_dict(cursor, cursor.fetchone())
+
+
+def _transport_fetchall(cursor):
+    return [
+        _transport_row_to_dict(cursor, row)
+        for row in cursor.fetchall()
+    ]
 
 
 def get_supabase_connection():
@@ -746,12 +770,9 @@ class User(UserMixin):
         self.profile_image = profile_image
         self.is_verified = is_verified
 
-
 # =========================================================
 # LOAD USER
 # =========================================================
-
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -922,12 +943,9 @@ def invest_page():
         properties_error=False
     )
 
-
 # =========================================================
 # REGISTER
 # =========================================================
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -1021,340 +1039,6 @@ def register():
         )
     )
 
-# =========================================================
-# HOSPITAL FINDER
-# =========================================================
-
-HOSPITAL_TYPES = [
-    ("hospital", "Hospitals"),
-    ("health_centre", "Health centres"),
-    ("clinic", "Clinics"),
-    ("dispensary", "Dispensaries"),
-    ("pharmacy", "Pharmacies"),
-]
-HOSPITAL_TYPE_KEYS = {key for key, _ in HOSPITAL_TYPES}
-HOSPITAL_TYPE_LABELS = dict(HOSPITAL_TYPES)
-HOSPITAL_OWNERSHIP_LABELS = {
-    "public": "Public",
-    "private": "Private",
-    "faith_based": "Faith-based / mission",
-}
-
-
-def parse_hospital_form():
-    f = request.form
-    name = f.get("name", "").strip()
-    facility_type = f.get("facility_type", "")
-    ownership = f.get("ownership", "public")
-    opening_hours = f.get("opening_hours", "").strip()
-    town = f.get("town", "").strip()
-    location = f.get("location", "").strip()
-    phone = f.get("phone", "").strip()
-    emergency_phone = f.get("emergency_phone", "").strip()
-    email = f.get("email", "").strip()
-    website = f.get("website", "").strip()
-    description = f.get("description", "").strip()
-    lat_raw = f.get("latitude", "").strip()
-    lon_raw = f.get("longitude", "").strip()
-
-    items = [s.strip() for s in f.get("services", "").split(",") if s.strip()]
-    services = ", ".join(items)
-
-    if not name or len(name) > 150:
-        return None, "Enter the facility name (up to 150 characters)."
-    if facility_type not in HOSPITAL_TYPE_KEYS:
-        return None, "Choose a valid facility type."
-    if ownership not in HOSPITAL_OWNERSHIP_LABELS:
-        return None, "Choose public, private or faith-based."
-    if not town or len(town) > 120:
-        return None, "Enter the town (up to 120 characters)."
-    if len(opening_hours) > 150 or len(location) > 255 or len(description) > 4000:
-        return None, "One of the fields is too long."
-    if len(phone) > 30 or len(emergency_phone) > 30:
-        return None, "A phone number is too long."
-    if len(items) > 20 or len(services) > 500:
-        return None, "Too many services. Keep the list short, separated by commas."
-    if email and ("@" not in email or len(email) > 150):
-        return None, "Enter a valid email address or leave it empty."
-
-    if website:
-        if not website.lower().startswith(("http://", "https://")):
-            if "://" in website:
-                return None, "The website must start with http:// or https://."
-            website = "https://" + website
-        if len(website) > 255:
-            return None, "The website address is too long."
-
-    latitude = longitude = None
-    if lat_raw or lon_raw:
-        try:
-            latitude = Decimal(lat_raw)
-            longitude = Decimal(lon_raw)
-            if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-                raise InvalidOperation
-        except InvalidOperation:
-            return None, "Enter a valid latitude and longitude, or leave both empty."
-
-    return {
-        "name": name,
-        "facility_type": facility_type,
-        "ownership": ownership,
-        "emergency_24h": f.get("emergency_24h") == "on",
-        "opening_hours": opening_hours or None,
-        "services": services or None,
-        "town": town,
-        "location": location or None,
-        "phone": phone or None,
-        "emergency_phone": emergency_phone or None,
-        "email": email or None,
-        "website": website or None,
-        "description": description or None,
-        "latitude": latitude,
-        "longitude": longitude,
-        "is_published": f.get("is_published") == "on",
-    }, None
-
-
-@app.route("/hospitals")
-def hospitals_page():
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT id, name, facility_type, ownership, emergency_24h,
-                   opening_hours, services, town, location, phone,
-                   emergency_phone, website, latitude, longitude
-            FROM hospitals
-            WHERE is_published = TRUE
-            ORDER BY name ASC
-            LIMIT 500
-            """
-        )
-        hospitals = cursor.fetchall()
-        counts = {}
-        for h in hospitals:
-            counts[h["facility_type"]] = counts.get(h["facility_type"], 0) + 1
-        return render_template(
-            "hospitals.html",
-            hospitals=hospitals,
-            counts=counts,
-            types=HOSPITAL_TYPES,
-            type_labels=HOSPITAL_TYPE_LABELS,
-            ownership_labels=HOSPITAL_OWNERSHIP_LABELS,
-            hospitals_error=False
-        )
-    except Exception as e:
-        print("HOSPITALS PAGE ERROR:", e)
-        return render_template(
-            "hospitals.html",
-            hospitals=[],
-            counts={},
-            types=HOSPITAL_TYPES,
-            type_labels=HOSPITAL_TYPE_LABELS,
-            ownership_labels=HOSPITAL_OWNERSHIP_LABELS,
-            hospitals_error=True
-        ), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
-@app.route("/hospitals/<int:hospital_id>")
-def hospital_details(hospital_id):
-    viewer_role = current_user.role if current_user.is_authenticated else ""
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT *
-            FROM hospitals
-            WHERE id = %s
-              AND (is_published = TRUE OR %s = 'admin')
-            LIMIT 1
-            """,
-            (hospital_id, viewer_role)
-        )
-        hospital = cursor.fetchone()
-        if not hospital:
-            flash("That facility was not found.", "error")
-            return redirect(url_for("hospitals_page"))
-        return render_template(
-            "hospital_details.html",
-            hospital=hospital,
-            type_labels=HOSPITAL_TYPE_LABELS,
-            ownership_labels=HOSPITAL_OWNERSHIP_LABELS
-        )
-    except Exception as e:
-        print("HOSPITAL DETAILS ERROR:", e)
-        flash("Unable to load that facility right now.", "error")
-        return redirect(url_for("hospitals_page"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
-@app.route("/admin/hospitals")
-@admin_required
-def admin_hospitals():
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT id, name, facility_type, ownership, town, emergency_24h, is_published
-            FROM hospitals
-            ORDER BY name ASC
-            LIMIT 1000
-            """
-        )
-        hospitals = cursor.fetchall()
-        return render_template(
-            "admin_hospitals.html",
-            hospitals=hospitals,
-            type_labels=HOSPITAL_TYPE_LABELS,
-            ownership_labels=HOSPITAL_OWNERSHIP_LABELS
-        )
-    except Exception as e:
-        print("ADMIN HOSPITALS ERROR:", e)
-        flash("Unable to load the facilities list right now.", "error")
-        return redirect(url_for("admin_dashboard"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
-@app.route("/admin/hospitals/new", defaults={"hospital_id": None}, methods=["GET", "POST"])
-@app.route("/admin/hospitals/<int:hospital_id>/edit", methods=["GET", "POST"])
-@admin_required
-def admin_hospital_form(hospital_id):
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        existing = None
-        if hospital_id:
-            cursor.execute("SELECT * FROM hospitals WHERE id = %s", (hospital_id,))
-            existing = cursor.fetchone()
-            if not existing:
-                flash("Facility not found.", "error")
-                return redirect(url_for("admin_hospitals"))
-
-        if request.method == "GET":
-            return render_template(
-                "admin_hospital_form.html",
-                hospital=existing or {"is_published": True},
-                is_edit=bool(hospital_id),
-                types=HOSPITAL_TYPES,
-                ownership_labels=HOSPITAL_OWNERSHIP_LABELS
-            )
-
-        data, error = parse_hospital_form()
-        if error:
-            flash(error, "error")
-            return render_template(
-                "admin_hospital_form.html",
-                hospital=request.form,
-                is_edit=bool(hospital_id),
-                types=HOSPITAL_TYPES,
-                ownership_labels=HOSPITAL_OWNERSHIP_LABELS
-            ), 400
-
-        values = (
-            data["name"], data["facility_type"], data["ownership"],
-            data["emergency_24h"], data["opening_hours"], data["services"],
-            data["town"], data["location"], data["phone"],
-            data["emergency_phone"], data["email"], data["website"],
-            data["description"], data["latitude"], data["longitude"],
-            data["is_published"],
-        )
-
-        if hospital_id:
-            cursor.execute(
-                """
-                UPDATE hospitals
-                SET name = %s, facility_type = %s, ownership = %s,
-                    emergency_24h = %s, opening_hours = %s, services = %s,
-                    town = %s, location = %s, phone = %s,
-                    emergency_phone = %s, email = %s, website = %s,
-                    description = %s, latitude = %s, longitude = %s,
-                    is_published = %s, updated_at = NOW()
-                WHERE id = %s
-                """,
-                values + (hospital_id,)
-            )
-            flash("Facility updated.", "success")
-        else:
-            cursor.execute(
-                """
-                INSERT INTO hospitals (
-                    name, facility_type, ownership, emergency_24h,
-                    opening_hours, services, town, location, phone,
-                    emergency_phone, email, website, description,
-                    latitude, longitude, is_published
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                values
-            )
-            flash("Facility added.", "success")
-
-        connection.commit()
-        return redirect(url_for("admin_hospitals"))
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        print("ADMIN HOSPITAL FORM ERROR:", e)
-        flash("Unable to save that facility right now.", "error")
-        return redirect(url_for("admin_hospitals"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
-@app.route("/admin/hospitals/<int:hospital_id>/delete", methods=["POST"])
-@admin_required
-def admin_delete_hospital(hospital_id):
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM hospitals WHERE id = %s", (hospital_id,))
-        connection.commit()
-        if cursor.rowcount:
-            flash("Facility deleted.", "success")
-        else:
-            flash("Facility not found.", "error")
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        print("ADMIN DELETE HOSPITAL ERROR:", e)
-        flash("Unable to delete that facility right now.", "error")
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-    return redirect(url_for("admin_hospitals"))    
-
 def get_conn():
     # If you already have a connection helper, use that instead.
     return get_db_connection()
@@ -1376,7 +1060,7 @@ def fetch_places(only_active=True):
     if only_active:
         sql += " WHERE is_active = TRUE AND status = 'approved'"
     sql += " ORDER BY (status = 'pending') DESC, created_at DESC"
-    with get_db_connection() as conn, conn.cursor(dictionary=True) as cur:
+    with get_db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
         cur.execute(sql)
         return cur.fetchall()
 
@@ -1500,6 +1184,55 @@ def read_admin_place_form(existing=None):
 @app.route("/stay-and-dine")
 def hospitality_page():
     return render_template("hospitality.html", places=fetch_places(only_active=True))
+
+@app.route("/stay-and-dine/<int:place_id>")
+def hospitality_details(place_id):
+    connection = None
+    cursor = None
+
+    viewer_role = current_user.role if current_user.is_authenticated else ""
+    viewer_id = str(current_user.id) if current_user.is_authenticated else ""
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM civicnest.places
+            WHERE id = %s
+            AND (
+                (is_active = TRUE AND status = 'approved')
+                OR owner_id = %s
+                OR %s = 'admin'
+            )
+            LIMIT 1
+            """,
+            (place_id, viewer_id, viewer_role)
+        )
+
+        place = cursor.fetchone()
+
+        if not place:
+            flash("This listing was not found or is no longer available.", "error")
+            return redirect(url_for("hospitality_page"))
+
+        return render_template(
+            "hospitality_details.html",
+            place=place
+        )
+
+    except Exception:
+        app.logger.exception("HOSPITALITY DETAILS ERROR")
+        flash("Unable to load this listing right now.", "error")
+        return redirect(url_for("hospitality_page"))
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()    
 
 
 # ---------- Admin ----------
@@ -3475,6 +3208,76 @@ def delete_property_photo(property_id, photo_id):
         if connection:
             connection.close()
 
+@app.route("/landlord/property/<int:property_id>/delete", methods=["POST"])
+@login_required
+def delete_property(property_id):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+
+                # 1. Verify property ownership
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM civicnest.properties
+                    WHERE id = %s AND landlord_id = %s
+                    """,
+                    (property_id, current_user.id)
+                )
+
+                property_record = cur.fetchone()
+
+                if not property_record:
+                    flash(
+                        "Property not found or you are not authorized to delete it.",
+                        "error"
+                    )
+                    return redirect(url_for("landlord_dashboard"))
+
+                # 2. Delete related records first
+                related_tables = [
+                    "property_images",
+                    "property_amenities",
+                    "inquiries",
+                    "property_reports"
+                ]
+
+                for table in related_tables:
+                    cur.execute(
+                        f"""
+                        DELETE FROM civicnest.{table}
+                        WHERE property_id = %s
+                        """,
+                        (property_id,)
+                    )
+
+                # 3. Delete the property itself
+                cur.execute(
+                    """
+                    DELETE FROM civicnest.properties
+                    WHERE id = %s AND landlord_id = %s
+                    """,
+                    (property_id, current_user.id)
+                )
+
+                if cur.rowcount != 1:
+                    raise Exception("Property deletion failed.")
+
+            # 4. Commit all deletions together
+            conn.commit()
+
+        flash("Property and its related records deleted successfully.", "success")
+
+    except Exception:
+        app.logger.exception(
+            "Error deleting property ID %s", property_id
+        )
+        flash(
+            "Unable to delete property. Please try again.",
+            "error"
+        )
+
+    return redirect(url_for("landlord_dashboard"))
 
 # =========================================================
 # ADMIN DASHBOARD
@@ -4327,349 +4130,2034 @@ def admin_update_report_status(report_id):
             connection.close()
 
 # =========================================================
-# SCHOOLS FINDER
+# TRAVEL WITH US
 # =========================================================
 
-SCHOOL_LEVELS = [
-    ("nursery", "Nursery / pre-primary"),
-    ("primary", "Primary"),
-    ("junior_secondary", "Junior secondary"),
-    ("secondary", "Secondary"),
-    ("college", "College / TVET"),
-    ("university", "University"),
-]
-SCHOOL_LEVEL_KEYS = {key for key, _ in SCHOOL_LEVELS}
-SCHOOL_LEVEL_LABELS = dict(SCHOOL_LEVELS)
+BOOKING_STATUSES = ("pending", "confirmed", "paid", "cancelled")
+TRIP_STATUSES = ("open", "closed", "cancelled")
+
+KENYA_TZ = timezone(timedelta(hours=3))  # Kenya has no daylight saving
 
 
-def parse_school_form():
+def kenya_today():
+    return datetime.now(KENYA_TZ).date()
+
+
+TRIP_SELECT = """
+    SELECT t.*,
+           t.seats_total - COALESCE(
+               SUM(b.seats) FILTER (WHERE b.status IN ('confirmed', 'paid')), 0
+           ) AS seats_left,
+           COUNT(b.id) FILTER (WHERE b.status = 'pending') AS pending_count,
+           COUNT(b.id) AS booking_count
+    FROM civicnest.trips t
+    LEFT JOIN civicnest.trip_bookings b ON b.trip_id = t.id
+"""
+
+
+def notify_admin_booking(trip, name, phone, seats, pickup):
+    esc = lambda v: html.escape(str(v or ""))
+    _send_telegram("\n".join([
+        "🚌 <b>New seat request!</b>",
+        "",
+        f"<b>Trip:</b> {esc(trip['route_from'])} → {esc(trip['route_to'])}",
+        f"<b>Date:</b> {esc(trip['departure_date'])} {esc(trip['departure_time'])}",
+        f"<b>Name:</b> {esc(name)}",
+        f"<b>Phone:</b> {esc(phone)}",
+        f"<b>Seats:</b> {seats}",
+        f"<b>Pickup:</b> {esc(pickup) or '-'}",
+        "",
+        "Open /admin/trips to confirm it.",
+    ]))
+
+
+# ---------- Public ----------
+
+@app.route("/travel")
+def travel_page():
+    return render_template(
+        "travel.html",
+        trips=[],
+        travel_error=False
+    )
+
+
+
+@app.route("/travel/<int:trip_id>/book", methods=["POST"])
+def travel_book(trip_id):
+    back = url_for("travel_page") + "#flashes"
     f = request.form
-    name = f.get("name", "").strip()
-    level = f.get("level", "")
-    ownership = f.get("ownership", "public")
-    gender = f.get("gender", "mixed")
-    boarding = f.get("boarding", "day")
-    town = f.get("town", "").strip()
-    location = f.get("location", "").strip()
+
+    if f.get("website"):
+        return redirect(url_for("travel_page"))
+
+    name = f.get("full_name", "").strip()
     phone = f.get("phone", "").strip()
-    email = f.get("email", "").strip()
-    website = f.get("website", "").strip()
-    description = f.get("description", "").strip()
-    lat_raw = f.get("latitude", "").strip()
-    lon_raw = f.get("longitude", "").strip()
+    pickup = f.get("pickup_point", "").strip()[:120] or None
+    wa = normalize_whatsapp_number(phone)
 
-    if not name or len(name) > 150:
-        return None, "Enter the school name (up to 150 characters)."
-    if level not in SCHOOL_LEVEL_KEYS:
-        return None, "Choose a valid level."
-    if ownership not in {"public", "private"}:
-        return None, "Choose public or private."
-    if gender not in {"mixed", "boys", "girls"}:
-        return None, "Choose mixed, boys or girls."
-    if boarding not in {"day", "boarding", "both"}:
-        return None, "Choose day, boarding or both."
-    if not town or len(town) > 120:
-        return None, "Enter the town (up to 120 characters)."
-    if len(location) > 255 or len(phone) > 30 or len(description) > 4000:
+    try:
+        seats = int(f.get("seats", "1"))
+    except (ValueError, TypeError):
+        seats = 0
+
+    def fail(msg):
+        flash(msg, "error")
+        return redirect(back)
+
+    if not 2 <= len(name) <= 120:
+        return fail("Enter your full name.")
+
+    if not wa or len(phone) > 30:
+        return fail("Enter a valid phone number we can call or WhatsApp.")
+
+    if not 1 <= seats <= 10:
+        return fail("Choose between 1 and 10 seats.")
+
+    trip = None
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+
+                # Lock the trip row first. Admin booking confirmations
+                # and trip-capacity edits must use this same lock.
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM civicnest.trips
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (trip_id,),
+                )
+
+                locked_trip = cur.fetchone()
+
+                if not locked_trip:
+                    flash("That trip is no longer open for booking.", "error")
+                    return redirect(back)
+
+                # Now read the trip and calculate its current remaining seats.
+                cur.execute(
+                    TRIP_SELECT + " WHERE t.id = %s GROUP BY t.id",
+                    (trip_id,),
+                )
+
+                trip = cur.fetchone()
+
+                if (
+                    not trip
+                    or not trip["is_active"]
+                    or trip["status"] != "open"
+                    or trip["departure_date"] < kenya_today()
+                ):
+                    flash(
+                        "That trip is no longer open for booking.",
+                        "error",
+                    )
+                    return redirect(back)
+
+                seats_left = max(trip["seats_left"], 0)
+
+                if seats_left < seats:
+                    return fail(
+                        f"Only {seats_left} seat(s) left on this trip."
+                    )
+
+                # Prevent another active request from the same phone
+                # for this particular trip.
+                cur.execute(
+                    """
+                    SELECT 1
+                    FROM civicnest.trip_bookings
+                    WHERE trip_id = %s
+                      AND whatsapp_phone = %s
+                      AND status IN ('pending', 'confirmed', 'paid')
+                    LIMIT 1
+                    """,
+                    (trip_id, wa),
+                )
+
+                if cur.fetchone():
+                    flash(
+                        "You already have a request for this trip. "
+                        "We will contact you.",
+                        "info",
+                    )
+                    return redirect(back)
+
+                cur.execute(
+                    """
+                    INSERT INTO civicnest.trip_bookings (
+                        trip_id,
+                        user_id,
+                        full_name,
+                        phone,
+                        whatsapp_phone,
+                        seats,
+                        pickup_point
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        trip_id,
+                        current_user.id if current_user.is_authenticated else None,
+                        name,
+                        phone,
+                        wa,
+                        seats,
+                        pickup,
+                    ),
+                )
+
+    except Exception:
+        app.logger.exception("TRAVEL BOOK ERROR")
+        return fail("Something went wrong. Please try again.")
+
+    # Notify the admin after the database transaction succeeds.
+    try:
+        notify_admin_booking(trip, name, phone, seats, pickup)
+    except Exception:
+        app.logger.exception("Telegram failed for a seat request")
+
+    flash(
+        "Request received! We will call or WhatsApp you shortly. "
+        "Your seat is only held once your booking is confirmed.",
+        "success",
+    )
+
+    return redirect(back)
+
+
+# ---------- Admin ----------
+
+def parse_trip_form(is_new):
+    f = request.form
+    route_from = f.get("route_from", "").strip()
+    route_to = f.get("route_to", "").strip()
+    operator_name = f.get("operator_name", "").strip()
+    operator_phone = f.get("operator_phone", "").strip()
+    pickup_point = f.get("pickup_point", "").strip()
+    vehicle_type = f.get("vehicle_type", "").strip()
+    notes = f.get("notes", "").strip()
+    status = f.get("status", "open")
+
+    if not route_from or not route_to or len(route_from) > 80 or len(route_to) > 80:
+        return None, "Enter where the trip starts and where it goes (up to 80 characters each)."
+    if route_from.lower() == route_to.lower():
+        return None, "The start and the destination must be different."
+    if not operator_name or len(operator_name) > 120:
+        return None, "Enter the operator name."
+    if (len(operator_phone) > 30 or len(pickup_point) > 200
+            or len(vehicle_type) > 60 or len(notes) > 1000):
         return None, "One of the fields is too long."
-    if email and ("@" not in email or len(email) > 150):
-        return None, "Enter a valid email address or leave it empty."
+    if status not in TRIP_STATUSES:
+        return None, "Choose a valid status."
 
-    if website:
-        if not website.lower().startswith(("http://", "https://")):
-            if "://" in website:
-                return None, "The website must start with http:// or https://."
-            website = "https://" + website
-        if len(website) > 255:
-            return None, "The website address is too long."
+    try:
+        dep_date = date.fromisoformat(f.get("departure_date", ""))
+    except ValueError:
+        return None, "Enter a valid departure date."
+    if is_new and dep_date < kenya_today():
+        return None, "The departure date cannot be in the past."
 
-    latitude = longitude = None
-    if lat_raw or lon_raw:
-        try:
-            latitude = Decimal(lat_raw)
-            longitude = Decimal(lon_raw)
-            if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-                raise InvalidOperation
-        except InvalidOperation:
-            return None, "Enter a valid latitude and longitude, or leave both empty."
+    try:
+        dep_time = datetime.strptime(f.get("departure_time", ""), "%H:%M").time()
+    except ValueError:
+        return None, "Enter a valid departure time."
+
+    try:
+        price = Decimal(f.get("price", "").strip())
+        if not price.is_finite() or price <= 0 or price > Decimal("1000000"):
+            raise InvalidOperation
+        raw_op = f.get("operator_price", "").strip()
+        operator_price = Decimal(raw_op) if raw_op else None
+        if operator_price is not None and (
+            not operator_price.is_finite() or operator_price < 0
+            or operator_price > Decimal("1000000")
+        ):
+            raise InvalidOperation
+    except (InvalidOperation, ValueError):
+        return None, "Enter valid prices."
+
+    try:
+        seats_total = int(f.get("seats_total", ""))
+        if not 1 <= seats_total <= 200:
+            raise ValueError
+    except ValueError:
+        return None, "Enter the number of seats (1 to 200)."
 
     return {
-        "name": name,
-        "level": level,
-        "ownership": ownership,
-        "gender": gender,
-        "boarding": boarding,
-        "town": town,
-        "location": location or None,
-        "phone": phone or None,
-        "email": email or None,
-        "website": website or None,
-        "description": description or None,
-        "latitude": latitude,
-        "longitude": longitude,
-        "is_published": f.get("is_published") == "on",
+        "route_from": route_from, "route_to": route_to,
+        "departure_date": dep_date, "departure_time": dep_time,
+        "pickup_point": pickup_point or None,
+        "operator_name": operator_name,
+        "operator_phone": operator_phone or None,
+        "operator_verified": f.get("operator_verified") == "on",
+        "vehicle_type": vehicle_type or None,
+        "price": price, "operator_price": operator_price,
+        "seats_total": seats_total, "notes": notes or None,
+        "status": status, "is_active": f.get("is_active") == "on",
     }, None
 
 
-
-@app.route("/schools")
-def schools_page():
-    connection = None
-    cursor = None
+@app.route("/admin/trips")
+@admin_required
+def admin_trips():
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT id, name, level, ownership, gender, boarding,
-                   town, location, phone, website
-            FROM schools
-            WHERE is_published = TRUE
-            ORDER BY name ASC
-            LIMIT 500
-            """
-        )
-        schools = cursor.fetchall()
-        counts = {}
-        for s in schools:
-            counts[s["level"]] = counts.get(s["level"], 0) + 1
+        with get_db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                TRIP_SELECT + " GROUP BY t.id ORDER BY t.departure_date DESC, t.departure_time"
+            )
+            trips = cur.fetchall()
+            cur.execute(
+                """
+                SELECT COUNT(*) AS total_bookings,
+                       COUNT(*) FILTER (WHERE status = 'pending') AS pending_bookings,
+                       COUNT(*) FILTER (WHERE status = 'confirmed') AS confirmed_bookings,
+                       COUNT(*) FILTER (WHERE status = 'paid') AS paid_bookings,
+                       COALESCE(SUM(seats) FILTER (
+                           WHERE status IN ('confirmed', 'paid')), 0) AS held_seats
+                FROM civicnest.trip_bookings
+                """
+            )
+            stats = cur.fetchone()
         return render_template(
-            "schools.html",
-            schools=schools,
-            counts=counts,
-            levels=SCHOOL_LEVELS,
-            level_labels=SCHOOL_LEVEL_LABELS,
-            schools_error=False
+            "admin/trips.html", trips=trips, stats=stats, load_error=False
         )
-    except Exception as e:
-        print("SCHOOLS PAGE ERROR:", e)
+    except Exception:
+        app.logger.exception("ADMIN TRIPS ERROR")
         return render_template(
-            "schools.html",
-            schools=[],
-            counts={},
-            levels=SCHOOL_LEVELS,
-            level_labels=SCHOOL_LEVEL_LABELS,
-            schools_error=True
+            "admin/trips.html", trips=[], stats=None, load_error=True
         ), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
 
 
-@app.route("/schools/<int:school_id>/visit")
-def school_visit(school_id):
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT website FROM schools WHERE id = %s AND is_published = TRUE",
-            (school_id,)
-        )
-        row = cursor.fetchone()
-        if row and row["website"] and row["website"].lower().startswith(("http://", "https://")):
-            is_admin = current_user.is_authenticated and current_user.role == "admin"
-            if not is_admin:
-                cursor.execute(
-                    "UPDATE schools SET website_clicks = website_clicks + 1 WHERE id = %s",
-                    (school_id,)
-                )
-                connection.commit()
-            return redirect(row["website"])
-    except Exception as e:
-        print("SCHOOL VISIT ERROR:", e)
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-    return redirect(url_for("school_details", school_id=school_id))            
 
-
-@app.route("/schools/<int:school_id>")
-def school_details(school_id):
-    viewer_role = current_user.role if current_user.is_authenticated else ""
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT *
-            FROM schools
-            WHERE id = %s
-              AND (is_published = TRUE OR %s = 'admin')
-            LIMIT 1
-            """,
-            (school_id, viewer_role)
-        )
-        school = cursor.fetchone()
-        if not school:
-            flash("That school was not found.", "error")
-            return redirect(url_for("schools_page"))
+def _trip_form_view(trip_id):
+    def show(trip=None, form_data=None, status=200):
         return render_template(
-            "school_details.html",
-            school=school,
-            level_labels=SCHOOL_LEVEL_LABELS
-        )
-    except Exception as e:
-        print("SCHOOL DETAILS ERROR:", e)
-        flash("Unable to load that school right now.", "error")
-        return redirect(url_for("schools_page"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+            "admin/trip_form.html",
+            trip=trip or {},
+            form_data=form_data,
+            is_edit=bool(trip_id),
+            trip_id=trip_id,
+            statuses=TRIP_STATUSES,
+        ), status
 
-
-@app.route("/admin/schools")
-@admin_required
-def admin_schools():
-    connection = None
-    cursor = None
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT id, name, level, ownership, town, is_published,
-                   website, website_clicks
-            FROM schools
-            ORDER BY name ASC
-            LIMIT 1000
-            """
-        )
-        schools = cursor.fetchall()
-        return render_template(
-            "admin_schools.html",
-            schools=schools,
-            level_labels=SCHOOL_LEVEL_LABELS
-        )
-    except Exception as e:
-        print("ADMIN SCHOOLS ERROR:", e)
-        flash("Unable to load the schools list right now.", "error")
-        return redirect(url_for("admin_dashboard"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+        with get_db_connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                existing = None
+
+                if trip_id:
+                    cur.execute(
+                        "SELECT * FROM civicnest.trips WHERE id = %s",
+                        (trip_id,),
+                    )
+                    existing = cur.fetchone()
+
+                    if not existing:
+                        flash("Trip not found.", "error")
+                        return redirect(url_for("admin_trips"))
+
+                if request.method == "GET":
+                    if existing:
+                        departure_time = existing.get("departure_time")
+                        if departure_time and hasattr(departure_time, "strftime"):
+                            existing["departure_time"] = departure_time.strftime("%H:%M")
+
+                        existing = {
+                            key: ("" if value is None else value)
+                            for key, value in existing.items()
+                        }
+
+                    return show(
+                        existing or {"is_active": True, "status": "open"}
+                    )
+
+                data, error = parse_trip_form(is_new=not trip_id)
+
+                if not error and trip_id:
+                    # Lock the trip row before checking or changing capacity.
+                    cur.execute(
+                        """
+                        SELECT id
+                        FROM civicnest.trips
+                        WHERE id = %s
+                        FOR UPDATE
+                        """,
+                        (trip_id,),
+                    )
+
+                    locked_trip = cur.fetchone()
+
+                    if not locked_trip:
+                        flash("Trip not found.", "error")
+                        return redirect(url_for("admin_trips"))
+
+                    # Count seats that are already confirmed or paid.
+                    cur.execute(
+                        """
+                        SELECT COALESCE(SUM(seats), 0) AS booked_seats
+                        FROM civicnest.trip_bookings
+                        WHERE trip_id = %s
+                          AND status IN ('confirmed', 'paid')
+                        """,
+                        (trip_id,),
+                    )
+
+                    booked_seats = cur.fetchone()["booked_seats"]
+
+                    if data["seats_total"] < booked_seats:
+                        error = (
+                            "Total seats cannot be less than the seats "
+                            "already confirmed or paid."
+                        )
+
+                if error:
+                    flash(error, "error")
+                    return show(form_data=request.form, status=400)
+
+                if trip_id:
+                    data["id"] = trip_id
+
+                    cur.execute(
+                        """
+                        UPDATE civicnest.trips SET
+                            route_from=%(route_from)s,
+                            route_to=%(route_to)s,
+                            departure_date=%(departure_date)s,
+                            departure_time=%(departure_time)s,
+                            pickup_point=%(pickup_point)s,
+                            operator_name=%(operator_name)s,
+                            operator_phone=%(operator_phone)s,
+                            operator_verified=%(operator_verified)s,
+                            vehicle_type=%(vehicle_type)s,
+                            price=%(price)s,
+                            operator_price=%(operator_price)s,
+                            seats_total=%(seats_total)s,
+                            notes=%(notes)s,
+                            status=%(status)s,
+                            is_active=%(is_active)s,
+                            updated_at=NOW()
+                        WHERE id=%(id)s
+                        """,
+                        data,
+                    )
+
+                    flash("Trip updated.", "success")
+
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO civicnest.trips (
+                            route_from,
+                            route_to,
+                            departure_date,
+                            departure_time,
+                            pickup_point,
+                            operator_name,
+                            operator_phone,
+                            operator_verified,
+                            vehicle_type,
+                            price,
+                            operator_price,
+                            seats_total,
+                            notes,
+                            status,
+                            is_active
+                        ) VALUES (
+                            %(route_from)s,
+                            %(route_to)s,
+                            %(departure_date)s,
+                            %(departure_time)s,
+                            %(pickup_point)s,
+                            %(operator_name)s,
+                            %(operator_phone)s,
+                            %(operator_verified)s,
+                            %(vehicle_type)s,
+                            %(price)s,
+                            %(operator_price)s,
+                            %(seats_total)s,
+                            %(notes)s,
+                            %(status)s,
+                            %(is_active)s
+                        )
+                        """,
+                        data,
+                    )
+
+                    flash("Trip added.", "success")
+
+        return redirect(url_for("admin_trips"))
+
+    except Exception:
+        app.logger.exception("ADMIN TRIP FORM ERROR")
+        flash("Unable to save that trip right now.", "error")
+        return redirect(url_for("admin_trips"))
 
 
-@app.route("/admin/schools/new", defaults={"school_id": None}, methods=["GET", "POST"])
-@app.route("/admin/schools/<int:school_id>/edit", methods=["GET", "POST"])
+
+@app.route("/admin/trips/new", methods=["GET", "POST"])
 @admin_required
-def admin_school_form(school_id):
-    connection = None
-    cursor = None
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
+def admin_trip_form_new():
+    return _trip_form_view(None)
 
-        existing = None
-        if school_id:
-            cursor.execute("SELECT * FROM schools WHERE id = %s", (school_id,))
-            existing = cursor.fetchone()
-            if not existing:
-                flash("School not found.", "error")
-                return redirect(url_for("admin_schools"))
 
-        if request.method == "GET":
-            return render_template(
-                "admin_school_form.html",
-                school=existing or {"is_published": True},
-                is_edit=bool(school_id),
-                school_id=school_id,
-                levels=SCHOOL_LEVELS
-            )
+@app.route("/admin/trips/<int:trip_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_trip_form_edit(trip_id):
+    return _trip_form_view(trip_id)
 
-        data, error = parse_school_form()
-        if error:
-            flash(error, "error")
-            return render_template(
-                "admin_school_form.html",
-                school=request.form,
-                is_edit=bool(school_id),
-                school_id=school_id,
-                levels=SCHOOL_LEVELS
-            ), 400
 
-        values = (
-            data["name"], data["level"], data["ownership"], data["gender"],
-            data["boarding"], data["town"], data["location"], data["phone"],
-            data["email"], data["website"], data["description"],
-            data["latitude"], data["longitude"], data["is_published"],
+@app.route("/admin/trips/<int:trip_id>/delete", methods=["POST"])
+@admin_required
+def admin_trip_delete(trip_id):
+    with get_db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            "SELECT COUNT(*) AS n FROM civicnest.trip_bookings WHERE trip_id = %s", (trip_id,)
         )
-
-        if school_id:
-            cursor.execute(
-                """
-                UPDATE schools
-                SET name = %s, level = %s, ownership = %s, gender = %s,
-                    boarding = %s, town = %s, location = %s, phone = %s,
-                    email = %s, website = %s, description = %s,
-                    latitude = %s, longitude = %s, is_published = %s
-                WHERE id = %s
-                """,
-                values + (school_id,)
-            )
-            flash("School updated.", "success")
+        if cur.fetchone()["n"]:
+            flash("This trip has booking requests. Set its status to Cancelled instead of deleting it.", "error")
         else:
-            cursor.execute(
-                """
-                INSERT INTO schools (
-                    name, level, ownership, gender, boarding, town, location,
-                    phone, email, website, description,
-                    latitude, longitude, is_published
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                values
-            )
-            flash("School added.", "success")
-
-        connection.commit()
-        return redirect(url_for("admin_schools"))
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        print("ADMIN SCHOOL FORM ERROR:", e)
-        flash("Unable to save that school right now.", "error")
-        return redirect(url_for("admin_schools"))
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+            cur.execute("DELETE FROM civicnest.trips WHERE id = %s", (trip_id,))
+            flash("Trip deleted.", "success")
+    return redirect(url_for("admin_trips"))
 
 
-@app.route("/admin/schools/<int:school_id>/delete", methods=["POST"])
+@app.route("/admin/trips/<int:trip_id>/bookings")
 @admin_required
-def admin_delete_school(school_id):
-    connection = None
-    cursor = None
+def admin_trip_bookings(trip_id):
+    with get_db_connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute("SELECT * FROM civicnest.trips WHERE id = %s", (trip_id,))
+        trip = cur.fetchone()
+        if not trip:
+            abort(404)
+        cur.execute(
+            """
+            SELECT b.*,
+                   b.created_at AT TIME ZONE 'Africa/Nairobi' AS created_local
+            FROM civicnest.trip_bookings b
+            WHERE b.trip_id = %s
+            ORDER BY CASE b.status WHEN 'pending' THEN 0 WHEN 'confirmed' THEN 1
+                                   WHEN 'paid' THEN 2 ELSE 3 END, b.created_at
+            """,
+            (trip_id,),
+        )
+        bookings = cur.fetchall()
+
+    held = sum(b["seats"] for b in bookings if b["status"] in ("confirmed", "paid"))
+    paid_seats = sum(b["seats"] for b in bookings if b["status"] == "paid")
+    margin = None
+    if trip["operator_price"] is not None:
+        margin = (trip["price"] - trip["operator_price"]) * paid_seats
+    return render_template(
+        "admin/trip_bookings.html", trip=trip, bookings=bookings,
+        held=held, paid_seats=paid_seats, revenue=trip["price"] * paid_seats,
+        margin=margin, booking_statuses=BOOKING_STATUSES,
+    )
+
+
+
+@app.route("/admin/bookings/<int:booking_id>/status/<status>", methods=["POST"])
+@admin_required
+def admin_booking_status(booking_id, status):
+    if status not in BOOKING_STATUSES:
+        abort(400)
+
+    ref = request.form.get("payment_ref", "").strip()[:60]
+
+    allowed_transitions = {
+        "pending": {"confirmed", "cancelled"},
+        "confirmed": {"paid", "cancelled"},
+        "paid": set(),
+        "cancelled": set(),
+    }
+
+    trip_id = None
+
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM schools WHERE id = %s", (school_id,))
-        connection.commit()
-        flash("School deleted." if cursor.rowcount else "School not found.", "success" if cursor.rowcount else "error")
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        print("ADMIN DELETE SCHOOL ERROR:", e)
-        flash("Unable to delete that school right now.", "error")
+        with get_db_connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+
+                # First identify the trip associated with this booking.
+                cur.execute(
+                    """
+                    SELECT trip_id
+                    FROM civicnest.trip_bookings
+                    WHERE id = %s
+                    """,
+                    (booking_id,),
+                )
+
+                initial_booking = cur.fetchone()
+
+                if not initial_booking:
+                    abort(404)
+
+                trip_id = initial_booking["trip_id"]
+
+                back = redirect(
+                    url_for("admin_trip_bookings", trip_id=trip_id)
+                )
+
+                # Lock the trip first. All booking confirmations and
+                # capacity edits for this trip must use this same lock.
+                cur.execute(
+                    """
+                    SELECT id, seats_total, status, is_active, departure_date
+                    FROM civicnest.trips
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (trip_id,),
+                )
+
+                trip = cur.fetchone()
+
+                if not trip:
+                    flash(
+                        "The trip associated with this booking no longer exists.",
+                        "error",
+                    )
+                    return back
+
+                # Re-read and lock the booking after acquiring the trip lock.
+                # This prevents decisions based on an outdated booking status.
+                cur.execute(
+                    """
+                    SELECT id, trip_id, seats, status
+                    FROM civicnest.trip_bookings
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (booking_id,),
+                )
+
+                booking = cur.fetchone()
+
+                if not booking:
+                    abort(404)
+
+                current_status = booking["status"]
+
+                if status == current_status:
+                    flash(
+                        "This booking already has that status.",
+                        "info",
+                    )
+                    return back
+
+                if status not in allowed_transitions.get(current_status, set()):
+                    flash(
+                        f"This booking cannot be changed from "
+                        f"{current_status} to {status}.",
+                        "error",
+                    )
+                    return back
+
+                # Only confirmed/paid bookings consume seats.
+                if status in ("confirmed", "paid"):
+
+                    if trip["status"] != "open" or not trip["is_active"]:
+                        flash(
+                            "This trip is not open for new confirmations.",
+                            "error",
+                        )
+                        return back
+
+                    if trip["departure_date"] < kenya_today():
+                        flash(
+                            "This trip's departure date has passed.",
+                            "error",
+                        )
+                        return back
+
+                    # Recalculate seats while holding the trip lock.
+                    cur.execute(
+                        """
+                        SELECT COALESCE(SUM(seats), 0) AS held
+                        FROM civicnest.trip_bookings
+                        WHERE trip_id = %s
+                          AND status IN ('confirmed', 'paid')
+                        """,
+                        (trip_id,),
+                    )
+
+                    held = cur.fetchone()["held"]
+                    seats_left = trip["seats_total"] - held
+
+                    if booking["seats"] > seats_left:
+                        flash(
+                            f"Not enough seats left. Only "
+                            f"{max(seats_left, 0)} seat(s) remain.",
+                            "error",
+                        )
+                        return back
+
+                # Update only after all checks have passed.
+                cur.execute(
+                    """
+                    UPDATE civicnest.trip_bookings
+                    SET status = %s,
+                        payment_ref = COALESCE(NULLIF(%s, ''), payment_ref),
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (status, ref, booking_id),
+                )
+
+        flash(f"Booking marked {status}.", "success")
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        app.logger.exception("ADMIN BOOKING STATUS ERROR")
+        flash(
+            "Unable to update this booking. Please try again.",
+            "error",
+        )
+
+    if trip_id is not None:
+        return redirect(
+            url_for("admin_trip_bookings", trip_id=trip_id)
+        )
+
+    return redirect(url_for("admin_trips"))
+
+
+# ============================================================
+# CIVICNEST TRANSPORT — NEW ROUTE SEARCH AND BOOKING REQUESTS
+# Existing trips and trip_bookings routes remain untouched.
+# ============================================================
+
+TRANSPORT_REQUEST_STATUSES = (
+    "pending",
+    "availability_confirmed",
+    "unavailable",
+    "booking_confirmed",
+    "cancelled",
+)
+
+
+
+def _transport_customer_required():
+    """Only logged-in student/customer accounts can make requests."""
+    if not current_user.is_authenticated:
+        return False
+
+    role = (
+        getattr(current_user, "role", "") or ""
+    ).strip().lower()
+
+    return role in {"student", "customer"}
+
+
+
+def _transport_admin_required():
+    """Use the existing admin role for transport administration."""
+    return (
+        current_user.is_authenticated
+        and getattr(current_user, "role", None) == "admin"
+    )
+
+
+def _transport_rows(cursor):
+    """Convert cursor results to dictionaries."""
+    rows = cursor.fetchall()
+    if not rows:
+        return []
+
+    if isinstance(rows[0], dict):
+        return rows
+
+    columns = [column.name for column in cursor.description]
+    return [dict(zip(columns, row)) for row in rows]
+
+def _transport_fetchone(cursor):
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    if isinstance(row, dict):
+        return row
+
+    columns = [
+        column.name if hasattr(column, "name") else column[0]
+        for column in cursor.description
+    ]
+
+    return dict(zip(columns, row))    
+
+
+# ------------------------------------------------------------
+# 1. CUSTOMER SEARCH
+# GET /travel/search?from=Kisumu&to=Nairobi&date=2026-11-05
+# ------------------------------------------------------------
+
+
+@app.route("/travel/search", methods=["GET"])
+def transport_search():
+    origin = (request.args.get("from") or "").strip()
+    destination = (request.args.get("to") or "").strip()
+    travel_date = (request.args.get("date") or "").strip()
+    preferred_time = (request.args.get("time") or "").strip()
+    passengers = request.args.get("passengers", "1")
+
+    if not origin or not destination or not travel_date:
+        return jsonify({
+            "success": False,
+            "message": "Enter your departure, destination and travel date."
+        }), 400
+
+    try:
+        selected_date = date.fromisoformat(travel_date)
+        passenger_count = int(passengers)
+
+        if selected_date < kenya_today():
+            return jsonify({
+                "success": False,
+                "message": "Travel date cannot be in the past."
+            }), 400
+
+        if not 1 <= passenger_count <= 10:
+            return jsonify({
+                "success": False,
+                "message": "Passenger count must be between 1 and 10."
+            }), 400
+
+    except (ValueError, TypeError):
+        return jsonify({
+            "success": False,
+            "message": "Check your travel date and passenger count."
+        }), 400
+
+    target_time = None
+
+    if preferred_time:
+        try:
+            target_time = datetime.strptime(
+                preferred_time, "%H:%M"
+            ).time()
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "message": "Enter a valid preferred departure time."
+            }), 400
+
+    conn = None
+
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT
+                    d.id AS departure_id,
+                    d.departure_time,
+                    d.price_per_passenger,
+                    r.id AS route_id,
+                    r.route_from,
+                    r.route_to,
+                    r.intermediate_stops,
+                    r.boarding_point,
+                    r.dropoff_point,
+                    r.vehicle_type,
+                    c.id AS company_id,
+                    c.company_name,
+                    c.logo_url,
+                    c.vehicle_image_url
+                FROM civicnest.transport_departures d
+                INNER JOIN civicnest.transport_routes r
+                    ON r.id = d.route_id
+                INNER JOIN civicnest.transport_companies c
+                    ON c.id = r.company_id
+                WHERE
+                    c.is_active IS TRUE
+                    AND r.is_active IS TRUE
+                    AND d.is_active IS TRUE
+                    AND LOWER(TRIM(r.route_from)) = LOWER(TRIM(%s))
+                    AND LOWER(TRIM(r.route_to)) = LOWER(TRIM(%s))
+                ORDER BY
+                    c.company_name,
+                    d.departure_time
+                """,
+                (origin, destination),
+            )
+
+            departures = _transport_rows(cur)
+
+        # Preferred time changes the order, not which departures appear.
+        if target_time and departures:
+
+            target_minutes = (
+                target_time.hour * 60 + target_time.minute
+            )
+
+            def time_distance(item):
+                departure = item["departure_time"]
+
+                if isinstance(departure, str):
+                    departure = datetime.strptime(
+                        departure, "%H:%M:%S"
+                    ).time()
+
+                departure_minutes = (
+                    departure.hour * 60 + departure.minute
+                )
+
+                difference = abs(
+                    departure_minutes - target_minutes
+                )
+
+                return min(difference, 1440 - difference)
+
+            departures.sort(key=time_distance)
+
+        results = []
+
+        for item in departures:
+            departure_time = item["departure_time"]
+
+            if isinstance(departure_time, str):
+                departure_time = datetime.strptime(
+                    departure_time, "%H:%M:%S"
+                ).time()
+
+            price = float(item["price_per_passenger"])
+
+            results.append({
+                "departure_id": item["departure_id"],
+                "company": item["company_name"],
+                "logo_url": item["logo_url"],
+                "vehicle_image_url": item["vehicle_image_url"],
+                "from": item["route_from"],
+                "to": item["route_to"],
+                "departure_time": departure_time.strftime("%H:%M"),
+                "price": price,
+                "estimated_total": price * passenger_count,
+                "boarding_point": item["boarding_point"],
+                "dropoff_point": item["dropoff_point"],
+                "intermediate_stops": item["intermediate_stops"],
+                "vehicle_type": item["vehicle_type"],
+            })
+
+        return jsonify({
+            "success": True,
+            "travel_date": selected_date.isoformat(),
+            "passengers": passenger_count,
+            "departures": results,
+            "count": len(results),
+            "message": (
+                "Departures found."
+                if results
+                else "No registered departures were found for this route."
+            )
+        })
+
+    except Exception:
+        app.logger.exception("TRANSPORT SEARCH ERROR")
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to search transport departures right now. Please try again."
+        }), 500
+
     finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-    return redirect(url_for("admin_schools"))            
+        if conn is not None:
+            conn.close()
+
+# ------------------------------------------------------------
+# 2. CUSTOMER SUBMITS A BOOKING / AVAILABILITY REQUEST
+# POST /travel/request
+# ------------------------------------------------------------
+
+
+@app.route("/travel/request", methods=["POST"])
+def transport_submit_request():
+
+    # --------------------------------------------------
+    # 1. Authentication and customer permissions
+    # --------------------------------------------------
+    if not current_user.is_authenticated:
+        flash(
+            "Please sign in before submitting a travel request.",
+            "error"
+        )
+        return redirect(url_for("login"))
+
+    if not _transport_customer_required():
+        abort(403)
+
+    # --------------------------------------------------
+    # 2. Read submitted form fields
+    # --------------------------------------------------
+    departure_id = request.form.get("departure_id", type=int)
+    travel_date = (request.form.get("travel_date") or "").strip()
+    passenger_count = request.form.get("passengers", type=int)
+
+    full_name = (request.form.get("full_name") or "").strip()
+    phone = (request.form.get("phone") or "").strip()
+
+    whatsapp_phone = (
+        request.form.get("whatsapp_phone") or phone
+    ).strip()
+
+    original_request_id = request.form.get(
+        "original_request_id",
+        type=int
+    )
+
+    # --------------------------------------------------
+    # 3. Validate required fields
+    # --------------------------------------------------
+    if not all([
+        departure_id,
+        travel_date,
+        passenger_count,
+        full_name,
+        phone,
+        whatsapp_phone
+    ]):
+        flash(
+            "Please complete all required booking details.",
+            "error"
+        )
+        return redirect(url_for("travel_page"))
+
+    if not 2 <= len(full_name) <= 120:
+        flash("Enter your full name.", "error")
+        return redirect(url_for("travel_page"))
+
+    if len(phone) > 30 or len(whatsapp_phone) > 30:
+        flash("Please enter valid phone numbers.", "error")
+        return redirect(url_for("travel_page"))
+
+    # --------------------------------------------------
+    # 4. Validate travel date and passenger count
+    # --------------------------------------------------
+    try:
+        selected_date = date.fromisoformat(travel_date)
+
+        if selected_date < kenya_today():
+            raise ValueError("Travel date cannot be in the past.")
+
+        if not 1 <= passenger_count <= 10:
+            raise ValueError("Passenger count must be between 1 and 10.")
+
+    except (ValueError, TypeError):
+        flash(
+            "Please check your travel date and passenger count.",
+            "error"
+        )
+        return redirect(url_for("travel_page"))
+
+    # --------------------------------------------------
+    # 5. Normalize WhatsApp number
+    # --------------------------------------------------
+    try:
+        normalized_phone = normalize_whatsapp_number(
+            whatsapp_phone
+        )
+    except Exception:
+        normalized_phone = None
+
+    if not normalized_phone:
+        flash("Enter a valid WhatsApp number.", "error")
+        return redirect(url_for("travel_page"))
+
+    conn = None
+    request_id = None
+
+    try:
+        # --------------------------------------------------
+        # 6. Connect to database
+        # --------------------------------------------------
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+
+            # --------------------------------------------------
+            # 7. Verify selected departure is active
+            # --------------------------------------------------
+            cur.execute(
+                """
+                SELECT
+                    d.id AS departure_id,
+                    d.departure_time,
+                    d.price_per_passenger,
+
+                    r.id AS route_id,
+                    r.route_from,
+                    r.route_to,
+                    r.boarding_point,
+                    r.dropoff_point,
+                    r.vehicle_type,
+
+                    c.id AS company_id,
+                    c.company_name
+
+                FROM civicnest.transport_departures d
+
+                INNER JOIN civicnest.transport_routes r
+                    ON r.id = d.route_id
+
+                INNER JOIN civicnest.transport_companies c
+                    ON c.id = r.company_id
+
+                WHERE
+                    d.id = %s
+                    AND d.is_active IS TRUE
+                    AND r.is_active IS TRUE
+                    AND c.is_active IS TRUE
+
+                LIMIT 1
+                """,
+                (departure_id,)
+            )
+
+            departure = _transport_fetchone(cur)
+
+            if not departure:
+                flash(
+                    "That departure is no longer available for requests.",
+                    "error"
+                )
+                return redirect(url_for("travel_page"))
+
+            # --------------------------------------------------
+            # 8. Verify original request for alternatives
+            # --------------------------------------------------
+            if original_request_id:
+
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM civicnest.transport_booking_requests
+                    WHERE
+                        id = %s
+                        AND user_id = %s
+                        AND status = 'unavailable'
+                    LIMIT 1
+                    """,
+                    (
+                        original_request_id,
+                        current_user.id
+                    )
+                )
+
+                original_request = cur.fetchone()
+
+                if not original_request:
+                    abort(403)
+
+            # --------------------------------------------------
+            # 9. Calculate estimated total
+            # --------------------------------------------------
+            price = Decimal(
+                str(departure["price_per_passenger"])
+            )
+
+            estimated_total = (
+                price * passenger_count
+            ).quantize(Decimal("0.01"))
+
+            # --------------------------------------------------
+            # 10. Save customer request
+            # --------------------------------------------------
+            cur.execute(
+                """
+                INSERT INTO civicnest.transport_booking_requests (
+                    user_id,
+                    departure_id,
+                    original_request_id,
+
+                    travel_date,
+                    passenger_count,
+
+                    full_name,
+                    phone,
+                    whatsapp_phone,
+
+                    company_name_snapshot,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    departure_time_snapshot,
+
+                    price_per_passenger_snapshot,
+                    boarding_point_snapshot,
+                    dropoff_point_snapshot,
+                    vehicle_type_snapshot,
+
+                    estimated_total
+                )
+
+                VALUES (
+                    %s, %s, %s,
+                    %s, %s,
+                    %s, %s, %s,
+                    %s, %s, %s, %s,
+                    %s, %s, %s, %s,
+                    %s
+                )
+
+                RETURNING id
+                """,
+                (
+                    current_user.id,
+                    departure_id,
+                    original_request_id,
+
+                    selected_date,
+                    passenger_count,
+
+                    full_name,
+                    phone,
+                    normalized_phone,
+
+                    departure["company_name"],
+                    departure["route_from"],
+                    departure["route_to"],
+                    departure["departure_time"],
+
+                    price,
+                    departure["boarding_point"],
+                    departure["dropoff_point"],
+                    departure["vehicle_type"],
+
+                    estimated_total
+                )
+            )
+
+            inserted = cur.fetchone()
+
+            if not inserted:
+                raise RuntimeError(
+                    "The transport request could not be saved."
+                )
+
+            request_id = inserted[0]
+
+        # --------------------------------------------------
+        # 11. Commit successful request
+        # --------------------------------------------------
+        conn.commit()
+
+        app.logger.info(
+            "Transport request %s submitted by user %s",
+            request_id,
+            current_user.id
+        )
+
+        flash(
+            "Your travel request has been submitted. "
+            "We will check availability and update your account.",
+            "success"
+        )
+
+        return redirect(
+            url_for("my_transport_requests")
+        )
+
+    except HTTPException:
+        if conn:
+            conn.rollback()
+        raise
+
+    except Exception:
+        if conn:
+            conn.rollback()
+
+        app.logger.exception(
+            "TRANSPORT REQUEST SUBMISSION ERROR"
+        )
+
+        flash(
+            "We could not submit your request. Please try again.",
+            "error"
+        )
+
+        return redirect(url_for("travel_page"))
+
+    finally:
+        if conn:
+            conn.close()
+
+
+
+# ------------------------------------------------------------
+# 3. CUSTOMER'S OWN REQUEST HISTORY
+# GET /my-travel-requests
+# ------------------------------------------------------------
+
+def _fmt_time(value):
+    """Return HH:MM for a time object or an 'HH:MM:SS' string."""
+    if value is None:
+        return None
+    if hasattr(value, "strftime"):
+        return value.strftime("%H:%M")
+    return str(value)[:5]
+
+
+@app.route("/my-travel-requests", methods=["GET"])
+def my_transport_requests():
+    if not current_user.is_authenticated:
+        return redirect(url_for("login"))
+
+    if not _transport_customer_required():
+        abort(403)
+
+    conn = None
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    id,
+                    original_request_id,
+                    travel_date,
+                    passenger_count,
+                    full_name,
+                    phone,
+                    company_name_snapshot AS company_name,
+                    route_from_snapshot AS route_from,
+                    route_to_snapshot AS route_to,
+                    departure_time_snapshot AS departure_time,
+                    price_per_passenger_snapshot AS price_per_passenger,
+                    estimated_total,
+                    boarding_point_snapshot AS boarding_point,
+                    dropoff_point_snapshot AS dropoff_point,
+                    vehicle_type_snapshot AS vehicle_type,
+                    status,
+                    admin_note,
+                    availability_checked_at,
+                    final_confirmed_at,
+                    created_at
+                FROM civicnest.transport_booking_requests
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+            """, (current_user.id,))
+
+            request_rows = _transport_rows(cur)
+
+        for item in request_rows:
+            item["departure_time"] = _fmt_time(item["departure_time"])
+
+        return render_template(
+            "my_transport_requests.html",
+            requests=request_rows
+        )
+
+    except Exception:
+        app.logger.exception("Could not load customer transport requests.")
+        flash("Could not load your travel requests. Please try again.", "error")
+        return redirect(url_for("travel_page"))
+
+    finally:
+        if conn:
+            conn.close()
+
+
+# ------------------------------------------------------------
+# 4. ADMIN: VIEW ALL TRANSPORT REQUESTS
+# GET /admin/transport/requests
+# ------------------------------------------------------------
+
+@app.route("/admin/transport/requests", methods=["GET"])
+@admin_required
+def admin_transport_requests():
+
+    conn = get_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    r.*,
+                    u.email AS customer_email
+                FROM civicnest.transport_booking_requests r
+                JOIN civicnest.users u ON u.id = r.user_id
+                ORDER BY
+                    CASE WHEN r.status = 'pending' THEN 0 ELSE 1 END,
+                    r.created_at DESC
+            """)
+
+            requests = _transport_rows(cur)
+
+        return render_template(
+            "admin/transport_requests.html",
+            requests=requests
+        )
+
+    finally:
+        conn.close()
+
+
+# ------------------------------------------------------------
+# 5. ADMIN: AVAILABLE / UNAVAILABLE DECISION
+# POST /admin/transport/request/<id>/availability
+# ------------------------------------------------------------
+
+@app.route(
+    "/admin/transport/request/<int:request_id>/availability",
+    methods=["POST"]
+)
+@admin_required
+def admin_transport_availability(request_id):
+    app.logger.info(
+    "TRANSPORT AVAILABILITY FORM: %r",
+    request.form.to_dict()
+)
+
+    decision = (
+    request.form.get("decision")
+    or request.form.get("availability")
+    or ""
+).strip().lower()
+    admin_note = (request.form.get("admin_note") or "").strip()
+
+    if decision not in ("available", "unavailable"):
+        abort(400)
+
+    new_status = (
+        "availability_confirmed"
+        if decision == "available"
+        else "unavailable"
+    )
+
+    conn = get_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE civicnest.transport_booking_requests
+                SET
+                    status = %s,
+                    admin_note = %s,
+                    checked_by_user_id = %s,
+                    availability_checked_at = NOW(),
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND status = 'pending'
+                RETURNING id
+            """, (
+                new_status,
+                admin_note or None,
+                current_user.id,
+                request_id
+            ))
+
+            updated = cur.fetchone()
+
+            if not updated:
+                conn.rollback()
+                flash(
+                    "This request has already been reviewed or does not exist.",
+                    "error"
+                )
+                return redirect(url_for("admin_transport_requests"))
+
+        conn.commit()
+
+        flash(
+            "Availability decision saved.",
+            "success"
+        )
+
+    except Exception:
+        conn.rollback()
+        app.logger.exception("Transport availability update failed.")
+        flash("Could not update availability.", "error")
+
+    finally:
+        conn.close()
+
+    return redirect(url_for("admin_transport_requests"))
+
+@app.route(
+    "/admin/transport/request/<int:request_id>/confirm",
+    methods=["POST"]
+)
+@admin_required
+def admin_transport_confirm_booking(request_id):
+    import html
+
+    conn = get_db_connection()
+    confirmed_request = None
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE civicnest.transport_booking_requests
+                SET
+                    status = 'booking_confirmed',
+                    checked_by_user_id = %s,
+                    final_confirmed_at = NOW(),
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND status = 'availability_confirmed'
+                RETURNING
+                    id,
+                    full_name,
+                    phone,
+                    company_name_snapshot,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    travel_date,
+                    departure_time_snapshot,
+                    passenger_count,
+                    price_per_passenger_snapshot,
+                    estimated_total
+            """, (current_user.id, request_id))
+
+            rows = _transport_rows(cur)
+
+            if not rows:
+                conn.rollback()
+                flash(
+                    "This request is not awaiting final confirmation, or it does not exist.",
+                    "error"
+                )
+                return redirect(url_for("admin_transport_requests"))
+
+            confirmed_request = rows[0]
+
+        conn.commit()
+
+        # Notify the administrator through Telegram.
+        try:
+            r = confirmed_request
+
+            message = (
+                "✅ <b>TRANSPORT BOOKING CONFIRMED</b>\n\n"
+                f"<b>Reference:</b> CN-{r['id']}\n"
+                f"<b>Company:</b> {html.escape(str(r['company_name_snapshot'] or 'N/A'))}\n"
+                f"<b>Route:</b> {html.escape(str(r['route_from_snapshot']))} "
+                f"→ {html.escape(str(r['route_to_snapshot']))}\n"
+                f"<b>Travel date:</b> {html.escape(str(r['travel_date']))}\n"
+                f"<b>Departure:</b> {html.escape(str(r['departure_time_snapshot']))}\n"
+                f"<b>Passenger:</b> {html.escape(str(r['full_name']))}\n"
+                f"<b>Phone:</b> {html.escape(str(r['phone']))}\n"
+                f"<b>Passengers:</b> {r['passenger_count']}\n"
+                f"<b>Fare each:</b> KSh {float(r['price_per_passenger_snapshot']):,.2f}\n"
+                f"<b>Total:</b> KSh {float(r['estimated_total']):,.2f}\n\n"
+                "The booking is finally confirmed on CivicNest."
+            )
+
+            _send_telegram(message)
+
+        except Exception:
+            app.logger.exception(
+                "Booking confirmed, but Telegram notification failed."
+            )
+
+        flash(
+            "Booking confirmed successfully.",
+            "success"
+        )
+
+    except Exception:
+        conn.rollback()
+        app.logger.exception("Transport booking confirmation failed.")
+        flash("Could not confirm this booking.", "error")
+
+    finally:
+        conn.close()
+
+    return redirect(url_for("admin_transport_requests"))   
+
+@app.route("/my-travel-requests/<int:request_id>/receipt")
+@login_required
+def my_transport_receipt(request_id):
+
+    if not _transport_customer_required():
+        abort(403)
+
+    conn = None
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    id,
+                    full_name,
+                    phone,
+                    company_name_snapshot,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    travel_date,
+                    departure_time_snapshot,
+                    passenger_count,
+                    price_per_passenger_snapshot,
+                    estimated_total,
+                    boarding_point_snapshot,
+                    dropoff_point_snapshot,
+                    vehicle_type_snapshot,
+                    final_confirmed_at
+                FROM civicnest.transport_booking_requests
+                WHERE id = %s
+                  AND user_id = %s
+                  AND status = 'booking_confirmed'
+                LIMIT 1
+            """, (request_id, current_user.id))
+
+            booking = _transport_fetchone(cur)
+
+        if not booking:
+            flash(
+                "Receipt is available only for your finally confirmed bookings.",
+                "error"
+            )
+            return redirect(url_for("my_transport_requests"))
+
+        booking["departure_time_snapshot"] = _fmt_time(
+            booking["departure_time_snapshot"]
+        )
+        booking["reference"] = f"CN-{booking['id']}"
+
+        return render_template(
+            "transport_receipt.html",
+            booking=booking
+        )
+
+    except Exception:
+        app.logger.exception("Could not load transport receipt.")
+        flash("Could not load your receipt.", "error")
+        return redirect(url_for("my_transport_requests"))
+
+    finally:
+        if conn:
+            conn.close()
+
+
+# =========================================================
+# ADMIN: TRANSPORT COMPANY, ROUTE AND DEPARTURE MANAGEMENT
+# =========================================================
+
+@app.route("/admin/transport", methods=["GET"])
+def admin_transport_page():
+    if not _transport_admin_required():
+        return "Forbidden", 403
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        id,
+                        company_name,
+                        company_phone,
+                        main_boarding_station,
+                        logo_url,
+                        vehicle_image_url,
+                        is_active
+                    FROM civicnest.transport_companies
+                    ORDER BY company_name
+                """)
+                companies = _transport_rows(cur)
+
+                cur.execute("""
+                    SELECT
+                        r.id,
+                        r.company_id,
+                        c.company_name,
+                        r.route_from,
+                        r.route_to,
+                        r.intermediate_stops,
+                        r.boarding_point,
+                        r.dropoff_point,
+                        r.vehicle_type,
+                        r.is_active
+                    FROM civicnest.transport_routes r
+                    JOIN civicnest.transport_companies c
+                      ON c.id = r.company_id
+                    ORDER BY c.company_name, r.route_from, r.route_to
+                """)
+                routes = _transport_rows(cur)
+
+                cur.execute("""
+                    SELECT
+                        d.id,
+                        d.route_id,
+                        c.company_name,
+                        r.route_from,
+                        r.route_to,
+                        d.departure_time,
+                        d.price_per_passenger,
+                        d.is_active
+                    FROM civicnest.transport_departures d
+                    JOIN civicnest.transport_routes r
+                      ON r.id = d.route_id
+                    JOIN civicnest.transport_companies c
+                      ON c.id = r.company_id
+                    ORDER BY c.company_name, r.route_from,
+                             r.route_to, d.departure_time
+                """)
+                departures = _transport_rows(cur)
+
+        return render_template(
+            "admin_transport.html",
+            companies=companies,
+            routes=routes,
+            departures=departures
+        )
+
+    except Exception:
+        app.logger.exception("ADMIN TRANSPORT PAGE ERROR")
+        return "Unable to load transport management.", 500
+
+
+@app.route("/admin/transport/company", methods=["POST"])
+def admin_add_transport_company():
+    if not _transport_admin_required():
+        return "Forbidden", 403
+
+    company_name = request.form.get("company_name", "").strip()
+    company_phone = request.form.get("company_phone", "").strip()
+    main_boarding_station = request.form.get(
+        "main_boarding_station", ""
+    ).strip()
+    logo_url = request.form.get("logo_url", "").strip()
+    vehicle_image_url = request.form.get(
+        "vehicle_image_url", ""
+    ).strip()
+
+    if not company_name:
+        flash("Enter the transport company name.", "error")
+        return redirect(url_for("admin_transport_page"))
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO civicnest.transport_companies (
+                        company_name,
+                        company_phone,
+                        main_boarding_station,
+                        logo_url,
+                        vehicle_image_url
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    company_name,
+                    company_phone or None,
+                    main_boarding_station or None,
+                    logo_url or None,
+                    vehicle_image_url or None
+                ))
+
+        flash("Transport company registered successfully.", "success")
+
+    except Exception:
+        app.logger.exception("ADD TRANSPORT COMPANY ERROR")
+        flash("Could not register the company.", "error")
+
+    return redirect(url_for("admin_transport_page"))
+
+
+@app.route("/admin/transport/route", methods=["POST"])
+def admin_add_transport_route():
+    if not _transport_admin_required():
+        return "Forbidden", 403
+
+    try:
+        company_id = int(request.form.get("company_id", ""))
+    except (TypeError, ValueError):
+        flash("Select a valid transport company.", "error")
+        return redirect(url_for("admin_transport_page"))
+
+    route_from = request.form.get("route_from", "").strip()
+    route_to = request.form.get("route_to", "").strip()
+    intermediate_stops = request.form.get(
+        "intermediate_stops", ""
+    ).strip()
+    boarding_point = request.form.get("boarding_point", "").strip()
+    dropoff_point = request.form.get("dropoff_point", "").strip()
+    vehicle_type = request.form.get("vehicle_type", "").strip()
+
+    if not route_from or not route_to:
+        flash("Enter both departure and destination towns.", "error")
+        return redirect(url_for("admin_transport_page"))
+
+    if route_from.casefold() == route_to.casefold():
+        flash("Departure and destination cannot be the same.", "error")
+        return redirect(url_for("admin_transport_page"))
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO civicnest.transport_routes (
+                        company_id,
+                        route_from,
+                        route_to,
+                        intermediate_stops,
+                        boarding_point,
+                        dropoff_point,
+                        vehicle_type
+                    )
+                    SELECT
+                        id, %s, %s, %s, %s, %s, %s
+                    FROM civicnest.transport_companies
+                    WHERE id = %s AND is_active = TRUE
+                    RETURNING id
+                """, (
+                    route_from,
+                    route_to,
+                    intermediate_stops or None,
+                    boarding_point or None,
+                    dropoff_point or None,
+                    vehicle_type or None,
+                    company_id
+                ))
+
+                created = cur.fetchone()
+
+                if not created:
+                    flash("The selected company was not found or is inactive.", "error")
+                    return redirect(url_for("admin_transport_page"))
+
+        flash("Transport route added successfully.", "success")
+
+    except Exception:
+        app.logger.exception("ADD TRANSPORT ROUTE ERROR")
+        flash("Could not add the transport route.", "error")
+
+    return redirect(url_for("admin_transport_page"))
+
+
+@app.route("/admin/transport/departure", methods=["POST"])
+def admin_add_transport_departure():
+    if not _transport_admin_required():
+        return "Forbidden", 403
+
+    try:
+        route_id = int(request.form.get("route_id", ""))
+        departure_time = request.form.get("departure_time", "").strip()
+        price = float(request.form.get("price_per_passenger", ""))
+
+        if not departure_time:
+            raise ValueError("Departure time is required.")
+
+        if price < 0:
+            raise ValueError("Fare cannot be negative.")
+
+    except (TypeError, ValueError):
+        flash("Enter a valid route, departure time and fare.", "error")
+        return redirect(url_for("admin_transport_page"))
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO civicnest.transport_departures (
+                        route_id,
+                        departure_time,
+                        price_per_passenger
+                    )
+                    SELECT id, %s, %s
+                    FROM civicnest.transport_routes
+                    WHERE id = %s AND is_active = TRUE
+                    RETURNING id
+                """, (
+                    departure_time,
+                    price,
+                    route_id
+                ))
+
+                created = cur.fetchone()
+
+                if not created:
+                    flash("The selected route was not found or is inactive.", "error")
+                    return redirect(url_for("admin_transport_page"))
+
+        flash("Departure time and fare added successfully.", "success")
+
+    except Exception:
+        app.logger.exception("ADD TRANSPORT DEPARTURE ERROR")
+        flash("Could not add the departure.", "error")
+
+    return redirect(url_for("admin_transport_page"))  
+
+
+@app.route("/admin/transport/routes/bulk", methods=["POST"])
+def admin_add_transport_routes_bulk():
+    if not _transport_admin_required():
+        return "Forbidden", 403
+
+    try:
+        company_id = int(request.form.get("company_id", ""))
+        routes = json.loads(request.form.get("routes_json", "[]"))
+
+        if not isinstance(routes, list) or not routes:
+            raise ValueError("Add at least one route.")
+
+        if len(routes) > 100:
+            raise ValueError("You can add up to 100 routes per batch.")
+
+        cleaned_routes = []
+
+        for index, route in enumerate(routes, start=1):
+            if not isinstance(route, dict):
+                raise ValueError(f"Route {index} is invalid.")
+
+            route_from = str(route.get("route_from", "")).strip()
+            route_to = str(route.get("route_to", "")).strip()
+
+            if not route_from or not route_to:
+                raise ValueError(
+                    f"Route {index}: departure and destination are required."
+                )
+
+            if route_from.casefold() == route_to.casefold():
+                raise ValueError(
+                    f"Route {index}: departure and destination cannot be the same."
+                )
+
+            departures = route.get("departures", [])
+
+            if not isinstance(departures, list) or not departures:
+                raise ValueError(
+                    f"Route {index}: add at least one departure time and fare."
+                )
+
+            cleaned_departures = []
+
+            for departure in departures:
+                if not isinstance(departure, dict):
+                    raise ValueError(f"Route {index}: invalid departure.")
+
+                departure_time = str(
+                    departure.get("departure_time", "")
+                ).strip()
+
+                price = float(departure.get("price_per_passenger", ""))
+
+                if not departure_time:
+                    raise ValueError(
+                        f"Route {index}: departure time is required."
+                    )
+
+                # Accept HTML time input format HH:MM.
+                import re
+                if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", departure_time):
+                    raise ValueError(
+                        f"Route {index}: enter a valid departure time."
+                    )
+
+                if price < 0:
+                    raise ValueError(
+                        f"Route {index}: fare cannot be negative."
+                    )
+
+                cleaned_departures.append((departure_time, price))
+
+            cleaned_routes.append({
+                "route_from": route_from,
+                "route_to": route_to,
+                "intermediate_stops": str(
+                    route.get("intermediate_stops", "")
+                ).strip() or None,
+                "boarding_point": str(
+                    route.get("boarding_point", "")
+                ).strip() or None,
+                "dropoff_point": str(
+                    route.get("dropoff_point", "")
+                ).strip() or None,
+                "vehicle_type": str(
+                    route.get("vehicle_type", "")
+                ).strip() or None,
+                "departures": cleaned_departures
+            })
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+
+                # Confirm that the company exists and is active.
+                cur.execute("""
+                    SELECT id
+                    FROM civicnest.transport_companies
+                    WHERE id = %s AND is_active = TRUE
+                """, (company_id,))
+
+                if not cur.fetchone():
+                    raise ValueError(
+                        "The selected company does not exist or is inactive."
+                    )
+
+                total_departures = 0
+
+                # Save all routes and departures in this transaction.
+                for route in cleaned_routes:
+                    cur.execute("""
+                        INSERT INTO civicnest.transport_routes (
+                            company_id,
+                            route_from,
+                            route_to,
+                            intermediate_stops,
+                            boarding_point,
+                            dropoff_point,
+                            vehicle_type
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, (
+                        company_id,
+                        route["route_from"],
+                        route["route_to"],
+                        route["intermediate_stops"],
+                        route["boarding_point"],
+                        route["dropoff_point"],
+                        route["vehicle_type"]
+                    ))
+
+                    created_route = cur.fetchone()
+                    route_id = created_route[0]
+
+                    for departure_time, price in route["departures"]:
+                        cur.execute("""
+                            INSERT INTO civicnest.transport_departures (
+                                route_id,
+                                departure_time,
+                                price_per_passenger
+                            )
+                            VALUES (%s, %s, %s)
+                        """, (
+                            route_id,
+                            departure_time,
+                            price
+                        ))
+
+                        total_departures += 1
+
+        flash(
+            f"Successfully added {len(cleaned_routes)} routes "
+            f"and {total_departures} departure times.",
+            "success"
+        )
+
+    except (TypeError, ValueError, json.JSONDecodeError) as exc:
+        flash(str(exc), "error")
+
+    except Exception:
+        app.logger.exception("BULK TRANSPORT ROUTE ERROR")
+        flash(
+            "Could not save the routes. No partial batch should have been saved.",
+            "error"
+        )
+
+    return redirect(url_for("admin_transport_page"))
+
+@app.route("/about")
+def about_page():
+    return render_template("about.html", current_year=datetime.utcnow().year)    
+
 
 
 # =========================================================

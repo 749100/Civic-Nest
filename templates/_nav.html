@@ -1,0 +1,148 @@
+{% set ep = request.endpoint %}
+<header class="gnav">
+  <div class="gwrap">
+    <a
+      class="gbrand"
+      href="{{ url_for('home') }}"
+      aria-label="CivicNest Africa home"
+    >
+      <span class="gmk"
+        ><svg class="gi" viewBox="0 0 24 24">
+          <path
+            d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
+          /></svg
+      ></span>
+      <span>CivicNest<small>Africa</small></span>
+    </a>
+
+    <nav class="glinks" aria-label="Main">
+      <a
+        href="{{ url_for('home') }}"
+        {%
+        if
+        ep=""
+        ="home"
+        %}class="on"
+        aria-current="page"
+        {%
+        endif
+        %}
+        >Home</a
+      >
+      <a
+        href="{{ url_for('rent_page') }}"
+        {%
+        if
+        ep
+        in
+        ['rent_page','buy_page','property_details']
+        %}class="on"
+        {%
+        endif
+        %}
+        >Properties</a
+      >
+      <a
+        href="{{ url_for('hospitality_page') }}"
+        {%
+        if
+        ep=""
+        ="hospitality_page"
+        %}class="on"
+        {%
+        endif
+        %}
+        >Stay &amp; Dine</a
+      >
+      <a
+        href="{{ url_for('travel_page') }}"
+        {%
+        if
+        ep=""
+        ="travel_page"
+        %}class="on"
+        {%
+        endif
+        %}
+        >Travel</a
+      >
+      <a
+        href="{{ url_for('sell_page') }}"
+        {%
+        if
+        ep
+        in
+        ['sell_page','add_property']
+        %}class="on"
+        {%
+        endif
+        %}
+        >List Property</a
+      >
+    </nav>
+
+    <div class="gright">
+      <a class="gt" href="{{ url_for('home') }}#properties"
+        ><svg class="gi" viewBox="0 0 24 24">
+          <path
+            d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+          /></svg
+        >Saved</a
+      >
+      {% if current_user.is_authenticated %}
+      <a class="gsign" href="{{ url_for('dashboard') }}">My account</a>
+      {% else %}
+      <a class="gsign" href="{{ url_for('login') }}">Sign In / Register</a>
+      {% endif %}
+      <button
+        class="gburger"
+        id="gMenuBtn"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="gMenu"
+      >
+        <svg class="gi" viewBox="0 0 24 24">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="gmenu" id="gMenu" aria-label="Menu" hidden>
+    <a href="{{ url_for('home') }}">Home</a>
+    <a href="{{ url_for('rent_page') }}">Rent</a>
+    <a href="{{ url_for('buy_page') }}">Buy</a>
+    <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+    <a href="{{ url_for('invest_page') }}">Invest</a>
+    <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+    <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+    <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+    <hr />
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('dashboard') }}">My account</a>
+    <a href="{{ url_for('logout') }}">Sign out</a>
+    {% else %}
+    <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+    <a href="{{ url_for('register') }}">Create account</a>
+    {% endif %}
+  </nav>
+</header>
+<script>
+  (function () {
+    var b = document.getElementById("gMenuBtn"),
+      m = document.getElementById("gMenu");
+    if (!b || !m) return;
+    b.addEventListener("click", function () {
+      var o = m.hidden;
+      m.hidden = !o;
+      b.setAttribute("aria-expanded", String(o));
+    });
+    document.addEventListener("click", function (e) {
+      if (!m.hidden && !m.contains(e.target) && !b.contains(e.target)) {
+        m.hidden = true;
+        b.setAttribute("aria-expanded", "false");
+      }
+    });
+  })();
+</script>

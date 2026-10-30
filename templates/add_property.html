@@ -2,1691 +2,1287 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='civicnest-header.css') }}"
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
-    <title>Add Property | Civic Nest</title>
+    <title>Add Property | CivicNest Africa</title>
+
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#1456d8" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
 
     <style>
-      :root {
-        --white: #ffffff;
-        --background: #f7f9fc;
-        --soft-blue: #eef5fa;
-        --light-blue: #dcecf6;
-
-        --blue: #155b86;
-        --blue-bright: #1677b8;
-
-        --navy: #092f49;
-        --deep-navy: #06263d;
-
-        --gold: #b79a68;
-
-        --text: #183b53;
-        --muted: #71889a;
-        --border: #dce6ed;
-
-        --success: #155b86;
-        --danger: #dc3545;
-        --warning: #d99400;
-
-        --shadow: 0 10px 30px rgba(9, 47, 73, 0.08);
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: Arial, sans-serif;
-        background: var(--background);
-        color: var(--text);
-      }
-
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
-
-      button,
-      input,
-      textarea,
-      select {
-        font-family: inherit;
-      }
-
       /* =====================================================
-           NAVBAR
-      ===================================================== */
+         CIVICNEST AFRICA — ADD PROPERTY
+         Design matched to the Travel and Stay & Dine pages.
+         ===================================================== */
 
-      .topbar {
-        height: 78px;
-
-        background: rgba(255, 255, 255, 0.97);
-
-        border-bottom: 1px solid var(--border);
-
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        padding: 0 5%;
-
-        position: sticky;
-        top: 0;
-
-        z-index: 1000;
-
-        box-shadow: 0 4px 20px rgba(9, 47, 73, 0.05);
+      .hero.a {
+        padding-bottom: 56px;
       }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+      .sec.a {
+        padding-top: 34px;
       }
 
-      .brand-mark {
-        width: 43px;
-        height: 43px;
-
-        border-radius: 50%;
-
-        background: var(--deep-navy);
-
-        color: white;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        font-family: Georgia, serif;
-        font-size: 15px;
-        font-weight: bold;
-
-        border: 2px solid var(--gold);
+      .a a:focus-visible,
+      .a button:focus-visible,
+      .a input:focus-visible,
+      .a select:focus-visible,
+      .a textarea:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 2px;
       }
 
-      .brand-title {
-        font-family: Georgia, serif;
-
-        font-size: 17px;
-        font-weight: bold;
-
-        letter-spacing: 2px;
-
-        color: var(--navy);
-      }
-
-      .brand-subtitle {
-        font-size: 9px;
-
-        letter-spacing: 2px;
-
-        color: var(--gold);
-
-        margin-top: 3px;
-      }
-
-      .back-link {
-        color: var(--blue);
-
-        font-size: 14px;
-        font-weight: 600;
-
-        padding: 10px 15px;
-
-        border-radius: 8px;
-      }
-
-      .back-link:hover {
-        background: var(--soft-blue);
-      }
-
-      /* =====================================================
-           PAGE
-      ===================================================== */
-
-      .page {
-        width: 92%;
-        max-width: 1100px;
-
-        margin: auto;
-
-        padding: 42px 0 70px;
-      }
-
-      .page-heading {
-        margin-bottom: 28px;
-      }
-
-      .page-heading h1 {
-        font-family: Georgia, serif;
-
-        color: var(--navy);
-
-        font-size: clamp(28px, 4vw, 38px);
-
-        margin-bottom: 8px;
-      }
-
-      .page-heading p {
-        color: var(--muted);
-
-        font-size: 14px;
-
-        line-height: 1.6;
-      }
-
-      /* =====================================================
-           FORM
-      ===================================================== */
-
-      .form-card {
-        background: var(--white);
-
-        border: 1px solid var(--border);
-
-        border-radius: 15px;
-
-        box-shadow: var(--shadow);
-
-        overflow: hidden;
-
-        margin-bottom: 25px;
-      }
-
-      .form-section {
-        padding: 28px;
-
-        border-bottom: 1px solid var(--border);
-      }
-
-      .form-section:last-child {
-        border-bottom: none;
-      }
-
-      .section-heading {
-        margin-bottom: 22px;
-      }
-
-      .section-heading h2 {
-        font-family: Georgia, serif;
-
-        color: var(--navy);
-
-        font-size: 21px;
-
-        margin-bottom: 5px;
-      }
-
-      .section-heading p {
-        color: var(--muted);
-
+      /* Flash messages */
+      .aflash {
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #e6eeff;
+        color: #1456d8;
         font-size: 12px;
+        font-weight: 700;
       }
 
-      .form-grid {
+      .aflash.success {
+        background: #dcf5e6;
+        color: #0b7a3b;
+      }
+
+      .aflash.error,
+      .aflash.danger {
+        background: #ffe1e1;
+        color: #b42318;
+      }
+
+      .aflash.warning {
+        background: #fff1d6;
+        color: #8a5a00;
+      }
+
+      /* Form sections */
+      .aform {
         display: grid;
-
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 20px;
+        gap: 14px;
       }
 
-      .form-group {
-        display: flex;
+      .asection {
+        min-width: 0;
+        padding: 20px;
+      }
 
+      .ahead {
+        margin-bottom: 16px;
+      }
+
+      .ahead h2 {
+        margin: 0;
+        color: #001b5e;
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .ahead p {
+        margin: 4px 0 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .agrid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      @media (min-width: 700px) {
+        .agrid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .agrid .full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .afield {
+        display: flex;
+        min-width: 0;
         flex-direction: column;
       }
 
-      .form-group.full {
-        grid-column: 1 / -1;
+      .afield label,
+      .afield .alabel {
+        margin-bottom: 6px;
+        color: #001b5e;
+        font-size: 12px;
+        font-weight: 800;
       }
 
-      label {
-        font-size: 13px;
-
-        font-weight: bold;
-
-        color: var(--navy);
-
-        margin-bottom: 8px;
+      .afield label span,
+      .alabel span {
+        color: #b42318;
       }
 
-      label span {
-        color: var(--danger);
-      }
-
-      input,
-      select,
-      textarea {
+      .afield input,
+      .afield select,
+      .afield textarea {
         width: 100%;
-
-        border: 1px solid var(--border);
-
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
         background: #fff;
-
-        color: var(--text);
-
-        border-radius: 8px;
-
-        padding: 12px 13px;
-
+        color: #001b5e;
+        font-family: inherit;
         font-size: 13px;
-
-        outline: none;
-
-        transition: 0.2s;
       }
 
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--blue-bright);
-
-        box-shadow: 0 0 0 3px rgba(22, 119, 184, 0.08);
-      }
-
-      textarea {
-        min-height: 135px;
-
+      .afield textarea {
+        min-height: 130px;
+        line-height: 1.6;
         resize: vertical;
+      }
 
+      .afield input:focus,
+      .afield select:focus,
+      .afield textarea:focus {
+        border-color: #1456d8;
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(20, 86, 216, 0.12);
+      }
+
+      .ahelp {
+        margin-top: 5px;
+        color: #405578;
+        font-size: 10px;
         line-height: 1.6;
       }
 
-      .input-help {
-        font-size: 11px;
-
-        color: var(--muted);
-
-        margin-top: 6px;
-
-        line-height: 1.5;
+      /* Availability */
+      .aavail {
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid #d3e0f5;
+        border-radius: 14px;
+        background: #f2f7fd;
       }
 
-      /* =====================================================
-           AVAILABILITY
-      ===================================================== */
-
-      .availability-section {
-        background: #fbfdff;
-
-        border: 1px solid var(--light-blue);
-
-        border-radius: 12px;
-
-        padding: 20px;
-
-        margin-top: 5px;
-      }
-
-      .availability-intro {
+      .aintro {
         display: flex;
-
         align-items: flex-start;
-
         gap: 12px;
-
-        margin-bottom: 18px;
+        margin-bottom: 14px;
       }
 
-      .availability-icon {
+      .aicon {
+        display: flex;
         width: 38px;
         height: 38px;
-
         flex-shrink: 0;
-
-        border-radius: 10px;
-
-        background: var(--light-blue);
-
-        color: var(--blue);
-
-        display: flex;
-
         align-items: center;
         justify-content: center;
-
+        border-radius: 12px;
+        background: #c5dcff;
         font-size: 18px;
       }
 
-      .availability-intro h3 {
-        color: var(--navy);
-
-        font-size: 14px;
-
-        margin-bottom: 3px;
+      .aintro h3 {
+        margin: 0 0 3px;
+        color: #001b5e;
+        font-size: 13px;
       }
 
-      .availability-intro p {
-        color: var(--muted);
-
+      .aintro p {
+        margin: 0;
+        color: #405578;
         font-size: 11px;
-
-        line-height: 1.5;
+        line-height: 1.7;
       }
 
-      .availability-grid {
+      .aavail-grid {
         display: grid;
-
-        grid-template-columns: repeat(3, 1fr);
-
-        gap: 15px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
       }
 
-      .availability-field {
-        display: flex;
-
-        flex-direction: column;
+      @media (min-width: 700px) {
+        .aavail-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
       }
 
-      .availability-field label {
-        margin-bottom: 7px;
-      }
-
-      .availability-field input {
-        background: white;
-
-        font-weight: 700;
-      }
-
-      .availability-field input[readonly] {
-        background: var(--soft-blue);
-
-        color: var(--blue);
-
+      .aavail input[readonly] {
+        background: #e6eeff;
+        color: #1456d8;
         cursor: not-allowed;
+        font-weight: 800;
       }
 
-      .availability-preview {
-        margin-top: 16px;
-
-        padding: 12px 14px;
-
-        border-radius: 9px;
-
-        background: #eaf7ef;
-
-        border: 1px solid #ccebd8;
-
-        color: var(--success);
-
+      .apreview {
+        margin-top: 14px;
+        padding: 11px 13px;
+        border-radius: 10px;
+        background: #dcf5e6;
+        color: #0b7a3b;
         font-size: 12px;
+        font-weight: 800;
+      }
 
+      .apreview.full {
+        background: #ffe1e1;
+        color: #b42318;
+      }
+
+      .aerror {
+        display: none;
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #ffe1e1;
+        color: #b42318;
+        font-size: 11px;
         font-weight: 700;
       }
 
-      .availability-preview.full {
-        background: #fcebea;
-
-        border-color: #f3cccc;
-
-        color: var(--danger);
+      .acheck {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 16px;
       }
 
-      .availability-error {
-        display: none;
-
-        margin-top: 10px;
-
-        padding: 10px 12px;
-
-        border-radius: 8px;
-
-        background: #fcebea;
-
-        border: 1px solid #f3cccc;
-
-        color: var(--danger);
-
-        font-size: 11px;
-
-        font-weight: 600;
+      .acheck input {
+        width: 17px;
+        height: 17px;
+        accent-color: #1456d8;
       }
 
-      /* =====================================================
-           AMENITIES
-      ===================================================== */
+      .acheck label {
+        color: #405578;
+        font-size: 12px;
+        font-weight: 700;
+      }
 
-      .amenities-grid {
+      /* Amenities */
+      .aamen {
         display: grid;
-
-        grid-template-columns: repeat(3, 1fr);
-
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
 
-      .amenity {
+      @media (min-width: 700px) {
+        .aamen {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .aam {
         position: relative;
       }
 
-      .amenity input {
+      .aam input {
         position: absolute;
-
         opacity: 0;
-
         pointer-events: none;
       }
 
-      .amenity label {
-        margin: 0;
-
-        cursor: pointer;
-
+      .aam label {
         display: flex;
-
         align-items: center;
-
         gap: 9px;
-
-        padding: 12px;
-
-        border: 1px solid var(--border);
-
-        border-radius: 8px;
-
-        color: var(--text);
-
+        padding: 11px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
+        background: #fff;
+        color: #405578;
+        cursor: pointer;
         font-size: 12px;
-
-        font-weight: normal;
-
-        transition: 0.2s;
+        font-weight: 700;
       }
 
-      .amenity label::before {
+      .aam label::before {
         content: "✓";
-
+        display: flex;
         width: 18px;
         height: 18px;
-
-        border: 1px solid var(--border);
-
-        border-radius: 4px;
-
-        display: flex;
-
+        flex-shrink: 0;
         align-items: center;
         justify-content: center;
-
+        border: 1px solid #d3e0f5;
+        border-radius: 5px;
         color: transparent;
-
         font-size: 11px;
-
-        flex-shrink: 0;
       }
 
-      .amenity input:checked + label {
-        background: var(--soft-blue);
-
-        border-color: var(--blue-bright);
-
-        color: var(--blue);
+      .aam input:checked + label {
+        border-color: #1456d8;
+        background: #e6eeff;
+        color: #1456d8;
       }
 
-      .amenity input:checked + label::before {
-        background: var(--blue-bright);
-
-        border-color: var(--blue-bright);
-
-        color: white;
+      .aam input:checked + label::before {
+        border-color: #1456d8;
+        background: #1456d8;
+        color: #fff;
       }
 
-      /* =====================================================
-           PHOTOS
-      ===================================================== */
+      .aam input:focus-visible + label {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 2px;
+      }
 
-      .upload-area {
+      /* Photos */
+      .aupload {
         display: block;
-
-        border: 2px dashed var(--light-blue);
-
-        border-radius: 12px;
-
-        padding: 35px 20px;
-
-        text-align: center;
-
-        background: var(--soft-blue);
-
+        padding: 30px 18px;
+        border: 2px dashed #b9d0f5;
+        border-radius: 16px;
+        background: #f2f7fd;
         cursor: pointer;
-
-        transition: 0.2s;
+        text-align: center;
       }
 
-      .upload-area:hover {
-        border-color: var(--blue-bright);
-
-        background: #e7f2f9;
+      .aupload:hover {
+        border-color: #1456d8;
+        background: #e6eeff;
       }
 
-      .upload-icon {
-        font-size: 35px;
-
-        margin-bottom: 10px;
+      .aupload .uicon {
+        margin-bottom: 8px;
+        font-size: 32px;
       }
 
-      .upload-area h3 {
-        color: var(--navy);
-
-        font-family: Georgia, serif;
-
-        font-size: 17px;
-
-        margin-bottom: 6px;
+      .aupload h3 {
+        margin: 0 0 5px;
+        color: #001b5e;
+        font-size: 15px;
       }
 
-      .upload-area p {
-        color: var(--muted);
-
-        font-size: 12px;
-
-        line-height: 1.5;
+      .aupload p {
+        margin: 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
       }
 
-      .upload-button {
+      .aupload .ubtn {
         display: inline-block;
-
-        margin-top: 14px;
-
-        padding: 9px 15px;
-
-        background: var(--blue);
-
-        color: white;
-
-        border-radius: 7px;
-
+        margin-top: 12px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        background: #1456d8;
+        color: #fff;
         font-size: 12px;
-
-        font-weight: bold;
+        font-weight: 800;
       }
 
       #photos {
         display: none;
       }
 
-      .preview-grid {
+      .apreview-grid {
         display: grid;
-
-        grid-template-columns: repeat(4, 1fr);
-
-        gap: 12px;
-
-        margin-top: 18px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
       }
 
-      .preview-item {
+      @media (min-width: 700px) {
+        .apreview-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      .apitem {
         position: relative;
-
-        height: 130px;
-
-        border-radius: 9px;
-
+        height: 125px;
         overflow: hidden;
-
-        border: 1px solid var(--border);
-
-        background: var(--soft-blue);
+        border-radius: 12px;
+        background: #e6eeff;
       }
 
-      .preview-item img {
+      .apitem img {
         width: 100%;
         height: 100%;
-
         object-fit: cover;
       }
 
-      .preview-remove {
+      .acover {
         position: absolute;
-
-        top: 6px;
-        right: 6px;
-
-        width: 25px;
-        height: 25px;
-
-        border: none;
-
-        border-radius: 50%;
-
-        background: rgba(6, 38, 61, 0.8);
-
-        color: white;
-
-        cursor: pointer;
-
-        font-size: 13px;
-      }
-
-      .cover-label {
-        position: absolute;
-
+        right: 0;
         bottom: 0;
         left: 0;
-        right: 0;
-
-        background: rgba(6, 38, 61, 0.82);
-
-        color: white;
-
         padding: 6px;
-
+        background: rgba(0, 27, 94, 0.82);
+        color: #fff;
         font-size: 10px;
-
+        font-weight: 800;
         text-align: center;
       }
 
-      /* =====================================================
-           CHECKBOX
-      ===================================================== */
-
-      .check-row {
+      /* Actions */
+      .aactions {
         display: flex;
+        flex-direction: column-reverse;
+        gap: 10px;
+        padding: 18px 20px;
+      }
 
+      @media (min-width: 700px) {
+        .aactions {
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-end;
+        }
+      }
+
+      .abtn {
+        display: inline-flex;
+        min-height: 44px;
         align-items: center;
-
-        gap: 9px;
-
-        margin-top: 18px;
-      }
-
-      .check-row input {
-        width: 17px;
-        height: 17px;
-
-        accent-color: var(--blue-bright);
-      }
-
-      .check-row label {
-        margin: 0;
-
-        font-size: 12px;
-
-        font-weight: normal;
-
-        color: var(--text);
-      }
-
-      /* =====================================================
-           FLASH MESSAGES
-      ===================================================== */
-
-      .flash-container {
-        margin-bottom: 20px;
-      }
-
-      .flash {
-        padding: 12px 15px;
-
-        border-radius: 8px;
-
-        margin-bottom: 8px;
-
-        font-size: 13px;
-      }
-
-      .flash.success {
-        background: #e8f6ef;
-
-        color: var(--success);
-
-        border: 1px solid #c9ead8;
-      }
-
-      .flash.error {
-        background: #fcebea;
-
-        color: var(--danger);
-
-        border: 1px solid #f3cccc;
-      }
-
-      .flash.warning {
-        background: #fff7e4;
-
-        color: var(--warning);
-
-        border: 1px solid #f1dfae;
-      }
-
-      .flash.info {
-        background: var(--soft-blue);
-
-        color: var(--blue);
-
-        border: 1px solid var(--light-blue);
-      }
-
-      /* =====================================================
-           FORM ACTIONS
-      ===================================================== */
-
-      .form-actions {
-        display: flex;
-
-        justify-content: flex-end;
-
-        align-items: center;
-
-        gap: 12px;
-
-        padding: 22px 28px;
-
-        background: #fbfcfd;
-      }
-
-      .cancel-btn {
-        padding: 12px 18px;
-
-        border: 1px solid var(--border);
-
-        background: white;
-
-        color: var(--text);
-
-        border-radius: 8px;
-
-        font-size: 13px;
-
-        font-weight: bold;
-      }
-
-      .cancel-btn:hover {
-        background: var(--soft-blue);
-      }
-
-      .publish-btn {
-        padding: 12px 22px;
-
-        border: none;
-
-        background: var(--blue-bright);
-
-        color: white;
-
-        border-radius: 8px;
-
-        font-size: 13px;
-
-        font-weight: bold;
-
+        justify-content: center;
+        padding: 10px 20px;
+        border: 1px solid #1456d8;
+        border-radius: 10px;
+        background: #1456d8;
+        color: #fff;
         cursor: pointer;
-
-        box-shadow: 0 7px 18px rgba(22, 119, 184, 0.2);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
       }
 
-      .publish-btn:hover {
-        background: var(--blue);
+      .abtn:hover {
+        border-color: #001b5e;
+        background: #001b5e;
       }
 
-      .publish-btn:disabled {
-        opacity: 0.6;
+      .abtn.ghost {
+        background: #fff;
+        color: #1456d8;
+      }
 
+      .abtn.ghost:hover {
+        background: #e6eeff;
+      }
+
+      .abtn:disabled {
+        opacity: 0.55;
         cursor: not-allowed;
       }
 
-      /* =====================================================
-           FOOTER
-      ===================================================== */
-
-      footer {
-        background: var(--deep-navy);
-
-        color: white;
-
-        text-align: center;
-
-        padding: 28px 5%;
-
-        font-size: 12px;
-      }
-
-      .footer-inner {
-        width: min(1250px, 100%);
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18px;
-      }
-
-      footer span {
-        color: var(--gold);
-      }
-
-      footer .footer-credit {
-        font-weight: 700;
-        white-space: nowrap;
-      }
-
-      @media (max-width: 560px) {
-        .footer-inner {
-          flex-direction: column;
-          gap: 8px;
-        }
-      }
-
-      /* =====================================================
-           RESPONSIVE
-      ===================================================== */
-
-      @media (max-width: 800px) {
-        .form-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .form-group.full {
-          grid-column: auto;
-        }
-
-        .availability-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .amenities-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .preview-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      @media (max-width: 550px) {
-        .topbar {
-          height: 70px;
-
-          padding: 0 4%;
-        }
-
-        .brand-subtitle {
-          display: none;
-        }
-
-        .brand-title {
-          font-size: 14px;
-        }
-
-        .back-link {
-          font-size: 12px;
-        }
-
-        .page {
-          width: 94%;
-
-          padding-top: 28px;
-        }
-
-        .form-section {
-          padding: 20px;
-        }
-
-        .availability-section {
-          padding: 15px;
-        }
-
-        .amenities-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .preview-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .form-actions {
-          padding: 18px 20px;
-
-          flex-direction: column-reverse;
-
-          align-items: stretch;
-        }
-
-        .cancel-btn,
-        .publish-btn {
-          width: 100%;
-
-          text-align: center;
+      @media (prefers-reduced-motion: reduce) {
+        .a *,
+        .a *::before,
+        .a *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
         }
       }
     </style>
   </head>
 
   <body>
-    {% include "_site_header.html" %}
+    {% include "_admin_bar.html" %}
 
-    <!-- =========================================================
-         MAIN
-    ========================================================= -->
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
 
-    <main class="page">
-      <div class="page-heading">
-        <h1>Add a Property</h1>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
 
-        <p>
-          Create a clear and accurate listing so people can find the right place
-          to live.
-        </p>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+    </svg>
+
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a class="on" href="{{ url_for('add_property') }}" aria-current="page"
+            >List Property</a
+          >
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a class="t" href="{{ url_for('landlord_dashboard') }}">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          <a class="signin" href="{{ url_for('landlord_dashboard') }}"
+            >My account</a
+          >
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <!-- =====================================================
-           FLASH MESSAGES
-      ===================================================== -->
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('landlord_dashboard') }}">My dashboard</a>
+      </nav>
+    </header>
 
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %}
+    <main>
+      <!-- HERO -->
+      <section class="hero a">
+        <div class="wrap">
+          <div class="eyebrow">List a property</div>
 
-      <div class="flash-container">
-        {% for category, message in messages %}
+          <h1>Add a <em>property.</em></h1>
 
-        <div class="flash {{ category }}">{{ message }}</div>
+          <p>
+            Create a clear and accurate listing so people can find the right
+            place to live.
+          </p>
+        </div>
+      </section>
 
-        {% endfor %}
-      </div>
+      <!-- FORM -->
+      <section class="sec a">
+        <div class="wrap">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div class="aflash {{ category }}" role="alert">{{ message }}</div>
+          {% endfor %} {% endif %} {% endwith %}
 
-      {% endif %} {% endwith %}
-
-      <!-- =====================================================
-           FORM
-      ===================================================== -->
-
-      <form
-        method="POST"
-        action="{{ url_for('add_property') }}"
-        enctype="multipart/form-data"
-        id="propertyForm"
-      >
-        <div class="form-card">
-          <!-- =================================================
-               PROPERTY INFORMATION
-          ================================================= -->
-
-          <section class="form-section">
-            <div class="section-heading">
-              <h2>Property Information</h2>
-
-              <p>Tell people what type of accommodation you are offering.</p>
-            </div>
-
-            <div class="form-grid">
-              <!-- TITLE -->
-
-              <div class="form-group full">
-                <label for="title"> Property Title <span>*</span> </label>
-
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  placeholder="e.g. Modern 2 Bedroom Apartment"
-                  maxlength="200"
-                  required
-                />
+          <form
+            class="aform"
+            method="POST"
+            action="{{ url_for('add_property') }}"
+            enctype="multipart/form-data"
+            id="propertyForm"
+          >
+            <!-- PROPERTY INFORMATION -->
+            <section class="card asection">
+              <div class="ahead">
+                <h2>Property Information</h2>
+                <p>Tell people what type of accommodation you are offering.</p>
               </div>
 
-              <!-- PROPERTY TYPE -->
-
-              <div class="form-group">
-                <label for="property_type">
-                  Property Type <span>*</span>
-                </label>
-
-                <select id="property_type" name="property_type" required>
-                  <option value="">Select property type</option>
-
-                  <option value="hostel">Hostel</option>
-
-                  <option value="single_room">Single Room</option>
-
-                  <option value="bedsitter">Bedsitter</option>
-
-                  <option value="apartment">Apartment</option>
-
-                  <option value="house">House</option>
-
-                  <option value="student_residence">Student Residence</option>
-
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <!-- LOCATION -->
-
-              <div class="form-group">
-                <label for="location"> Location (Town) <span>*</span> </label>
-
-                <select id="location" name="location" required>
-                  <option value="" disabled selected>-- Select Town --</option>
-                  {% for town in towns %}
-                  <option value="{{ town }}">{{ town }}</option>
-                  {% endfor %}
-                </select>
-                <div class="input-help">
-                  Select the primary town for clean search results.
-                </div>
-              </div>
-
-              <!-- CAMPUS -->
-
-              <div class="form-group">
-                <label for="campus"> Nearby Campus / Institution </label>
-
-                <input
-                  type="text"
-                  id="campus"
-                  name="campus"
-                  placeholder="e.g. Kibabii University"
-                  maxlength="200"
-                />
-              </div>
-
-              <!-- DISTANCE -->
-
-              <div class="form-group">
-                <label for="distance_from_campus">
-                  Distance from Campus (km)
-                </label>
-
-                <input
-                  type="number"
-                  id="distance_from_campus"
-                  name="distance_from_campus"
-                  placeholder="e.g. 1.5"
-                  min="0"
-                  step="0.01"
-                />
-
-                <div class="input-help">Leave blank if not applicable.</div>
-              </div>
-
-              <!-- DESCRIPTION -->
-
-              <div class="form-group full">
-                <label for="description"> Description <span>*</span> </label>
-
-                <textarea
-                  id="description"
-                  name="description"
-                  placeholder="Describe the property, rooms, surroundings, access, security and anything else people should know..."
-                  required
-                ></textarea>
-              </div>
-            </div>
-          </section>
-
-          <!-- =================================================
-               PRICING & AVAILABILITY
-          ================================================= -->
-
-          <section class="form-section">
-            <div class="section-heading">
-              <h2>Pricing & Availability</h2>
-
-              <p>
-                Set the rent and tell people how many units are currently
-                available.
-              </p>
-            </div>
-
-            <!-- PRICING -->
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="price"> Monthly Rent (KSh) <span>*</span> </label>
-
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  placeholder="e.g. 8500"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="deposit"> Deposit (KSh) </label>
-
-                <input
-                  type="number"
-                  id="deposit"
-                  name="deposit"
-                  placeholder="e.g. 8500"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-            </div>
-
-            <!-- =================================================
-                 UNIT AVAILABILITY
-            ================================================= -->
-
-            <div class="availability-section">
-              <div class="availability-intro">
-                <div class="availability-icon">🏠</div>
-
-                <div>
-                  <h3>Unit Availability</h3>
-
-                  <p>
-                    Enter the total number of units in this property and how
-                    many are currently vacant. Occupied units are calculated
-                    automatically.
-                  </p>
-                </div>
-              </div>
-
-              <div class="availability-grid">
-                <!-- TOTAL -->
-
-                <div class="availability-field">
-                  <label for="total_units"> Total Units <span>*</span> </label>
-
+              <div class="agrid">
+                <div class="afield full">
+                  <label for="title">Property Title <span>*</span></label>
                   <input
-                    type="number"
-                    id="total_units"
-                    name="total_units"
-                    min="1"
-                    value="1"
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Modern 2 Bedroom Apartment"
+                    maxlength="200"
                     required
                   />
+                </div>
 
-                  <div class="input-help">
-                    Example: 20 rooms = 20 total units.
+                <div class="afield">
+                  <label for="property_type"
+                    >Property Type <span>*</span></label
+                  >
+                  <select id="property_type" name="property_type" required>
+                    <option value="">Select property type</option>
+                    <option value="hostel">Hostel</option>
+                    <option value="single_room">Single Room</option>
+                    <option value="bedsitter">Bedsitter</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="house">House</option>
+                    <option value="student_residence">Student Residence</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div class="afield">
+                  <label for="location">Location (Town) <span>*</span></label>
+                  <select id="location" name="location" required>
+                    <option value="" disabled selected>
+                      -- Select Town --
+                    </option>
+                    {% for town in towns %}
+                    <option value="{{ town }}">{{ town }}</option>
+                    {% endfor %}
+                  </select>
+                  <div class="ahelp">
+                    Select the primary town for clean search results.
                   </div>
                 </div>
 
-                <!-- VACANT -->
+                <div class="afield">
+                  <label for="campus">Nearby Campus / Institution</label>
+                  <input
+                    type="text"
+                    id="campus"
+                    name="campus"
+                    placeholder="e.g. Kibabii University"
+                    maxlength="200"
+                  />
+                </div>
 
-                <div class="availability-field">
-                  <label for="vacant_units">
-                    Vacant Units <span>*</span>
-                  </label>
-
+                <div class="afield">
+                  <label for="distance_from_campus"
+                    >Distance from Campus (km)</label
+                  >
                   <input
                     type="number"
-                    id="vacant_units"
-                    name="vacant_units"
+                    id="distance_from_campus"
+                    name="distance_from_campus"
+                    placeholder="e.g. 1.5"
                     min="0"
-                    value="1"
+                    step="0.01"
+                  />
+                  <div class="ahelp">Leave blank if not applicable.</div>
+                </div>
+
+                <div class="afield full">
+                  <label for="description">Description <span>*</span></label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe the property, rooms, surroundings, access, security and anything else people should know..."
+                    required
+                  ></textarea>
+                </div>
+              </div>
+            </section>
+
+            <!-- PRICING & AVAILABILITY -->
+            <section class="card asection">
+              <div class="ahead">
+                <h2>Pricing &amp; Availability</h2>
+                <p>
+                  Set the rent and tell people how many units are currently
+                  available.
+                </p>
+              </div>
+
+              <div class="agrid">
+                <div class="afield">
+                  <label for="price">Monthly Rent (KSh) <span>*</span></label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    placeholder="e.g. 8500"
+                    min="0"
+                    step="0.01"
                     required
                   />
+                </div>
 
-                  <div class="input-help">
-                    Number of units currently available.
+                <div class="afield">
+                  <label for="deposit">Deposit (KSh)</label>
+                  <input
+                    type="number"
+                    id="deposit"
+                    name="deposit"
+                    placeholder="e.g. 8500"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div class="aavail">
+                <div class="aintro">
+                  <div class="aicon" aria-hidden="true">🏠</div>
+                  <div>
+                    <h3>Unit Availability</h3>
+                    <p>
+                      Enter the total number of units in this property and how
+                      many are currently vacant. Occupied units are calculated
+                      automatically.
+                    </p>
                   </div>
                 </div>
 
-                <!-- OCCUPIED -->
+                <div class="aavail-grid">
+                  <div class="afield">
+                    <label for="total_units">Total Units <span>*</span></label>
+                    <input
+                      type="number"
+                      id="total_units"
+                      name="total_units"
+                      min="1"
+                      value="1"
+                      required
+                    />
+                    <div class="ahelp">Example: 20 rooms = 20 total units.</div>
+                  </div>
 
-                <div class="availability-field">
-                  <label for="occupied_units"> Occupied Units </label>
+                  <div class="afield">
+                    <label for="vacant_units"
+                      >Vacant Units <span>*</span></label
+                    >
+                    <input
+                      type="number"
+                      id="vacant_units"
+                      name="vacant_units"
+                      min="0"
+                      value="1"
+                      required
+                    />
+                    <div class="ahelp">
+                      Number of units currently available.
+                    </div>
+                  </div>
 
+                  <div class="afield">
+                    <label for="occupied_units">Occupied Units</label>
+                    <input
+                      type="number"
+                      id="occupied_units"
+                      name="occupied_units"
+                      value="0"
+                      readonly
+                    />
+                    <div class="ahelp">Automatically calculated.</div>
+                  </div>
+                </div>
+
+                <div
+                  id="availabilityPreview"
+                  class="apreview"
+                  aria-live="polite"
+                >
+                  ✓ 1 of 1 unit is currently available.
+                </div>
+
+                <div id="availabilityError" class="aerror" role="alert"></div>
+              </div>
+
+              <div class="acheck">
+                <input type="checkbox" id="furnished" name="furnished" />
+                <label for="furnished">This property is furnished.</label>
+              </div>
+            </section>
+
+            <!-- AMENITIES -->
+            <section class="card asection">
+              <div class="ahead">
+                <h2>Amenities</h2>
+                <p>Select everything that is available at the property.</p>
+              </div>
+
+              <div class="aamen">
+                <div class="aam">
                   <input
-                    type="number"
-                    id="occupied_units"
-                    name="occupied_units"
-                    value="0"
-                    readonly
+                    type="checkbox"
+                    id="wifi"
+                    name="amenities"
+                    value="Wi-Fi"
                   />
+                  <label for="wifi">Wi-Fi</label>
+                </div>
 
-                  <div class="input-help">Automatically calculated.</div>
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="water"
+                    name="amenities"
+                    value="Water"
+                  />
+                  <label for="water">Water</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="electricity"
+                    name="amenities"
+                    value="Electricity"
+                  />
+                  <label for="electricity">Electricity</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="security"
+                    name="amenities"
+                    value="Security"
+                  />
+                  <label for="security">Security</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="parking"
+                    name="amenities"
+                    value="Parking"
+                  />
+                  <label for="parking">Parking</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="laundry"
+                    name="amenities"
+                    value="Laundry"
+                  />
+                  <label for="laundry">Laundry</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="kitchen"
+                    name="amenities"
+                    value="Kitchen"
+                  />
+                  <label for="kitchen">Kitchen</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="shower"
+                    name="amenities"
+                    value="Hot Shower"
+                  />
+                  <label for="shower">Hot Shower</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="study"
+                    name="amenities"
+                    value="Study Area"
+                  />
+                  <label for="study">Study Area</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="generator"
+                    name="amenities"
+                    value="Backup Generator"
+                  />
+                  <label for="generator">Backup Generator</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="cctv"
+                    name="amenities"
+                    value="CCTV"
+                  />
+                  <label for="cctv">CCTV</label>
+                </div>
+
+                <div class="aam">
+                  <input
+                    type="checkbox"
+                    id="furnishedAmenity"
+                    name="amenities"
+                    value="Furnished"
+                  />
+                  <label for="furnishedAmenity">Furnished</label>
                 </div>
               </div>
+            </section>
 
-              <!-- AVAILABILITY MESSAGE -->
-
-              <div id="availabilityPreview" class="availability-preview">
-                ✓ 1 of 1 unit is currently available.
+            <!-- PHOTOS -->
+            <section class="card asection">
+              <div class="ahead">
+                <h2>Property Photos</h2>
+                <p>
+                  Good photos help people understand the property before
+                  contacting you.
+                </p>
               </div>
 
-              <div id="availabilityError" class="availability-error"></div>
+              <label for="photos" class="aupload">
+                <div class="uicon" aria-hidden="true">📷</div>
+                <h3>Add property photos</h3>
+                <p>Select multiple photos from your phone or computer.</p>
+                <span class="ubtn">Choose Photos</span>
+              </label>
+
+              <input
+                type="file"
+                id="photos"
+                name="photos"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+              />
+
+              <div id="previewGrid" class="apreview-grid"></div>
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="card aactions">
+              <a class="abtn ghost" href="{{ url_for('landlord_dashboard') }}"
+                >Cancel</a
+              >
+              <button type="submit" class="abtn" id="publishButton">
+                Publish Property
+              </button>
             </div>
+          </form>
+        </div>
+      </section>
 
-            <!-- FURNISHED -->
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
 
-            <div class="check-row">
-              <input type="checkbox" id="furnished" name="furnished" />
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
 
-              <label for="furnished"> This property is furnished. </label>
+            <div>
+              +254 768387842
+              <small>Call or WhatsApp</small>
             </div>
-          </section>
+          </div>
 
-          <!-- =================================================
-               AMENITIES
-          ================================================= -->
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
 
-          <section class="form-section">
-            <div class="section-heading">
-              <h2>Amenities</h2>
-
-              <p>Select everything that is available at the property.</p>
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
             </div>
+          </div>
 
-            <div class="amenities-grid">
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="wifi"
-                  name="amenities"
-                  value="Wi-Fi"
-                />
-
-                <label for="wifi"> Wi-Fi </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="water"
-                  name="amenities"
-                  value="Water"
-                />
-
-                <label for="water"> Water </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="electricity"
-                  name="amenities"
-                  value="Electricity"
-                />
-
-                <label for="electricity"> Electricity </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="security"
-                  name="amenities"
-                  value="Security"
-                />
-
-                <label for="security"> Security </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="parking"
-                  name="amenities"
-                  value="Parking"
-                />
-
-                <label for="parking"> Parking </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="laundry"
-                  name="amenities"
-                  value="Laundry"
-                />
-
-                <label for="laundry"> Laundry </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="kitchen"
-                  name="amenities"
-                  value="Kitchen"
-                />
-
-                <label for="kitchen"> Kitchen </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="shower"
-                  name="amenities"
-                  value="Hot Shower"
-                />
-
-                <label for="shower"> Hot Shower </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="study"
-                  name="amenities"
-                  value="Study Area"
-                />
-
-                <label for="study"> Study Area </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="generator"
-                  name="amenities"
-                  value="Backup Generator"
-                />
-
-                <label for="generator"> Backup Generator </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="cctv"
-                  name="amenities"
-                  value="CCTV"
-                />
-
-                <label for="cctv"> CCTV </label>
-              </div>
-
-              <div class="amenity">
-                <input
-                  type="checkbox"
-                  id="furnishedAmenity"
-                  name="amenities"
-                  value="Furnished"
-                />
-
-                <label for="furnishedAmenity"> Furnished </label>
-              </div>
-            </div>
-          </section>
-
-          <!-- =================================================
-               PHOTOS
-          ================================================= -->
-
-          <section class="form-section">
-            <div class="section-heading">
-              <h2>Property Photos</h2>
-
-              <p>
-                Good photos help people understand the property before
-                contacting you.
-              </p>
-            </div>
-
-            <label for="photos" class="upload-area">
-              <div class="upload-icon">📷</div>
-
-              <h3>Add property photos</h3>
-
-              <p>Select multiple photos from your phone or computer.</p>
-
-              <span class="upload-button"> Choose Photos </span>
-            </label>
-
-            <input
-              type="file"
-              id="photos"
-              name="photos"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-            />
-
-            <div id="previewGrid" class="preview-grid"></div>
-          </section>
-
-          <!-- =================================================
-               ACTIONS
-          ================================================= -->
-
-          <div class="form-actions">
-            <a href="{{ url_for('landlord_dashboard') }}" class="cancel-btn">
-              Cancel
-            </a>
-
-            <button type="submit" class="publish-btn" id="publishButton">
-              Publish Property
-            </button>
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
           </div>
         </div>
-      </form>
+      </section>
     </main>
 
-    <!-- =========================================================
-         FOOTER
-    ========================================================= -->
-
-    <footer>
-      <div class="footer-inner">
-        <div>
-          © 2026 <span>Civic Nest</span>. Find your place. Find your people.
-        </div>
-        <span class="footer-credit">Developed by Mabel Technologies</span>
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
       </div>
     </footer>
 
-    <!-- =========================================================
-         JAVASCRIPT
-    ========================================================= -->
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
 
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a href="{{ url_for('landlord_dashboard') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Dashboard
+      </a>
+
+      <a class="on" href="{{ url_for('add_property') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List Property
+      </a>
+    </nav>
+
+    <!-- JAVASCRIPT -->
     <script>
-      /* =========================================================
-         AVAILABILITY CALCULATOR
-      ========================================================= */
+      (() => {
+        "use strict";
 
-      const totalUnitsInput = document.getElementById("total_units");
+        // MOBILE NAVIGATION
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
 
-      const vacantUnitsInput = document.getElementById("vacant_units");
+        if (menuBtn && menuPanel) {
+          menuBtn.addEventListener("click", () => {
+            const isOpening = menuPanel.hidden;
 
-      const occupiedUnitsInput = document.getElementById("occupied_units");
+            menuPanel.hidden = !isOpening;
+            menuBtn.setAttribute("aria-expanded", String(isOpening));
+            menuBtn.setAttribute(
+              "aria-label",
+              isOpening ? "Close menu" : "Open menu",
+            );
+          });
 
-      const availabilityPreview = document.getElementById(
-        "availabilityPreview",
-      );
+          document.addEventListener("click", (event) => {
+            if (
+              !menuPanel.hidden &&
+              !menuPanel.contains(event.target) &&
+              !menuBtn.contains(event.target)
+            ) {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.setAttribute("aria-label", "Open menu");
+            }
+          });
 
-      const availabilityError = document.getElementById("availabilityError");
-
-      const publishButton = document.getElementById("publishButton");
-
-      function updateAvailability() {
-        let total = parseInt(totalUnitsInput.value) || 0;
-
-        let vacant = parseInt(vacantUnitsInput.value) || 0;
-
-        availabilityError.style.display = "none";
-
-        availabilityError.textContent = "";
-
-        publishButton.disabled = false;
-
-        /* -----------------------------------------
-           TOTAL VALIDATION
-        ----------------------------------------- */
-
-        if (total < 1) {
-          occupiedUnitsInput.value = 0;
-
-          availabilityError.textContent = "Total units must be at least 1.";
-
-          availabilityError.style.display = "block";
-
-          publishButton.disabled = true;
-
-          availabilityPreview.classList.add("full");
-
-          availabilityPreview.textContent =
-            "Please enter a valid total number of units.";
-
-          return;
+          menuPanel.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.focus();
+            }
+          });
         }
 
-        /* -----------------------------------------
-           VACANT VALIDATION
-        ----------------------------------------- */
+        // AVAILABILITY CALCULATOR
+        const totalUnitsInput = document.getElementById("total_units");
+        const vacantUnitsInput = document.getElementById("vacant_units");
+        const occupiedUnitsInput = document.getElementById("occupied_units");
+        const availabilityPreview = document.getElementById(
+          "availabilityPreview",
+        );
+        const availabilityError = document.getElementById("availabilityError");
+        const publishButton = document.getElementById("publishButton");
 
-        if (vacant < 0) {
-          vacant = 0;
+        function updateAvailability() {
+          const total = parseInt(totalUnitsInput.value, 10) || 0;
+          let vacant = parseInt(vacantUnitsInput.value, 10) || 0;
 
-          vacantUnitsInput.value = 0;
-        }
+          availabilityError.style.display = "none";
+          availabilityError.textContent = "";
+          publishButton.disabled = false;
 
-        if (vacant > total) {
-          availabilityError.textContent =
-            "Vacant units cannot be greater than total units.";
-
-          availabilityError.style.display = "block";
-
-          publishButton.disabled = true;
-
-          occupiedUnitsInput.value = 0;
-
-          availabilityPreview.classList.add("full");
-
-          availabilityPreview.textContent =
-            "Please reduce the number of vacant units.";
-
-          return;
-        }
-
-        /* -----------------------------------------
-           CALCULATE OCCUPIED
-        ----------------------------------------- */
-
-        const occupied = total - vacant;
-
-        occupiedUnitsInput.value = occupied;
-
-        /* -----------------------------------------
-           PUBLIC AVAILABILITY MESSAGE
-        ----------------------------------------- */
-
-        availabilityPreview.classList.remove("full");
-
-        if (vacant === 0) {
-          availabilityPreview.classList.add("full");
-
-          availabilityPreview.textContent =
-            "Currently fully occupied. No units are available.";
-        } else if (vacant === 1) {
-          availabilityPreview.textContent =
-            "✓ 1 of " + total + " unit is currently available.";
-        } else {
-          availabilityPreview.textContent =
-            "✓ " + vacant + " of " + total + " units are currently available.";
-        }
-      }
-
-      totalUnitsInput.addEventListener("input", updateAvailability);
-
-      vacantUnitsInput.addEventListener("input", updateAvailability);
-
-      /* Initial calculation */
-
-      updateAvailability();
-
-      /* =========================================================
-         FORM VALIDATION
-      ========================================================= */
-
-      const propertyForm = document.getElementById("propertyForm");
-
-      propertyForm.addEventListener("submit", function (event) {
-        const total = parseInt(totalUnitsInput.value) || 0;
-
-        const vacant = parseInt(vacantUnitsInput.value) || 0;
-
-        if (total < 1) {
-          event.preventDefault();
-
-          alert("Total units must be at least 1.");
-
-          totalUnitsInput.focus();
-
-          return;
-        }
-
-        if (vacant < 0 || vacant > total) {
-          event.preventDefault();
-
-          alert(
-            "Vacant units must be between 0 and the total number of units.",
-          );
-
-          vacantUnitsInput.focus();
-
-          return;
-        }
-
-        /*
-         * Occupied is always calculated here as well.
-         * The Flask backend will also recalculate it
-         * for security and data integrity.
-         */
-
-        occupiedUnitsInput.value = total - vacant;
-      });
-
-      /* =========================================================
-         PHOTO PREVIEW
-      ========================================================= */
-
-      const photoInput = document.getElementById("photos");
-
-      const previewGrid = document.getElementById("previewGrid");
-
-      photoInput.addEventListener("change", function () {
-        previewGrid.innerHTML = "";
-
-        const files = Array.from(this.files);
-
-        files.forEach((file, index) => {
-          if (!file.type.startsWith("image/")) {
+          if (total < 1) {
+            occupiedUnitsInput.value = 0;
+            availabilityError.textContent = "Total units must be at least 1.";
+            availabilityError.style.display = "block";
+            publishButton.disabled = true;
+            availabilityPreview.classList.add("full");
+            availabilityPreview.textContent =
+              "Please enter a valid total number of units.";
             return;
           }
 
-          const reader = new FileReader();
+          if (vacant < 0) {
+            vacant = 0;
+            vacantUnitsInput.value = 0;
+          }
 
-          reader.onload = function (event) {
-            const item = document.createElement("div");
+          if (vacant > total) {
+            availabilityError.textContent =
+              "Vacant units cannot be greater than total units.";
+            availabilityError.style.display = "block";
+            publishButton.disabled = true;
+            occupiedUnitsInput.value = 0;
+            availabilityPreview.classList.add("full");
+            availabilityPreview.textContent =
+              "Please reduce the number of vacant units.";
+            return;
+          }
 
-            item.className = "preview-item";
+          occupiedUnitsInput.value = total - vacant;
 
-            const image = document.createElement("img");
+          availabilityPreview.classList.remove("full");
 
-            image.src = event.target.result;
+          if (vacant === 0) {
+            availabilityPreview.classList.add("full");
+            availabilityPreview.textContent =
+              "Currently fully occupied. No units are available.";
+          } else if (vacant === 1) {
+            availabilityPreview.textContent =
+              "✓ 1 of " + total + " unit is currently available.";
+          } else {
+            availabilityPreview.textContent =
+              "✓ " +
+              vacant +
+              " of " +
+              total +
+              " units are currently available.";
+          }
+        }
 
-            image.alt = "Property photo " + (index + 1);
+        totalUnitsInput.addEventListener("input", updateAvailability);
+        vacantUnitsInput.addEventListener("input", updateAvailability);
+        updateAvailability();
 
-            item.appendChild(image);
+        // FORM VALIDATION
+        const propertyForm = document.getElementById("propertyForm");
 
-            /*
-             * First selected photo becomes
-             * the cover photo.
-             */
+        propertyForm.addEventListener("submit", (event) => {
+          const total = parseInt(totalUnitsInput.value, 10) || 0;
+          const vacant = parseInt(vacantUnitsInput.value, 10) || 0;
 
-            if (index === 0) {
-              const cover = document.createElement("div");
+          if (total < 1) {
+            event.preventDefault();
+            alert("Total units must be at least 1.");
+            totalUnitsInput.focus();
+            return;
+          }
 
-              cover.className = "cover-label";
+          if (vacant < 0 || vacant > total) {
+            event.preventDefault();
+            alert(
+              "Vacant units must be between 0 and the total number of units.",
+            );
+            vacantUnitsInput.focus();
+            return;
+          }
 
-              cover.textContent = "Cover Photo";
-
-              item.appendChild(cover);
-            }
-
-            previewGrid.appendChild(item);
-          };
-
-          reader.readAsDataURL(file);
+          // The Flask backend also recalculates this for data integrity.
+          occupiedUnitsInput.value = total - vacant;
         });
-      });
+
+        // PHOTO PREVIEW
+        const photoInput = document.getElementById("photos");
+        const previewGrid = document.getElementById("previewGrid");
+
+        photoInput.addEventListener("change", function () {
+          previewGrid.innerHTML = "";
+
+          Array.from(this.files).forEach((file, index) => {
+            if (!file.type.startsWith("image/")) return;
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+              const item = document.createElement("div");
+              item.className = "apitem";
+
+              const image = document.createElement("img");
+              image.src = event.target.result;
+              image.alt = "Property photo " + (index + 1);
+              item.appendChild(image);
+
+              // The first selected photo becomes the cover photo.
+              if (index === 0) {
+                const cover = document.createElement("div");
+                cover.className = "acover";
+                cover.textContent = "Cover Photo";
+                item.appendChild(cover);
+              }
+
+              previewGrid.appendChild(item);
+            };
+
+            reader.readAsDataURL(file);
+          });
+        });
+      })();
     </script>
   </body>
 </html>

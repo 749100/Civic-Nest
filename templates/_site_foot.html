@@ -1,0 +1,91 @@
+{% set ep = request.endpoint %}
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div>
+      <h3>Contact Us</h3>
+      <p>We’re here to help. Get in touch with us.</p>
+    </div>
+    <div class="ci">
+      <svg class="i"><use href="#i-phone" /></svg>
+      <div>+254 768387842<small>Call or WhatsApp</small></div>
+    </div>
+    <div class="ci">
+      <svg class="i"><use href="#i-mail" /></svg>
+      <div>
+        www.mokuajoshuaongeri@gmail.com<small
+          >We’ll respond within 24 hours</small
+        >
+      </div>
+    </div>
+    <div class="soc" aria-label="Social links">
+      <a href="#" aria-label="Facebook">f</a><a href="#" aria-label="X">𝕏</a
+      ><a href="#" aria-label="Instagram">ig</a
+      ><a href="#" aria-label="LinkedIn">in</a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span
+      >© {{ current_year }} CivicNest Africa. Developed by
+      <a class="dev" href="#">Mabel Technologies</a>.</span
+    >
+  </div>
+</footer>
+
+<nav class="bnav" aria-label="Primary">
+  <a href="{{ url_for('home') }}"
+    ><svg class="i" style="width: 22px; height: 22px">
+      <use href="#i-house" /></svg
+    >Home</a
+  >
+  <a
+    {%
+    if
+    ep
+    in
+    ['roommate_finder','roommate_profile','roommate_requests','create_roommate_profile','edit_roommate_profile']
+    %}class="on"
+    aria-current="page"
+    {%
+    endif
+    %}
+    href="{{ url_for('roommate_finder') }}"
+    ><svg class="i" style="width: 22px; height: 22px">
+      <use href="#i-users" /></svg
+    >Roommates</a
+  >
+  <a href="{{ url_for('travel_page') }}"
+    ><svg class="i" style="width: 22px; height: 22px">
+      <use href="#i-plane" /></svg
+    >Travel</a
+  >
+  <a href="{{ url_for('sell_page') }}"
+    ><svg class="i" style="width: 22px; height: 22px">
+      <use href="#i-plus" /></svg
+    >List Property</a
+  >
+</nav>
+
+<script>
+  (function () {
+    var b = document.getElementById("menuBtn"),
+      m = document.getElementById("menuPanel");
+    if (!b || !m) return;
+    b.addEventListener("click", function () {
+      var o = m.hidden;
+      m.hidden = !o;
+      b.setAttribute("aria-expanded", String(o));
+      b.setAttribute("aria-label", o ? "Close menu" : "Open menu");
+    });
+    document.addEventListener("click", function (e) {
+      if (!m.hidden && !m.contains(e.target) && !b.contains(e.target)) {
+        m.hidden = true;
+        b.setAttribute("aria-expanded", "false");
+        b.setAttribute("aria-label", "Open menu");
+      }
+    });
+  })();
+</script>

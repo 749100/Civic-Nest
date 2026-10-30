@@ -7,100 +7,65 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
-    <!-- Primary SEO Meta Tags -->
-    <title>
-      Rent Houses, Student Hostels & Apartments in Kenya - CivicNest Africa
-    </title>
-    <meta
-      name="title"
-      content="Rent Houses, Student Hostels & Apartments in Kenya - CivicNest Africa"
-    />
+    <title>Rent Homes & Student Hostels in Kenya | CivicNest Africa</title>
     <meta
       name="description"
-      content="Find verified rental houses, bedsitters, student hostels, and apartments near campuses and towns across Kenya. Search and filter rentals easily on CivicNest Africa."
+      content="Find houses, apartments, bedsitters and student hostels for rent across Kenya with CivicNest Africa."
     />
-    <meta
-      name="keywords"
-      content="houses for rent kenya, student hostels near kibabii, bedsitters for rent, apartments nairobi, rental property kenya"
-    />
-    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0047ff" />
 
-    <!-- Canonical URL -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="canonical"
-      href="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
     />
-
-    <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:type" content="website" />
-    <meta
-      property="og:url"
-      content="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
-    />
-    <meta
-      property="og:title"
-      content="Rent Houses, Student Hostels & Apartments in Kenya"
-    />
-    <meta
-      property="og:description"
-      content="Browse verified rental properties, rooms, and student hostels across Kenya."
-    />
-    <meta
-      property="og:image"
-      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-    />
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta
-      property="twitter:url"
-      content="https://civic-nest.onrender.com{{ url_for('rent_page') }}"
-    />
-    <meta
-      property="twitter:title"
-      content="Rent Houses, Student Hostels & Apartments in Kenya"
-    />
-    <meta
-      property="twitter:description"
-      content="Browse verified rental properties, rooms, and student hostels across Kenya."
-    />
-    <meta
-      property="twitter:image"
-      content="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-    />
-
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
+
     <style>
       :root {
-        --blue: #1e4fa3;
-        --blue2: #2d63c8;
-        --navy: #0a2260;
-        --tint: #e1ebfa;
-        --bg: #f3f7fd;
-        --line: #d9e3f3;
-        --ink: #14213d;
-        --muted: #55627a;
-        --lift:
-          0 1px 2px rgba(20, 33, 61, 0.05), 0 10px 28px rgba(30, 79, 163, 0.09);
+        --blue: #0047ff;
+        --blue-dark: #0035c5;
+        --navy: #001b5e;
+        --ink: #071a42;
+        --muted: #405578;
+        --bg: #eaf2ff;
+        --line: #c4d8ff;
+        --tint: #d8e7ff;
+        --white: #fff;
+        --green: #008749;
+        --red: #e33445;
+        --shadow:
+          0 3px 10px rgba(0, 45, 170, 0.1), 0 8px 22px rgba(0, 70, 230, 0.08);
+        --shadow-strong: 0 12px 30px rgba(0, 55, 210, 0.2);
       }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       html {
         scroll-behavior: smooth;
+        scroll-padding-top: 85px;
       }
+
       body {
-        overflow-x: hidden;
-        font-family: "DM Sans", sans-serif;
+        font-family: "Plus Jakarta Sans", Arial, sans-serif;
         color: var(--ink);
         background: var(--bg);
-        padding-bottom: calc(112px + env(safe-area-inset-bottom));
+        line-height: 1.6;
+        overflow-x: hidden;
       }
+
+      body.menu-open {
+        overflow: hidden;
+      }
+
       a {
         color: inherit;
         text-decoration: none;
@@ -108,1055 +73,1868 @@
       button,
       input,
       select {
-        font-family: inherit;
+        font: inherit;
       }
+      button {
+        cursor: pointer;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+      }
+      [hidden] {
+        display: none !important;
+      }
+
       :focus-visible {
-        outline: 3px solid #9dc0ff;
-        outline-offset: 2px;
+        outline: 3px solid #ffb800;
+        outline-offset: 3px;
       }
+
       .wrap {
-        position: relative;
-        max-width: 1180px;
+        width: min(1180px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 0 22px;
-      }
-      svg.i {
-        width: 20px;
-        height: 20px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex: none;
       }
 
-      .stage {
-        position: relative;
-        overflow: hidden;
-        color: #fff;
-        padding-bottom: 44px;
-        border-radius: 0 0 40px 40px;
-        background:
-          radial-gradient(
-            700px 420px at 92% 4%,
-            rgba(120, 175, 255, 0.4),
-            transparent 70%
-          ),
-          radial-gradient(
-            600px 400px at 0 70%,
-            rgba(45, 99, 200, 0.55),
-            transparent 70%
-          ),
-          linear-gradient(
-            180deg,
-            rgba(7, 24, 72, 0.8) 0,
-            rgba(14, 52, 128, 0.82) 55%,
-            rgba(8, 30, 86, 0.94) 100%
-          ),
-          url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85")
-            center/cover #0e3478;
-      }
-      .stage::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.22) 1.1px,
-            transparent 1.6px
-          )
-          0 0/24px 24px;
-        -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
-        mask-image: linear-gradient(180deg, #000, transparent 70%);
+      /* Navigation — aligned with homepage */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 2px 0 #c4d8ff;
+        backdrop-filter: blur(12px);
       }
 
-      .top {
-        position: relative;
-        z-index: 5;
+      .nav-inner {
+        min-height: 66px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 76px;
-        padding-top: 6px;
+        gap: 20px;
       }
-      .icon-btn {
-        width: 46px;
-        height: 46px;
-        border-radius: 23px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-      }
-      .icon-btn.ring {
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.32);
-        -webkit-backdrop-filter: blur(10px);
-        backdrop-filter: blur(10px);
-      }
+
       .brand {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 9px;
+        color: var(--navy);
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        white-space: nowrap;
       }
+
       .brand-mark {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        background: #fff;
-        color: var(--blue);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-      }
-      .brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1;
-      }
-      .brand-name {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 25px;
-        color: #fff;
-      }
-      .brand-sub {
-        margin-top: 3px;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.78);
-      }
-      .menu {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        z-index: 30;
-        min-width: 230px;
-        background: #fff;
-        color: var(--ink);
-        border-radius: 16px;
-        padding: 6px;
-        box-shadow: 0 22px 50px rgba(5, 15, 50, 0.4);
-      }
-      .menu[hidden] {
-        display: none;
-      }
-      .menu a {
-        display: block;
-        padding: 12px 14px;
-        border-radius: 10px;
-        font-weight: 500;
-        font-size: 15px;
-      }
-      .menu a:hover {
-        background: var(--tint);
-      }
-
-      h1 {
-        position: relative;
-        margin: clamp(18px, 5vw, 40px) 0 26px;
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(36px, 6.5vw, 64px);
-        line-height: 1.06;
-        letter-spacing: -0.02em;
-        max-width: 16ch;
-        text-shadow: 0 6px 30px rgba(3, 12, 40, 0.45);
-      }
-      .search {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        height: 62px;
-        padding: 0 9px 0 20px;
-        background: #fff;
-        border-radius: 20px;
-        color: var(--muted);
-        max-width: 720px;
-        box-shadow: 0 24px 50px rgba(3, 12, 40, 0.4);
-      }
-      .search input {
-        flex: 1;
-        min-width: 0;
-        border: 0;
-        outline: 0;
-        background: transparent;
-        font-size: 16px;
-        color: var(--ink);
-      }
-      .search:focus-within {
-        box-shadow:
-          0 0 0 4px rgba(157, 192, 255, 0.55),
-          0 24px 50px rgba(3, 12, 40, 0.4);
-      }
-      .go {
-        width: 46px;
-        height: 46px;
-        border-radius: 15px;
-        border: 0;
-        cursor: pointer;
-        color: #fff;
-        background: linear-gradient(135deg, var(--blue2), #173f85);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 18px rgba(30, 79, 163, 0.4);
-      }
-
-      .label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 32px 0 14px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.82);
-      }
-      .label::before {
-        content: "";
-        width: 26px;
-        height: 3px;
-        border-radius: 2px;
-        background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.2));
-      }
-      .grid {
+        width: 39px;
+        height: 39px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        place-items: center;
+        color: white;
+        background: linear-gradient(135deg, #0066ff, #0030c9);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 71, 255, 0.3);
       }
-      .tile {
-        position: relative;
-        overflow: hidden;
+
+      .brand small {
+        display: block;
+        margin-top: -3px;
+        color: var(--blue);
+        font-size: 11px;
+        letter-spacing: 1.7px;
+        line-height: 1.2;
+      }
+
+      .links {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding: 15px 16px;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.11);
-        border: 1px solid rgba(255, 255, 255, 0.26);
-        border-radius: 20px;
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        box-shadow:
-          0 14px 34px rgba(3, 12, 40, 0.22),
-          inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        align-items: center;
+        gap: 23px;
+      }
+
+      .links a {
+        padding: 22px 0 19px;
+        border-bottom: 3px solid transparent;
+        color: #30466e;
+        font-size: 13px;
+        font-weight: 800;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+
+      .links a:hover,
+      .links a.active {
+        color: var(--blue);
+        border-color: var(--blue);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 15px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
         transition:
           transform 0.2s,
           background 0.2s,
-          border-color 0.2s;
-      }
-      a.tile:hover {
-        transform: translateY(-4px);
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-      }
-      .tile.on {
-        background: rgba(255, 255, 255, 0.28);
-        border-color: #fff;
-      }
-      .ico {
-        width: 40px;
-        height: 40px;
-        border-radius: 13px;
-        background: #fff;
-        color: var(--blue);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 18px rgba(3, 12, 40, 0.28);
-      }
-      .tile strong {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .tile small {
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.82);
+          box-shadow 0.2s;
       }
 
-      .filters {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 4px;
+      .btn:hover {
+        transform: translateY(-1px);
       }
-      .field {
+
+      .btn-primary {
+        color: white;
+        background: linear-gradient(135deg, #0066ff, #003bd9);
+        box-shadow: 0 4px 12px rgba(0, 64, 255, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #0050e8, #0028b5);
+      }
+
+      .btn-outline {
+        color: var(--blue);
+        background: white;
+        border-color: var(--line);
+      }
+
+      .menu-toggle {
+        display: none;
+        width: 39px;
+        height: 39px;
+        color: var(--blue);
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 18px;
+      }
+
+      /* Hero — homepage photo and saturated blue overlay */
+      .hero {
+        position: relative;
+        color: white;
+        min-height: 360px;
+        padding: 45px 0 94px;
+        background-color: #063b91;
+        background-image:
+          linear-gradient(
+            90deg,
+            rgba(0, 24, 100, 0.98) 0%,
+            rgba(0, 56, 190, 0.88) 32%,
+            rgba(0, 80, 200, 0.48) 58%,
+            rgba(0, 40, 100, 0.1) 100%
+          ),
+          url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=95");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .hero-content {
+        max-width: 780px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 7px 12px;
+        color: #e6f2ff;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .hero h1 {
+        max-width: 650px;
+        margin-bottom: 14px;
+        color: white;
+        font-size: clamp(34px, 4.8vw, 54px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1.8px;
+        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.18);
+      }
+
+      .hero h1 em {
+        color: #68c5ff;
+        font-style: normal;
+      }
+
+      .hero p {
+        max-width: 590px;
+        color: white;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .hero-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 17px;
+        padding: 9px 13px;
+        color: var(--blue);
+        background: white;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        box-shadow: 0 4px 14px rgba(0, 20, 90, 0.2);
+      }
+
+      /* Floating search panel */
+      .search-panel {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr auto;
+        align-items: stretch;
+        gap: 9px;
+        margin-top: 29px;
+        padding: 12px;
+        background: white;
+        border: 2px solid #d5e4ff;
+        border-radius: 19px;
+        box-shadow: 0 14px 40px rgba(0, 25, 110, 0.28);
+      }
+
+      .search-field {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-      }
-      .field span {
-        font-size: 12px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.85);
-      }
-      .field select {
-        width: 100%;
-        height: 50px;
-        padding: 0 40px 0 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.14)
-          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
-          right 12px center/18px no-repeat;
-        color: #fff;
-        font-size: 15px;
-        -webkit-appearance: none;
-        appearance: none;
-        cursor: pointer;
-      }
-      .field select option {
-        color: #14213d;
-      }
-      .ghost {
-        align-self: end;
-        height: 50px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.45);
-        background: transparent;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .ghost:hover {
-        background: rgba(255, 255, 255, 0.16);
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+        padding: 5px 12px;
+        border-right: 1px solid #dce7f7;
       }
 
-      .listings {
-        position: relative;
-        padding: 56px 0 8px;
-        background: radial-gradient(
-            circle,
-            rgba(30, 79, 163, 0.1) 1.1px,
-            transparent 1.5px
-          )
-          0 0/24px 24px;
+      .search-field label {
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
       }
-      .listings h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(28px, 4vw, 40px);
+
+      .search-field input,
+      .search-field select {
+        width: 100%;
+        min-width: 0;
+        padding: 3px 0;
+        color: var(--ink);
+        background: white;
+        border: 0;
+        outline: 0;
+        font-size: 12px;
+      }
+
+      .search-field input::placeholder {
+        color: #617493;
+      }
+
+      .search-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 126px;
+        padding: 12px 18px;
+        color: white;
+        background: linear-gradient(135deg, #0066ff, #003bd9);
+        border: 0;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(0, 64, 255, 0.25);
+      }
+
+      .search-submit:hover {
+        background: var(--blue-dark);
+      }
+
+      /* Sections */
+      .section {
+        padding: 43px 0;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 21px;
+      }
+
+      .eyebrow-label {
+        margin-bottom: 5px;
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .section-heading h2 {
         color: var(--navy);
+        font-size: clamp(21px, 3vw, 28px);
+        line-height: 1.3;
+        letter-spacing: -0.7px;
       }
-      .count {
+
+      .section-heading p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      /* Rental category cards */
+      .category-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .category-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+        min-height: 103px;
+        padding: 16px;
+        background: white;
+        border: 1px solid #c6d9ff;
+        border-radius: 15px;
+        box-shadow:
+          0 3px 8px rgba(0, 50, 180, 0.06),
+          0 8px 22px rgba(0, 70, 220, 0.05);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s,
+          border-color 0.2s;
+      }
+
+      .category-card:hover {
+        transform: translateY(-3px);
+        border-color: #80aaff;
+        box-shadow: var(--shadow-strong);
+      }
+
+      .category-icon {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        color: var(--blue);
+        background: #d5e6ff;
+        border-radius: 13px;
+        font-size: 17px;
+      }
+
+      .category-card:nth-child(2) .category-icon {
+        color: #6500dc;
+        background: #eadbff;
+      }
+
+      .category-card:nth-child(3) .category-icon {
+        color: #007c43;
+        background: #c7f5dd;
+      }
+
+      .category-card:nth-child(4) .category-icon {
+        color: #00757d;
+        background: #c5f5f2;
+      }
+
+      .category-card h3 {
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .category-card p {
         margin-top: 4px;
         color: var(--muted);
-        font-size: 15px;
+        font-size: 10px;
       }
-      .plist {
+
+      /* Toolbar */
+      .listings-section {
+        padding-top: 8px;
+      }
+
+      .listing-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding: 13px;
+        background: white;
+        border: 1px solid #c6d9ff;
+        border-radius: 14px;
+        box-shadow: 0 3px 10px rgba(0, 45, 170, 0.05);
+      }
+
+      .results-count {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .results-count strong {
+        color: var(--navy);
+      }
+
+      .toolbar-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .toolbar-controls select {
+        min-height: 37px;
+        max-width: 180px;
+        padding: 7px 10px;
+        color: var(--ink);
+        background: white;
+        border: 1px solid #c5d8ff;
+        border-radius: 9px;
+        outline-color: var(--blue);
+        font-size: 11px;
+      }
+
+      .clear-filters {
+        min-height: 37px;
+        padding: 8px 11px;
+        color: var(--blue);
+        background: #d8e7ff;
+        border: 0;
+        border-radius: 9px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .clear-filters:hover {
+        color: white;
+        background: var(--blue);
+      }
+
+      /* Property cards */
+      .property-grid {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        margin-top: 22px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 19px;
       }
-      .card {
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 22px;
+
+      .property-card {
+        min-width: 0;
         overflow: hidden;
-        box-shadow: var(--lift);
+        background: white;
+        border: 1px solid #c1d6ff;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
         transition:
           transform 0.2s,
           box-shadow 0.2s;
       }
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 26px 50px rgba(30, 79, 163, 0.2);
+
+      .property-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-strong);
       }
-      .photo {
+
+      .property-image-wrap {
         position: relative;
-        height: 210px;
-        background: linear-gradient(135deg, #c9d8f2, #e1ebfa);
+        height: 205px;
+        overflow: hidden;
+        background: #dbe8ff;
       }
-      .photo::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(10, 34, 96, 0.2),
-          transparent 35%,
-          rgba(10, 34, 96, 0.5)
-        );
-        pointer-events: none;
-      }
-      .photo img {
+
+      .property-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.35s;
       }
-      .no-photo {
-        height: 100%;
+
+      .property-card:hover .property-image {
+        transform: scale(1.04);
+      }
+
+      .property-badges {
+        position: absolute;
+        top: 11px;
+        left: 11px;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 500;
+        flex-wrap: wrap;
+        gap: 6px;
       }
-      .fav,
+
       .badge {
-        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        color: var(--ink);
+        background: white;
+        border-radius: 7px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 10px;
+        font-weight: 800;
       }
-      .fav {
+
+      .badge-verified {
+        color: #006b40;
+        background: #c7f5dd;
+      }
+      .badge-unavailable {
+        color: #a12230;
+        background: #fff0f1;
+      }
+      .badge-available {
+        color: #006b40;
+        background: #c7f5dd;
+      }
+
+      .favorite-btn {
         position: absolute;
         top: 10px;
         right: 10px;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        color: var(--navy);
+        background: white;
         border: 0;
-        background: rgba(255, 255, 255, 0.94);
-        font-size: 18px;
-        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 20, 80, 0.15);
+        font-size: 15px;
+      }
+
+      .favorite-btn.is-favorite {
+        color: var(--red);
+      }
+
+      .property-body {
+        padding: 15px;
+      }
+
+      .property-type {
+        margin-bottom: 5px;
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+      }
+
+      .property-title {
+        margin-bottom: 7px;
         color: var(--ink);
-        box-shadow: 0 6px 14px rgba(20, 33, 61, 0.25);
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.45;
       }
-      .badge {
-        position: absolute;
-        left: 12px;
-        padding: 4px 10px;
-        border-radius: 8px;
+
+      .property-title a:hover {
+        color: var(--blue);
+      }
+
+      .property-location {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        min-height: 35px;
+        margin-bottom: 10px;
+        color: var(--muted);
         font-size: 11px;
-        font-weight: 600;
-        color: #fff;
       }
-      .badge.v {
-        top: 12px;
+
+      .property-location i {
+        margin-top: 4px;
+        color: var(--blue);
+      }
+
+      .property-features {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        padding: 11px 0;
+        border-top: 1px solid #e2ebfa;
+        border-bottom: 1px solid #e2ebfa;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .property-features span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .property-features i {
+        color: var(--blue);
+      }
+
+      .property-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 13px;
+      }
+
+      .property-price {
+        color: #003acb;
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.35;
+      }
+
+      .property-price small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .view-property {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 11px;
+        color: var(--blue);
+        background: #d8e7ff;
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+
+      .view-property:hover {
+        color: white;
         background: var(--blue);
       }
-      .badge.a {
-        bottom: 12px;
-        background: #0f7a55;
-      }
-      .info {
-        padding: 16px 18px 18px;
-      }
-      .price {
-        font-size: 22px;
-        font-weight: 600;
-        color: var(--blue);
-      }
-      .price span {
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--muted);
-      }
-      .info h3 {
-        margin-top: 4px;
-        font-size: 17px;
-        font-weight: 600;
-      }
-      .loc {
-        margin-top: 2px;
-        font-size: 13px;
-        color: var(--muted);
-      }
-      .meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 12px;
-      }
-      .meta span {
-        padding: 4px 10px;
-        border-radius: 8px;
-        background: var(--tint);
-        font-size: 12px;
-        font-weight: 500;
-        color: #2b4a82;
-      }
-      .more {
-        display: inline-block;
-        margin-top: 14px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--blue);
-      }
-      .more:hover {
-        text-decoration: underline;
-      }
-      .empty {
-        grid-column: 1/-1;
-        padding: 44px 20px;
+
+      .empty-state {
+        grid-column: 1 / -1;
+        padding: 48px 20px;
         text-align: center;
-        background: #fff;
-        border: 1px dashed #9db4dd;
-        border-radius: 22px;
+        background: white;
+        border: 1px dashed #7fa8ff;
+        border-radius: 15px;
       }
-      .empty h3 {
-        font-size: 18px;
+
+      .empty-state > i {
+        margin-bottom: 12px;
+        color: #7196df;
+        font-size: 34px;
+      }
+
+      .empty-state h3 {
         margin-bottom: 6px;
+        color: var(--navy);
+        font-size: 18px;
       }
-      .empty p {
+      .empty-state p {
+        margin-bottom: 16px;
         color: var(--muted);
-        font-size: 14px;
-        max-width: 420px;
-        margin: auto;
+        font-size: 12px;
       }
-      .empty[hidden] {
+
+      /* Call to action */
+      .cta-section {
+        padding: 8px 0 42px;
+      }
+
+      .cta-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        padding: 30px;
+        color: white;
+        background: linear-gradient(110deg, #001344, #0047ff);
+        border-radius: 18px;
+        box-shadow: var(--shadow-strong);
+      }
+
+      .cta-card h2 {
+        margin-bottom: 7px;
+        font-size: 22px;
+      }
+      .cta-card p {
+        color: #e2edff;
+        font-size: 12px;
+      }
+
+      .btn-light {
+        flex-shrink: 0;
+        color: var(--navy);
+        background: white;
+      }
+
+      .btn-light:hover {
+        background: #d8e7ff;
+      }
+
+      /* Footer */
+      .contact {
+        padding: 27px 0;
+        background: linear-gradient(110deg, #d5e6ff, #edf4ff);
+        border-top: 1px solid #c2d7ff;
+      }
+
+      .contact-inner {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        align-items: center;
+        gap: 22px;
+      }
+
+      .contact h3 {
+        color: #002a86;
+        font-size: 16px;
+      }
+      .contact p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .contact-item small {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 500;
+      }
+
+      .footer {
+        padding: 25px 0;
+        color: white;
+        background: linear-gradient(110deg, #001344, #0039a8);
+      }
+
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 11px;
+      }
+
+      .footer a {
+        color: #76bdff;
+        font-weight: 800;
+      }
+
+      /* Mobile navigation */
+      .bottom-nav {
         display: none;
       }
 
-      .cta {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin: 44px 0 0;
-        padding: 28px;
-        border-radius: 24px;
-        color: #fff;
-        background: linear-gradient(135deg, #1e4fa3, #0a2260);
-        box-shadow: 0 24px 50px rgba(30, 79, 163, 0.3);
-      }
-      .cta h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 26px;
-        color: #fff;
-      }
-      .cta p {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 15px;
-        max-width: 52ch;
-      }
-      .cta .btn {
-        align-self: flex-start;
-        min-height: 46px;
-        padding: 0 26px;
-        display: flex;
-        align-items: center;
-        border-radius: 13px;
-        background: #fff;
-        color: var(--navy);
-        font-weight: 700;
-        font-size: 14px;
-      }
-
-      .tabbar {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 40;
-        max-width: 520px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        height: 68px;
-        padding: 0 8px;
-        background: rgba(255, 255, 255, 0.9);
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(201, 214, 236, 0.9);
-        border-radius: 24px;
-        box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
-      }
-      .tab {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        min-width: 76px;
-        padding: 7px 14px;
-        border-radius: 18px;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--muted);
-      }
-      .tab.on {
-        background: var(--tint);
-        color: var(--blue);
-        font-weight: 600;
-      }
-      .tab svg.i {
-        width: 22px;
-        height: 22px;
-      }
-      .tab em {
-        position: absolute;
-        top: 2px;
-        left: calc(50% + 6px);
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        border-radius: 9px;
-        background: var(--blue);
-        color: #fff;
-        font-style: normal;
-        font-size: 11px;
-        font-weight: 600;
-        line-height: 18px;
-        text-align: center;
-      }
-
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
+      @media (max-width: 1000px) {
+        .links {
+          gap: 14px;
         }
-        to {
-          opacity: 1;
-          transform: none;
+        .links a {
+          font-size: 11px;
+        }
+        .property-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .category-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .search-panel {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .search-field {
+          border-right: 0;
+          border-bottom: 1px solid #dce7f7;
+        }
+        .search-submit {
+          min-height: 45px;
         }
       }
-      h1 {
-        animation: rise 0.7s 0.05s both;
-      }
-      .search {
-        animation: rise 0.7s 0.15s both;
-      }
-      .stage .label,
-      .stage .grid,
-      .stage .filters {
-        animation: rise 0.7s 0.26s both;
-      }
 
-      @media (min-width: 700px) {
-        .plist {
+      @media (max-width: 760px) {
+        html {
+          scroll-padding-top: 70px;
+        }
+        .wrap {
+          width: calc(100% - 28px);
+        }
+        .nav-inner {
+          min-height: 64px;
+          gap: 8px;
+        }
+        .brand {
+          gap: 6px;
+          font-size: 17px;
+        }
+        .brand-mark {
+          width: 35px;
+          height: 35px;
+        }
+        .menu-toggle {
+          display: grid;
+          place-items: center;
+        }
+
+        .links {
+          position: fixed;
+          top: 64px;
+          left: 0;
+          right: 0;
+          display: none;
+          align-items: stretch;
+          gap: 0;
+          padding: 10px 20px 18px;
+          background: white;
+          border-bottom: 1px solid var(--line);
+          box-shadow: 0 20px 35px rgba(0, 20, 90, 0.16);
+        }
+
+        .links.is-open {
+          display: flex;
+          flex-direction: column;
+        }
+        .links a {
+          padding: 12px 3px;
+          border-bottom: 1px solid #e4edff;
+        }
+        .links a.active {
+          border-bottom-color: var(--blue);
+        }
+        .nav-actions {
+          gap: 7px;
+        }
+        .nav-actions .btn-outline {
+          display: none;
+        }
+        .nav-actions .btn {
+          padding: 9px 10px;
+          font-size: 10px;
+        }
+
+        .hero {
+          min-height: 0;
+          padding: 35px 0 35px;
+          background-position:
+            center,
+            60% center;
+        }
+        .hero h1 {
+          font-size: clamp(33px, 8vw, 43px);
+          letter-spacing: -1.1px;
+        }
+        .hero p {
+          font-size: 12px;
+        }
+        .search-panel {
+          grid-template-columns: 1fr 1fr;
+          gap: 7px;
+          margin-top: 22px;
+          padding: 10px;
+          border-radius: 16px;
+        }
+        .search-field {
+          padding: 7px 8px;
+        }
+        .search-field:first-child,
+        .search-submit {
+          grid-column: 1 / -1;
+        }
+        .search-submit {
+          border-radius: 10px;
+        }
+        .search-field input,
+        .search-field select {
+          font-size: 11px;
+        }
+
+        .section {
+          padding: 32px 0;
+        }
+        .section-heading {
+          align-items: flex-start;
+        }
+        .section-heading h2 {
+          font-size: 21px;
+        }
+        .section-heading p {
+          font-size: 11px;
+        }
+        .category-grid {
+          gap: 10px;
+        }
+        .category-card {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 9px;
+          padding: 12px;
+          min-height: 120px;
+        }
+        .category-icon {
+          width: 39px;
+          height: 39px;
+          flex-basis: 39px;
+          font-size: 15px;
+        }
+        .category-card h3 {
+          font-size: 11px;
+        }
+        .category-card p {
+          font-size: 10px;
+        }
+
+        .listing-toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .toolbar-controls {
+          display: grid;
           grid-template-columns: 1fr 1fr;
         }
-        .stage {
-          padding-bottom: 60px;
+        .toolbar-controls select {
+          width: 100%;
+          max-width: none;
         }
-        .cta {
-          flex-direction: row;
+        .clear-filters {
+          width: 100%;
+        }
+        .property-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .property-image-wrap {
+          height: 135px;
+        }
+        .property-body {
+          padding: 9px;
+        }
+        .property-type {
+          font-size: 9px;
+        }
+        .property-title {
+          font-size: 11px;
+        }
+        .property-location {
+          min-height: 38px;
+          font-size: 9px;
+        }
+        .property-features {
+          gap: 6px;
+          font-size: 9px;
+        }
+        .property-footer {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .property-price {
+          font-size: 14px;
+        }
+        .property-price small {
+          font-size: 9px;
+        }
+        .view-property {
+          width: 100%;
+          padding: 8px 5px;
+          font-size: 9px;
+        }
+        .badge {
+          padding: 4px 6px;
+          font-size: 8px;
+        }
+        .favorite-btn {
+          width: 30px;
+          height: 30px;
+          font-size: 13px;
+        }
+
+        .cta-card {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 22px;
+        }
+        .cta-card h2 {
+          font-size: 19px;
+        }
+        .contact-inner {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+        .footer-inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .bottom-nav {
+          position: fixed;
+          z-index: 900;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
+          background: linear-gradient(110deg, #001344, #0039a8);
+          box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        .bottom-nav a {
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: space-between;
+          justify-content: center;
+          gap: 4px;
+          color: white;
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        .bottom-nav a i {
+          font-size: 16px;
+        }
+        .bottom-nav a.active {
+          color: #ffcf33;
+        }
+        body {
+          padding-bottom: 68px;
         }
       }
-      @media (min-width: 1000px) {
-        .grid {
-          grid-template-columns: repeat(4, 1fr);
+
+      @media (max-width: 390px) {
+        .wrap {
+          width: calc(100% - 24px);
         }
-        .plist {
-          grid-template-columns: repeat(3, 1fr);
+        .nav-actions .btn-primary {
+          padding: 8px;
+          font-size: 9px;
         }
-        .filters {
-          grid-template-columns: repeat(4, 1fr);
+        .brand {
+          font-size: 15px;
+        }
+        .property-grid {
+          gap: 8px;
+        }
+        .property-image-wrap {
+          height: 115px;
+        }
+        .property-title {
+          font-size: 10px;
+        }
+        .property-price {
+          font-size: 12px;
+        }
+        .section-heading .text-link {
+          font-size: 10px;
         }
       }
+
       @media (prefers-reduced-motion: reduce) {
-        * {
-          transition: none !important;
-          animation: none !important;
+        *,
+        *::before,
+        *::after {
           scroll-behavior: auto !important;
+          transition: none !important;
         }
       }
     </style>
   </head>
+
   <body>
-    {% include "_admin_bar.html" %}
+    {% include '_admin_bar.html' ignore missing %}
 
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
-      <symbol id="i-house" viewBox="0 0 24 24">
-        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-      </symbol>
-      <symbol id="i-building" viewBox="0 0 24 24">
-        <path
-          d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"
-        />
-      </symbol>
-      <symbol id="i-menu" viewBox="0 0 24 24">
-        <path d="M4 7h16M4 12h16M4 17h16" />
-      </symbol>
-      <symbol id="i-user" viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-      </symbol>
-      <symbol id="i-search" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-4-4" />
-      </symbol>
-      <symbol id="i-arrow" viewBox="0 0 24 24">
-        <path d="M5 12h14M13 6l6 6-6 6" />
-      </symbol>
-      <symbol id="i-bookmark" viewBox="0 0 24 24">
-        <path d="M6 3h12v18l-6-4-6 4z" />
-      </symbol>
-      <symbol id="i-chat" viewBox="0 0 24 24">
-        <path d="M4 5h16v11H9l-5 4z" />
-      </symbol>
-    </svg>
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a
+          class="brand"
+          href="{{ url_for('rent_page') }}"
+          aria-label="CivicNest Africa"
+        >
+          <span class="brand-mark"
+            ><i class="fa-solid fa-house-chimney"></i
+          ></span>
+          <span>CivicNest<small>AFRICA</small></span>
+        </a>
 
-    <main>
-      <div class="stage">
-        <div class="wrap">
-          <header class="top">
-            <button
-              class="icon-btn"
-              id="menuBtn"
-              type="button"
-              aria-label="Open menu"
-              aria-expanded="false"
-              aria-controls="menuPanel"
-            >
-              <svg class="i" width="24" height="24"><use href="#i-menu" /></svg>
-            </button>
-            <nav class="menu" id="menuPanel" aria-label="Main menu" hidden>
-              <a href="{{ url_for('rent_page') }}">Rent</a>
-              <a href="{{ url_for('buy_page') }}">Buy</a>
-              <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
-              <a href="{{ url_for('invest_page') }}">Invest</a>
-              <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
-              <a href="{{ url_for('login', role='landlord') }}"
-                >Landlord login</a
-              >
-              <a href="{{ url_for('register') }}">Create account</a>
-            </nav>
-            <a class="brand" href="/" aria-label="CivicNest Africa home">
-              <span class="brand-mark"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <span class="brand-text"
-                ><span class="brand-name">CivicNest</span
-                ><span class="brand-sub">Africa</span></span
-              >
-            </a>
-            <a
-              class="icon-btn ring"
-              href="{{ url_for('login') }}"
-              aria-label="Your account"
-              ><svg class="i" width="22" height="22"><use href="#i-user" /></svg
-            ></a>
-          </header>
+        <nav class="links" id="mainNav" aria-label="Main navigation">
+          <a
+            href="{{ url_for('rent_page') }}"
+            class="active"
+            aria-current="page"
+            >Properties</a
+          >
+          <a href="{{ url_for('buy_page') }}">Buy</a>
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a href="{{ url_for('invest_page') }}">Invest</a>
+          <a href="{{ url_for('roommate_finder') }}">Roommate Finder</a>
+        </nav>
 
-          <h1>
-            {% if category == 'hostels' %}Student hostels to rent. {% elif
-            category == 'rentals' %}Homes and rooms to rent. {% else %}Find a
-            place to rent.{% endif %}
-          </h1>
+        <div class="nav-actions">
+          {% if current_user.is_authenticated %}
+          <a class="btn btn-outline" href="{{ url_for('dashboard') }}"
+            >My Account</a
+          >
+          {% else %}
+          <a class="btn btn-outline" href="{{ url_for('login') }}">Sign In</a>
+          {% endif %}
 
-          <form class="search" id="searchForm" role="search">
-            <svg class="i"><use href="#i-search" /></svg>
-            <input
-              type="search"
-              id="locationSearch"
-              aria-label="Search town, neighborhood or campus"
-              placeholder="Search town, neighborhood, campus..."
-            />
-            <button class="go" type="submit" aria-label="Search">
-              <svg class="i"><use href="#i-arrow" /></svg>
-            </button>
-          </form>
+          <a class="btn btn-primary" href="{{ url_for('add_property') }}">
+            <i class="fa-solid fa-plus"></i> List Property
+          </a>
 
-          <div class="label">Browse by accommodation</div>
-          <div class="grid">
-            <a
-              class="tile {{ 'on' if category == 'hostels' else '' }}"
-              href="{{ url_for('rent_page', category='hostels') }}"
-              aria-current="{{ 'page' if category == 'hostels' else 'false' }}"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-building" /></svg
-              ></span>
-              <strong>Student hostels</strong><small>Close to campus</small>
-            </a>
-            <a
-              class="tile {{ 'on' if category == 'rentals' else '' }}"
-              href="{{ url_for('rent_page', category='rentals') }}"
-              aria-current="{{ 'page' if category == 'rentals' else 'false' }}"
-            >
-              <span class="ico"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <strong>Homes &amp; rentals</strong
-              ><small>Rooms, bedsitters, houses</small>
-            </a>
-          </div>
-
-          <div class="label">Refine your search</div>
-          <div class="filters">
-            <label class="field"
-              ><span>Property type</span>
-              <select id="typeSearch">
-                <option value="">Any type</option>
-                <option value="hostel">Hostel</option>
-                <option value="single_room">Single room</option>
-                <option value="bedsitter">Bedsitter</option>
-                <option value="apartment">Apartment</option>
-                <option value="house">House</option>
-                <option value="student_residence">Student residence</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-            <label class="field"
-              ><span>Monthly budget</span>
-              <select id="budgetSearch">
-                <option value="">Any budget</option>
-                <option value="3000">Below KSh 3,000</option>
-                <option value="5000">KSh 3,000 – 5,000</option>
-                <option value="8000">KSh 5,000 – 8,000</option>
-                <option value="999999999">Above KSh 8,000</option>
-              </select>
-            </label>
-            <label class="field"
-              ><span>Sort by</span>
-              <select id="sortSearch">
-                <option value="">Newest first</option>
-                <option value="low">Price: low to high</option>
-                <option value="high">Price: high to low</option>
-              </select>
-            </label>
-            <button class="ghost" type="button" id="clearBtn">
-              Clear filters
-            </button>
-          </div>
+          <button
+            class="menu-toggle"
+            id="menuToggle"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="mainNav"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
         </div>
       </div>
+    </header>
 
-      <section class="listings" id="properties" aria-labelledby="listingsTitle">
+    <main>
+      <section class="hero">
         <div class="wrap">
-          <h2 id="listingsTitle">Available places</h2>
-          <p class="count" id="propertyCount">
-            {{ properties|length }} {{ 'place' if properties|length == 1 else
-            'places' }} to rent
-          </p>
+          <div class="hero-content">
+            <div class="eyebrow">
+              <i class="fa-solid fa-location-dot"></i>
+              Find your next home in Kenya
+            </div>
 
-          <div class="plist" id="propertyGrid">
-            {% if properties %} {% for property in properties %}
-            <article
-              class="card"
-              data-property-id="{{ property.id }}"
-              data-location="{{ property.location|lower }}"
-              data-campus="{{ (property.campus or '')|lower }}"
-              data-type="{{ property.property_type }}"
-              data-price="{{ property.price }}"
+            <h1>Find a place you’ll <em>love</em> to call home.</h1>
+
+            <p>
+              Discover houses, apartments, bedsitters and student accommodation
+              across Kenya. Compare prices and find a place that fits your
+              lifestyle.
+            </p>
+
+            <a class="hero-link" href="#listings">
+              <i class="fa-solid fa-house"></i> Explore rental properties
+            </a>
+
+            <form
+              class="search-panel"
+              id="searchForm"
+              action="{{ url_for('rent_page') }}"
+              method="get"
             >
-              <div class="photo">
-                {% if property.cover_image %}
+              <div class="search-field">
+                <label for="locationSearch">Location</label>
+                <input
+                  id="locationSearch"
+                  name="location"
+                  type="search"
+                  placeholder="Town, estate or campus"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="search-field">
+                <label for="typeSearch">Property type</label>
+                <select id="typeSearch" name="property_type">
+                  <option value="">Any type</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
+                  <option value="bedsitter">Bedsitter</option>
+                  <option value="studio">Studio</option>
+                  <option value="hostel">Student hostel</option>
+                  <option value="single room">Single room</option>
+                  <option value="shared room">Shared room</option>
+                </select>
+              </div>
+
+              <div class="search-field">
+                <label for="budgetSearch">Maximum monthly rent</label>
+                <select id="budgetSearch" name="max_price">
+                  <option value="">Any budget</option>
+                  <option value="5000">Up to KSh 5,000</option>
+                  <option value="10000">Up to KSh 10,000</option>
+                  <option value="20000">Up to KSh 20,000</option>
+                  <option value="35000">Up to KSh 35,000</option>
+                  <option value="50000">Up to KSh 50,000</option>
+                </select>
+              </div>
+
+              <button class="search-submit" type="submit">
+                <i class="fa-solid fa-magnifying-glass"></i> Search
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow-label">Explore rentals</div>
+              <h2>Find Your Perfect Space</h2>
+              <p>Choose the type of home that works for you.</p>
+            </div>
+          </div>
+
+          <div class="category-grid">
+            <a
+              class="category-card category-filter"
+              href="#listings"
+              data-type="apartment"
+            >
+              <span class="category-icon"
+                ><i class="fa-solid fa-building"></i
+              ></span>
+              <span
+                ><h3>Apartments</h3>
+                <p>Modern independent living</p></span
+              >
+            </a>
+
+            <a
+              class="category-card category-filter"
+              href="#listings"
+              data-type="bedsitter"
+            >
+              <span class="category-icon"
+                ><i class="fa-solid fa-door-closed"></i
+              ></span>
+              <span
+                ><h3>Bedsitters</h3>
+                <p>Simple, affordable spaces</p></span
+              >
+            </a>
+
+            <a
+              class="category-card category-filter"
+              href="#listings"
+              data-type="hostel"
+            >
+              <span class="category-icon"
+                ><i class="fa-solid fa-graduation-cap"></i
+              ></span>
+              <span
+                ><h3>Student Hostels</h3>
+                <p>Stay closer to campus</p></span
+              >
+            </a>
+
+            <a
+              class="category-card category-filter"
+              href="#listings"
+              data-type="house"
+            >
+              <span class="category-icon"
+                ><i class="fa-solid fa-house"></i
+              ></span>
+              <span
+                ><h3>Family Houses</h3>
+                <p>More room to live</p></span
+              >
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section listings-section" id="listings">
+        <div class="wrap">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow-label">Browse available homes</div>
+              <h2>Rental Properties</h2>
+              <p>Explore listings and find your next place to stay.</p>
+            </div>
+
+            <a class="text-link" href="{{ url_for('add_property') }}">
+              List a property <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+
+          <div class="listing-toolbar">
+            <p class="results-count">
+              Showing
+              <strong id="visibleCount">{{ properties|length }}</strong> of
+              <strong id="totalCount">{{ properties|length }}</strong>
+              properties
+            </p>
+
+            <div class="toolbar-controls">
+              <select id="typeFilter" aria-label="Filter by property type">
+                <option value="">All types</option>
+                <option value="apartment">Apartments</option>
+                <option value="house">Houses</option>
+                <option value="bedsitter">Bedsitters</option>
+                <option value="studio">Studios</option>
+                <option value="hostel">Student hostels</option>
+                <option value="single room">Single rooms</option>
+                <option value="shared room">Shared rooms</option>
+              </select>
+
+              <select id="priceFilter" aria-label="Filter by maximum rent">
+                <option value="">Any budget</option>
+                <option value="5000">Up to KSh 5,000</option>
+                <option value="10000">Up to KSh 10,000</option>
+                <option value="20000">Up to KSh 20,000</option>
+                <option value="35000">Up to KSh 35,000</option>
+                <option value="50000">Up to KSh 50,000</option>
+              </select>
+
+              <select id="sortFilter" aria-label="Sort properties">
+                <option value="newest">Newest first</option>
+                <option value="price-low">Price: low to high</option>
+                <option value="price-high">Price: high to low</option>
+              </select>
+
+              <button class="clear-filters" id="clearFilters" type="button">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="property-grid" id="propertyGrid">
+            {% for property in properties %} {% set property_title =
+            property.title or 'Rental property' %} {% set property_location =
+            property.location or 'Kenya' %} {% set property_kind =
+            property.property_type or 'Rental' %} {% set property_price =
+            property.price or 0 %} {% set property_image = property.cover_image
+            or '' %} {% set property_available = property.available if
+            property.available is defined else true %} {% set property_verified
+            = property.is_verified if property.is_verified is defined else false
+            %} {% set property_furnished = property.furnished if
+            property.furnished is defined else false %} {% set property_campus =
+            property.campus if property.campus is defined else '' %} {% set
+            property_distance = property.distance_from_campus if
+            property.distance_from_campus is defined else none %}
+
+            <article
+              class="property-card"
+              data-property-id="{{ property.id }}"
+              data-title="{{ property_title|lower|e }}"
+              data-location="{{ property_location|lower|e }}"
+              data-campus="{{ property_campus|lower|e }}"
+              data-type="{{ property_kind|lower|replace('_',' ')|e }}"
+              data-price="{{ property_price|float }}"
+              data-available="{{ 'yes' if property_available else 'no' }}"
+              data-index="{{ loop.index0 }}"
+            >
+              <div class="property-image-wrap">
+                {% if property_image %}
                 <img
-                  src="{{ property.cover_image if property.cover_image.startswith('http') else url_for('static', filename='uploads/properties/' + property.cover_image) }}"
+                  class="property-image"
+                  src="{{ property_image|photo_url }}"
+                  alt="{{ property_title|e }}"
+                  loading="lazy"
                   onerror="
                     this.onerror = null;
                     this.src =
-                      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800';
+                      'https://placehold.co/800x500/eaf2ff/0047ff?text=CivicNest+Property';
                   "
-                  alt="{{ property.title }}"
-                  loading="lazy"
                 />
                 {% else %}
-                <div class="no-photo">No photo available</div>
+                <img
+                  class="property-image"
+                  src="https://placehold.co/800x500/eaf2ff/0047ff?text=CivicNest+Property"
+                  alt="Property image unavailable"
+                  loading="lazy"
+                />
                 {% endif %}
+
+                <div class="property-badges">
+                  {% if property_verified %}
+                  <span class="badge badge-verified">
+                    <i class="fa-solid fa-circle-check"></i> Verified
+                  </span>
+                  {% endif %} {% if not property_available %}
+                  <span class="badge badge-unavailable">Unavailable</span>
+                  {% else %}
+                  <span class="badge badge-available">Available</span>
+                  {% endif %}
+                </div>
+
                 <button
-                  class="fav"
+                  class="favorite-btn"
                   type="button"
                   aria-label="Save property"
                   aria-pressed="false"
+                  data-favorite-id="{{ property.id }}"
+                  title="Save property"
                 >
-                  ♡
+                  <i class="fa-regular fa-heart"></i>
                 </button>
-                {% if property.is_verified %}<span class="badge v"
-                  >Verified</span
-                >{% endif %} {% if property.available %}<span class="badge a"
-                  >Available</span
-                >{% endif %}
               </div>
-              <div class="info">
-                <div class="price">
-                  KSh {{ "{:,.0f}".format(property.price) }}
-                  <span>/ month</span>
-                </div>
-                <h3>{{ property.title }}</h3>
-                <div class="loc">
-                  {{ property.location }}{% if property.campus %}, near {{
-                  property.campus }}{% endif %}
-                </div>
-                <div class="meta">
-                  <span
-                    >{{ property.property_type|replace('_', ' ')|title }}</span
+
+              <div class="property-body">
+                <p class="property-type">
+                  {{ property_kind|replace('_',' ')|title|e }}
+                </p>
+
+                <h3 class="property-title">
+                  <a
+                    href="{{ url_for('property_details', property_id=property.id) }}"
                   >
-                  {% if property.furnished %}<span>Furnished</span>{% endif %}
-                  {% if property.distance_from_campus is not none %}<span
-                    >{{ property.distance_from_campus }} km from campus</span
-                  >{% endif %}
+                    {{ property_title|e }}
+                  </a>
+                </h3>
+
+                <p class="property-location">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>
+                    {{ property_location|e }} {% if property_campus %} · Near {{
+                    property_campus|e }}{% endif %}
+                  </span>
+                </p>
+
+                <div class="property-features">
+                  {% if property_furnished %}
+                  <span><i class="fa-solid fa-couch"></i> Furnished</span>
+                  {% else %}
+                  <span><i class="fa-solid fa-house"></i> Rental</span>
+                  {% endif %} {% if property_distance is not none %}
+                  <span
+                    ><i class="fa-solid fa-person-walking"></i> {{
+                    property_distance }} km to campus</span
+                  >
+                  {% endif %} {% if property.bedrooms %}
+                  <span
+                    ><i class="fa-solid fa-bed"></i> {{ property.bedrooms }}
+                    bed</span
+                  >
+                  {% endif %} {% if property.bathrooms %}
+                  <span
+                    ><i class="fa-solid fa-bath"></i> {{ property.bathrooms }}
+                    bath</span
+                  >
+                  {% endif %}
                 </div>
-                <a
-                  class="more"
-                  href="{{ url_for('property_details', property_id=property.id) }}"
-                  >View details</a
-                >
+
+                <div class="property-footer">
+                  <p class="property-price">
+                    KSh {{ "{:,.0f}".format(property_price|float) }}
+                    <small>per month</small>
+                  </p>
+
+                  <a
+                    class="view-property"
+                    href="{{ url_for('property_details', property_id=property.id) }}"
+                  >
+                    View details <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </div>
               </div>
             </article>
-            {% endfor %} {% else %}
-            <div class="empty">
-              <h3>No rentals listed here yet</h3>
-              <p>
-                New places appear as landlords publish them. Check back soon, or
-                look at the other category above.
-              </p>
+            {% else %}
+            <div class="empty-state" id="serverEmptyState">
+              <i class="fa-solid fa-house-circle-exclamation"></i>
+              <h3>No rental properties yet</h3>
+              <p>New listings will appear here when properties are added.</p>
+              <a class="btn btn-primary" href="{{ url_for('add_property') }}">
+                <i class="fa-solid fa-plus"></i> Add a property
+              </a>
             </div>
-            {% endif %} {% if properties %}
-            <div class="empty" id="searchEmptyState" hidden>
-              <h3>No places match your search</h3>
-              <p>Try a different town, a wider budget, or clear the filters.</p>
-            </div>
-            {% endif %}
-          </div>
+            {% endfor %}
 
-          <div class="cta">
+            <div class="empty-state" id="filterEmptyState" hidden>
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <h3>No matching properties found</h3>
+              <p>Try changing your search or clearing some filters.</p>
+              <button class="btn btn-primary" id="emptyReset" type="button">
+                Clear filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <div class="wrap">
+          <div class="cta-card">
             <div>
-              <h2>Have a place to rent out?</h2>
+              <h2>Have a property to rent out?</h2>
               <p>
-                List your room, hostel or house in a few minutes and reach
-                students and tenants looking right now.
+                Reach people searching for their next home with CivicNest
+                Africa.
               </p>
             </div>
-            <a
-              class="btn"
-              href="{{ url_for('login', role='landlord', next=url_for('add_property')) }}"
-              >List your property</a
-            >
+            <a class="btn btn-light" href="{{ url_for('add_property') }}">
+              List your property <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="contact">
+        <div class="wrap contact-inner">
+          <div>
+            <h3>Contact CivicNest Africa</h3>
+            <p>We’re here to help you find your next home.</p>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-phone"></i>
+            <div>+254 768387842<small>Call or WhatsApp</small></div>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-envelope"></i>
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond as soon as possible</small>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
-    <nav class="tabbar" aria-label="Primary">
-      <a class="tab" href="/"
-        ><svg class="i"><use href="#i-house" /></svg>Home</a
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <p>
+          &copy; <span id="currentYear"></span> CivicNest Africa. Developed by
+          Mabel Technologies.
+        </p>
+        <p>Find your place. Build your future.</p>
+      </div>
+    </footer>
+
+    <nav class="bottom-nav" aria-label="Quick navigation">
+      <a href="{{ url_for('rent_page') }}" class="active">
+        <i class="fa-solid fa-house"></i><span>Rent</span>
+      </a>
+      <a href="{{ url_for('buy_page') }}">
+        <i class="fa-solid fa-building"></i><span>Buy</span>
+      </a>
+      <a href="{{ url_for('roommate_finder') }}">
+        <i class="fa-solid fa-users"></i><span>Roommates</span>
+      </a>
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
       >
-      <a class="tab" href="#properties"
-        ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
-          >0</em
-        ></a
-      >
-      <a class="tab" href="#"
-        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
-      >
+        <i class="fa-solid fa-user"></i><span>Account</span>
+      </a>
     </nav>
 
     <script>
-      // Menu
-      const menuBtn = document.getElementById("menuBtn");
-      const menuPanel = document.getElementById("menuPanel");
-      menuBtn.addEventListener("click", () => {
-        const open = menuPanel.hidden;
-        menuPanel.hidden = !open;
-        menuBtn.setAttribute("aria-expanded", String(open));
-      });
-      document.addEventListener("click", (e) => {
-        if (
-          !menuPanel.hidden &&
-          !menuPanel.contains(e.target) &&
-          !menuBtn.contains(e.target)
-        ) {
-          menuPanel.hidden = true;
-          menuBtn.setAttribute("aria-expanded", "false");
+      document.addEventListener("DOMContentLoaded", function () {
+        "use strict";
+
+        const menuToggle = document.getElementById("menuToggle");
+        const mainNav = document.getElementById("mainNav");
+
+        if (menuToggle && mainNav) {
+          menuToggle.addEventListener("click", function () {
+            const isOpen = mainNav.classList.toggle("is-open");
+            document.body.classList.toggle("menu-open", isOpen);
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+
+            const icon = menuToggle.querySelector("i");
+            if (icon) {
+              icon.className = isOpen
+                ? "fa-solid fa-xmark"
+                : "fa-solid fa-bars";
+            }
+          });
+
+          mainNav.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+              mainNav.classList.remove("is-open");
+              document.body.classList.remove("menu-open");
+              menuToggle.setAttribute("aria-expanded", "false");
+              const icon = menuToggle.querySelector("i");
+              if (icon) icon.className = "fa-solid fa-bars";
+            });
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              mainNav.classList.remove("is-open");
+              document.body.classList.remove("menu-open");
+              menuToggle.setAttribute("aria-expanded", "false");
+              const icon = menuToggle.querySelector("i");
+              if (icon) icon.className = "fa-solid fa-bars";
+            }
+          });
         }
-      });
 
-      // Favorites (saved in this browser)
-      const savedCount = document.getElementById("savedCount");
-      let favorites = [];
-      try {
-        favorites = JSON.parse(
-          localStorage.getItem("civicNestFavorites") || "[]",
-        );
-      } catch (e) {}
-      const paint = (btn, on) => {
-        btn.textContent = on ? "♥" : "♡";
-        btn.style.color = on ? "#ef4444" : "";
-        btn.setAttribute("aria-pressed", String(on));
-      };
-      document.querySelectorAll(".fav").forEach((btn, i) => {
-        const id = btn.closest(".card")?.dataset.propertyId || String(i);
-        paint(btn, favorites.includes(id));
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const on = !favorites.includes(id);
-          favorites = on
-            ? [...new Set([...favorites, id])]
-            : favorites.filter((x) => x !== id);
+        const propertyGrid = document.getElementById("propertyGrid");
+        const cards = Array.from(document.querySelectorAll(".property-card"));
+        const locationSearch = document.getElementById("locationSearch");
+        const typeSearch = document.getElementById("typeSearch");
+        const budgetSearch = document.getElementById("budgetSearch");
+        const typeFilter = document.getElementById("typeFilter");
+        const priceFilter = document.getElementById("priceFilter");
+        const sortFilter = document.getElementById("sortFilter");
+        const visibleCount = document.getElementById("visibleCount");
+        const totalCount = document.getElementById("totalCount");
+        const filterEmptyState = document.getElementById("filterEmptyState");
+        const FAVORITES_KEY = "civicnest_favorite_properties";
+
+        const normalize = (value) =>
+          String(value || "")
+            .trim()
+            .toLowerCase();
+
+        document.getElementById("currentYear").textContent =
+          new Date().getFullYear();
+
+        if (totalCount) totalCount.textContent = String(cards.length);
+
+        /* Favorites remain compatible with the previous Rent page. */
+        function readFavorites() {
           try {
-            localStorage.setItem(
-              "civicNestFavorites",
-              JSON.stringify(favorites),
+            const value = JSON.parse(
+              localStorage.getItem(FAVORITES_KEY) || "[]",
             );
-          } catch (e) {}
-          paint(btn, on);
-          savedCount.textContent = favorites.length;
+            return Array.isArray(value) ? value.map(String) : [];
+          } catch (error) {
+            return [];
+          }
+        }
+
+        function saveFavorites(items) {
+          try {
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(items));
+          } catch (error) {
+            /* Favorites still work for this page session. */
+          }
+        }
+
+        let favorites = readFavorites();
+
+        document.querySelectorAll(".favorite-btn").forEach(function (button) {
+          const id = String(button.dataset.favoriteId || "");
+          const icon = button.querySelector("i");
+
+          function paint(saved) {
+            button.classList.toggle("is-favorite", saved);
+            button.setAttribute("aria-pressed", String(saved));
+            button.setAttribute(
+              "aria-label",
+              saved ? "Remove saved property" : "Save property",
+            );
+            button.title = saved ? "Remove from favorites" : "Save property";
+            if (icon)
+              icon.className = saved
+                ? "fa-solid fa-heart"
+                : "fa-regular fa-heart";
+          }
+
+          paint(favorites.includes(id));
+
+          button.addEventListener("click", function () {
+            if (!id) return;
+
+            if (favorites.includes(id)) {
+              favorites = favorites.filter((item) => item !== id);
+              paint(false);
+            } else {
+              favorites = [...new Set([...favorites, id])];
+              paint(true);
+            }
+
+            saveFavorites(favorites);
+          });
         });
-      });
-      savedCount.textContent = favorites.length;
 
-      // Search, filters and sorting
-      const grid = document.getElementById("propertyGrid");
-      const cards = [...document.querySelectorAll(".card")];
-      const originalOrder = [...cards];
-      const form = document.getElementById("searchForm");
-      const locationInput = document.getElementById("locationSearch");
-      const typeSel = document.getElementById("typeSearch");
-      const budgetSel = document.getElementById("budgetSearch");
-      const sortSel = document.getElementById("sortSearch");
-      const countLabel = document.getElementById("propertyCount");
-      const emptyState = document.getElementById("searchEmptyState");
+        /*
+         * Combine the hero search and toolbar filters.
+         * Unavailable listings remain visible unless the visitor explicitly
+         * selects the "available only" option (not enabled by default).
+         */
+        function applyFilters() {
+          const query = normalize(locationSearch ? locationSearch.value : "");
+          const selectedType = normalize(
+            (typeFilter && typeFilter.value) ||
+              (typeSearch && typeSearch.value) ||
+              "",
+          );
+          const selectedPrice = Number(
+            (priceFilter && priceFilter.value) ||
+              (budgetSearch && budgetSearch.value) ||
+              0,
+          );
 
-      function applyFilters() {
-        const q = locationInput.value.trim().toLowerCase();
-        const type = typeSel.value;
-        const budget = budgetSel.value ? parseFloat(budgetSel.value) : null;
-        let found = 0;
+          let visibleCards = [];
 
-        cards.forEach((c) => {
-          const price = parseFloat(c.dataset.price || 0);
-          const okLocation =
-            !q ||
-            (c.dataset.location || "").includes(q) ||
-            (c.dataset.campus || "").includes(q);
-          const okType = !type || c.dataset.type === type;
-          let okBudget = true;
-          if (budget === 3000) okBudget = price < 3000;
-          else if (budget === 5000) okBudget = price >= 3000 && price <= 5000;
-          else if (budget === 8000) okBudget = price > 5000 && price <= 8000;
-          else if (budget === 999999999) okBudget = price > 8000;
-          const show = okLocation && okType && okBudget;
-          c.style.display = show ? "" : "none";
-          if (show) found++;
+          cards.forEach(function (card) {
+            const title = normalize(card.dataset.title);
+            const location = normalize(card.dataset.location);
+            const campus = normalize(card.dataset.campus);
+            const type = normalize(card.dataset.type).replace(/_/g, " ");
+            const price = Number(card.dataset.price || 0);
+
+            const matchesQuery =
+              !query ||
+              title.includes(query) ||
+              location.includes(query) ||
+              campus.includes(query);
+            const matchesType =
+              !selectedType || type.includes(selectedType.replace(/_/g, " "));
+            const matchesPrice = !selectedPrice || price <= selectedPrice;
+
+            const matches = matchesQuery && matchesType && matchesPrice;
+            card.hidden = !matches;
+
+            if (matches) visibleCards.push(card);
+          });
+
+          const sortMode = sortFilter ? sortFilter.value : "newest";
+
+          visibleCards.sort(function (a, b) {
+            const priceA = Number(a.dataset.price || 0);
+            const priceB = Number(b.dataset.price || 0);
+            const indexA = Number(a.dataset.index || 0);
+            const indexB = Number(b.dataset.index || 0);
+
+            if (sortMode === "price-low") return priceA - priceB;
+            if (sortMode === "price-high") return priceB - priceA;
+            return indexA - indexB;
+          });
+
+          /*
+           * Reorder only actual property cards. Keep the empty-state element
+           * at the end so it does not disappear or become a sortable listing.
+           */
+          visibleCards.forEach(function (card) {
+            propertyGrid.insertBefore(card, filterEmptyState);
+          });
+
+          if (visibleCount)
+            visibleCount.textContent = String(visibleCards.length);
+
+          if (filterEmptyState) {
+            filterEmptyState.hidden =
+              visibleCards.length !== 0 || cards.length === 0;
+          }
+        }
+
+        function syncType(value, source) {
+          if (source !== typeFilter && typeFilter) typeFilter.value = value;
+          if (source !== typeSearch && typeSearch) typeSearch.value = value;
+        }
+
+        function syncPrice(value, source) {
+          if (source !== priceFilter && priceFilter) priceFilter.value = value;
+          if (source !== budgetSearch && budgetSearch)
+            budgetSearch.value = value;
+        }
+
+        if (locationSearch)
+          locationSearch.addEventListener("input", applyFilters);
+
+        if (typeFilter) {
+          typeFilter.addEventListener("change", function () {
+            syncType(typeFilter.value, typeFilter);
+            applyFilters();
+          });
+        }
+
+        if (typeSearch) {
+          typeSearch.addEventListener("change", function () {
+            syncType(typeSearch.value, typeSearch);
+            applyFilters();
+          });
+        }
+
+        if (priceFilter) {
+          priceFilter.addEventListener("change", function () {
+            syncPrice(priceFilter.value, priceFilter);
+            applyFilters();
+          });
+        }
+
+        if (budgetSearch) {
+          budgetSearch.addEventListener("change", function () {
+            syncPrice(budgetSearch.value, budgetSearch);
+            applyFilters();
+          });
+        }
+
+        if (sortFilter) sortFilter.addEventListener("change", applyFilters);
+
+        function clearFilters() {
+          if (locationSearch) locationSearch.value = "";
+          if (typeSearch) typeSearch.value = "";
+          if (budgetSearch) budgetSearch.value = "";
+          if (typeFilter) typeFilter.value = "";
+          if (priceFilter) priceFilter.value = "";
+          if (sortFilter) sortFilter.value = "newest";
+          applyFilters();
+        }
+
+        const clearButton = document.getElementById("clearFilters");
+        const emptyReset = document.getElementById("emptyReset");
+
+        if (clearButton) clearButton.addEventListener("click", clearFilters);
+        if (emptyReset) emptyReset.addEventListener("click", clearFilters);
+
+        document.querySelectorAll(".category-filter").forEach(function (link) {
+          link.addEventListener("click", function () {
+            const type = normalize(link.dataset.type);
+            syncType(type, null);
+            applyFilters();
+          });
         });
 
-        const sorted = sortSel.value
-          ? [...cards].sort((a, b) => {
-              const d =
-                parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-              return sortSel.value === "low" ? d : -d;
-            })
-          : originalOrder;
-        sorted.forEach((c) => grid.insertBefore(c, emptyState));
+        const searchForm = document.getElementById("searchForm");
 
-        countLabel.textContent = `${found} ${found === 1 ? "place" : "places"} to rent`;
-        if (emptyState) emptyState.hidden = found !== 0;
-      }
+        if (searchForm) {
+          searchForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            applyFilters();
 
-      [locationInput, typeSel, budgetSel, sortSel].forEach((el) =>
-        el.addEventListener("input", applyFilters),
-      );
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        applyFilters();
-        document
-          .getElementById("properties")
-          .scrollIntoView({ behavior: "smooth" });
-      });
-      document.getElementById("clearBtn").addEventListener("click", () => {
-        locationInput.value = "";
-        typeSel.value = "";
-        budgetSel.value = "";
-        sortSel.value = "";
+            const listings = document.getElementById("listings");
+            if (listings) {
+              listings.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          });
+        }
+
         applyFilters();
       });
     </script>

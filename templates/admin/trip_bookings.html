@@ -1,0 +1,211 @@
+{% extends "admin/travel_base.html" %} {% block title %}Trip bookings{% endblock
+%} {% block content %}
+
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Passenger management</p>
+
+    <h1>{{ trip.route_from|e }} → {{ trip.route_to|e }}</h1>
+
+    <p class="sub">
+      {{ trip.departure_date.strftime('%a %d %b %Y') if
+      trip.departure_date.strftime is defined else trip.departure_date }} · {{
+      trip.departure_time.strftime('%H:%M') if trip.departure_time.strftime is
+      defined else trip.departure_time }} · {{ trip.operator_name|e }}
+    </p>
+  </div>
+
+  <div class="actions">
+    <a
+      class="btn secondary"
+      href="{{ url_for('admin_trip_form_edit', trip_id=trip.id) }}"
+    >
+      Edit trip
+    </a>
+
+    <a class="btn secondary" href="{{ url_for('admin_trips') }}">
+      ← All trips
+    </a>
+  </div>
+</section>
+
+<section class="summary-grid">
+  <div class="summary">
+    <span>Total capacity</span>
+    <strong>{{ trip.seats_total }}</strong>
+  </div>
+
+  <div class="summary">
+    <span>Seats held</span>
+    <strong>{{ held }}</strong>
+  </div>
+
+  <div class="summary">
+    <span>Paid seats</span>
+    <strong>{{ paid_seats }}</strong>
+  </div>
+
+  <div class="summary">
+    <span>Seats remaining</span>
+    <strong>{{ trip.seats_total - held }}</strong>
+  </div>
+</section>
+
+<section class="summary-grid">
+  <div class="summary">
+    <span>Customer price per seat</span>
+    <strong>KSh {{ "{:,.2f}".format(trip.price) }}</strong>
+  </div>
+
+  <div class="summary">
+    <span>Recorded paid-seat revenue</span>
+    <strong>KSh {{ "{:,.2f}".format(revenue) }}</strong>
+  </div>
+
+  <div class="summary">
+    <span>Estimated margin on paid seats</span>
+    <strong>
+      {% if margin is not none %} KSh {{ "{:,.2f}".format(margin) }} {% else %}
+      — {% endif %}
+    </strong>
+  </div>
+
+  <div class="summary">
+    <span>Trip status</span>
+    <strong>
+      <span class="badge {{ trip.status|e }}"> {{ trip.status|e }} </span>
+    </strong>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Passenger bookings</h2>
+
+      <p class="sub">
+        Pending bookings do not reserve seats. Confirmed and paid bookings do.
+      </p>
+    </div>
+
+    <span class="badge">
+      {{ bookings|length }} booking{% if bookings|length != 1 %}s{% endif %}
+    </span>
+  </div>
+
+  {% if bookings %}
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Passenger</th>
+          <th>Contact</th>
+          <th>Seats</th>
+          <th>Pickup</th>
+          <th>Status</th>
+          <th>Payment reference</th>
+          <th>Created</th>
+          <th>Update status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>
+            <strong>{{ booking.full_name|e }}</strong>
+
+            <small class="muted" style="display: block">
+              Booking #{{ booking.id }}
+            </small>
+          </td>
+
+          <td>
+            {{ booking.phone|e }} {% if booking.whatsapp_phone %}
+            <small class="muted" style="display: block">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://wa.me/{{ booking.whatsapp_phone|urlencode }}?text={{ ('Hello ' ~ booking.full_name ~ ', this is CivicNest about your seat request for ' ~ trip.route_from ~ ' to ' ~ trip.route_to ~ ' on ' ~ trip.departure_date.strftime('%d %b') ~ '.')|urlencode }}"
+              >
+                WhatsApp {{ booking.whatsapp_phone|e }}
+              </a>
+            </small>
+            {% endif %}
+          </td>
+
+          <td>
+            <strong>{{ booking.seats }}</strong>
+          </td>
+
+          <td>{{ booking.pickup_point|default('Not specified', true)|e }}</td>
+
+          <td>
+            <span class="badge {{ booking.status|e }}">
+              {{ booking.status|e }}
+            </span>
+          </td>
+
+          <td>{{ booking.payment_ref|default('—', true)|e }}</td>
+
+          <td>
+            {{ booking.created_local.strftime('%d %b %Y, %H:%M') if
+            booking.created_local.strftime is defined else booking.created_local
+            }}
+          </td>
+
+          <td>
+            <div class="actions">
+              {% for next_status in booking_statuses %} {% if next_status !=
+              booking.status %}
+
+              <form
+                method="post"
+                action="{{ url_for('admin_booking_status', booking_id=booking.id, status=next_status) }}"
+                onsubmit="return confirm('Change booking #{{ booking.id }} to {{ next_status }}?');"
+              >
+                {% if csrf_token is defined %}
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                {% endif %} {% if next_status == 'paid' %}
+                <input
+                  type="text"
+                  name="payment_ref"
+                  maxlength="60"
+                  placeholder="M-Pesa code (optional)"
+                  aria-label="Payment reference for booking {{ booking.id }}"
+                />
+                {% endif %}
+
+                <button
+                  class="btn small {% if next_status == 'cancelled' %}danger{% else %}secondary{% endif %}"
+                  type="submit"
+                >
+                  {{ next_status|capitalize }}
+                </button>
+              </form>
+
+              {% endif %} {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+
+  <div class="empty">
+    <strong>No bookings yet</strong>
+    <p>Passenger bookings for this trip will appear here.</p>
+  </div>
+
+  {% endif %}
+</section>
+
+{% endblock %} `

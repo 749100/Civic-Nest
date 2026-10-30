@@ -1,162 +1,826 @@
-{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
-stage_class %}compact{% endblock %} {% block page_title %}Your dashboard{%
-endblock %} {% block page_sub %}
-<p class="page-sub">
-  Manage your listings, vacancies and enquiries in one place.
-</p>
-{% endblock %} {% block hero_extra %}
-<a class="btn light" href="{{ url_for('add_property') }}">List a property</a>
-{% endblock %} {% block content %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
-<div class="stats">
-  <div class="stat">
-    <strong>{{ total_properties }}</strong><span>Listings</span>
-  </div>
-  <div class="stat">
-    <strong>{{ active_listings }}</strong><span>Live now</span>
-  </div>
-  <div class="stat">
-    <strong>{{ new_inquiries }}</strong><span>New enquiries</span>
-  </div>
-  <div class="stat">
-    <strong>{{ total_inquiries }}</strong><span>All enquiries</span>
-  </div>
-  <div class="stat">
-    <strong>{{ vacant_units }}</strong><span>Vacant units</span>
-  </div>
-  <div class="stat">
-    <strong>{{ occupied_units }}</strong><span>Occupied units</span>
-  </div>
-</div>
+    <title>Your Dashboard | CivicNest Africa</title>
 
-<h2 class="sec-title">Your listings</h2>
-<div class="stack">
-  {% for p in properties %}
-  <article class="card row-card">
-    <div class="row-photo">
-      {% if p.cover_image %}
-      <img
-        src="{{ p.cover_image|photo_url }}"
-        alt="{{ p.title }}"
-        loading="lazy"
-      />
-      {% else %}
-      <div class="no-photo">No photo</div>
-      {% endif %}
-    </div>
-    <div>
-      <div class="row-head">
-        <div>
-          <h3>{{ p.title }}</h3>
-          <p class="muted">
-            {{ p.property_type|replace('_', ' ')|title }} · KSh {{
-            "{:,.0f}".format(p.price) }}{% if p.listing_type == 'rent' %} /
-            month{% endif %} · {{ p.location }}
-          </p>
-        </div>
-        <div>
-          <span class="pill st-{{ p.status }}">{{ p.status|title }}</span>
-          {% if p.is_verified %}<span class="pill ok">Verified</span>{% endif %}
-        </div>
-      </div>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#1456d8" />
 
-      {% if p.status == 'pending' %}
-      <p class="note">
-        Waiting for review. It will go live once it has been approved.
-      </p>
-      {% elif p.status == 'rejected' %}
-      <p class="note bad">
-        Not approved{% if p.rejection_reason %}: {{ p.rejection_reason }}{%
-        endif %}. Edit the listing and it will be reviewed again.
-      </p>
-      {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
-      <form
-        class="qty"
-        method="post"
-        action="{{ url_for('update_property_availability', property_id=p.id) }}"
-      >
-        <label
-          >Total units
-          <input
-            type="number"
-            name="total_units"
-            min="1"
-            value="{{ p.total_units }}"
-            required
-          />
-        </label>
-        <label
-          >Vacant units
-          <input
-            type="number"
-            name="vacant_units"
-            min="0"
-            value="{{ p.vacant_units }}"
-            required
-          />
-        </label>
-        <button class="btn ghost" type="submit">Update vacancy</button>
-      </form>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
 
-      <div class="links">
-        <a class="btn" href="{{ url_for('edit_property', property_id=p.id) }}"
-          >Edit</a
-        >
-        <a
-          class="btn ghost"
-          href="{{ url_for('property_details', property_id=p.id) }}"
-          >View page</a
-        >
-      </div>
-    </div>
-  </article>
-  {% else %}
-  <div class="empty">
-    You have not listed anything yet.<br /><br />
-    <a class="btn" href="{{ url_for('add_property') }}"
-      >List your first property</a
+    <style>
+      /* =====================================================
+         CIVICNEST AFRICA — DASHBOARD
+         Design matched to the Travel and Stay & Dine pages.
+         ===================================================== */
+
+      .hero.d {
+        padding-bottom: 64px;
+      }
+
+      .hero.d .dhero-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 16px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: #fff;
+        color: #0047ff;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .sec.d {
+        padding-top: 40px;
+      }
+
+      .d a:focus-visible,
+      .d button:focus-visible,
+      .d input:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
+      }
+
+      /* Stats */
+      .dstats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      @media (min-width: 700px) {
+        .dstats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 960px) {
+        .dstats {
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+      }
+
+      .dstat {
+        padding: 16px;
+      }
+
+      .dstat strong {
+        display: block;
+        color: #1456d8;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .dstat span {
+        display: block;
+        margin-top: 4px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      /* Section titles */
+      .dtitle {
+        margin: 30px 0 14px;
+        color: #001b5e;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .dstack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .dstack .card {
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      /* Listing rows */
+      .drow {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @media (min-width: 700px) {
+        .drow {
+          grid-template-columns: 220px minmax(0, 1fr);
+        }
+      }
+
+      .dphoto {
+        position: relative;
+        min-height: 165px;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
+      }
+
+      .dphoto img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .dphoto .nophoto {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .dbody {
+        min-width: 0;
+        padding: 16px;
+      }
+
+      .dhead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .dhead > div {
+        min-width: 0;
+      }
+
+      .dhead h3 {
+        margin: 0;
+        color: #001b5e;
+        font-size: 15px;
+        overflow-wrap: anywhere;
+      }
+
+      .dmuted {
+        margin: 4px 0 0;
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+      }
+
+      .dpills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .dpill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #e6eeff;
+        color: #1456d8;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .dpill.st-live,
+      .dpill.st-approved,
+      .dpill.st-active,
+      .dpill.ok {
+        background: #dcf5e6;
+        color: #0b7a3b;
+      }
+
+      .dpill.st-pending {
+        background: #fff1d6;
+        color: #8a5a00;
+      }
+
+      .dpill.st-rejected {
+        background: #ffe1e1;
+        color: #b42318;
+      }
+
+      .dnote {
+        margin: 12px 0 0;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fff1d6;
+        color: #8a5a00;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .dnote.bad {
+        background: #ffe1e1;
+        color: #b42318;
+      }
+
+      /* Vacancy form */
+      .dqty {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: end;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      @media (min-width: 700px) {
+        .dqty {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        }
+      }
+
+      .dqty label {
+        display: grid;
+        gap: 5px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .dqty input {
+        width: 100%;
+        min-height: 40px;
+        padding: 9px 12px;
+        border: 1px solid #d3e0f5;
+        border-radius: 10px;
+        background: #fff;
+        color: #001b5e;
+        font-family: inherit;
+        font-size: 13px;
+      }
+
+      .dqty .dbtn {
+        grid-column: 1 / -1;
+      }
+
+      @media (min-width: 700px) {
+        .dqty .dbtn {
+          grid-column: auto;
+        }
+      }
+
+      /* Buttons */
+      .dlinks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .dbtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 9px 14px;
+        border: 1px solid #1456d8;
+        border-radius: 10px;
+        background: #1456d8;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .dbtn:hover {
+        background: #001b5e;
+        border-color: #001b5e;
+      }
+
+      .dbtn.ghost {
+        background: #fff;
+        color: #1456d8;
+      }
+
+      .dbtn.ghost:hover {
+        background: #e6eeff;
+      }
+
+      /* Enquiries */
+      .denq {
+        padding: 16px;
+      }
+
+      .denq .dlink {
+        color: #1456d8;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .denq .dmessage {
+        margin: 12px 0 0;
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+      }
+
+      /* Empty states */
+      .dempty {
+        padding: 30px 18px;
+        border: 1px dashed #d3e0f5;
+        border-radius: 18px;
+        background: #f2f7fd;
+        color: #405578;
+        font-size: 12px;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .d *,
+        .d *::before,
+        .d *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include "_admin_bar.html" %}
+
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
     >
-  </div>
-  {% endfor %}
-</div>
+      <symbol id="i-house" viewBox="0 0 24 24">
+        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </symbol>
 
-<h2 class="sec-title">Recent enquiries</h2>
-<div class="stack">
-  {% for i in inquiries %}
-  <article class="card">
-    <div class="row-head">
-      <div>
-        <h3>{{ i.seeker_name }}</h3>
-        <p class="muted">
-          About
-          <a
-            href="{{ url_for('property_details', property_id=i.property_id) }}"
-            style="color: var(--blue); font-weight: 600"
-            >{{ i.property_title }}</a
-          >{% if i.created_at %} · {{ i.created_at.strftime('%d %b %Y') }}{%
-          endif %}
-        </p>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+        />
+      </symbol>
+
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M4 5h16v11H9l-5 4z" />
+      </symbol>
+
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </symbol>
+
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path
+          d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+        />
+      </symbol>
+
+      <symbol id="i-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 7l9 6 9-6" />
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </symbol>
+
+      <symbol id="i-bed" viewBox="0 0 24 24">
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+    </svg>
+
+    <!-- HEADER AND NAVIGATION -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Africa</small></span>
+        </a>
+
+        <nav class="links" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('rent_page') }}">Properties</a>
+          <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}">Travel</a>
+          <a href="{{ url_for('sell_page') }}">List Property</a>
+          <a href="{{ url_for('about_page') }}">About</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('home') }}#properties">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
+            Saved
+          </a>
+
+          <a class="t" href="{{ url_for('dashboard') }}">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
+          </a>
+
+          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+
+          <button
+            class="burger"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+          >
+            <svg class="i" style="width: 24px; height: 24px" aria-hidden="true">
+              <use href="#i-menu" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <span class="pill {{ 'st-pending' if i.status == 'new' else '' }}"
-        >{{ i.status|title }}</span
-      >
-    </div>
-    <p class="prose" style="margin-top: 10px">{{ i.message }}</p>
-    <div class="links">
-      {% if i.seeker_phone %}<a
-        class="btn ghost"
-        href="tel:{{ i.seeker_phone }}"
-        >Call {{ i.seeker_phone }}</a
-      >{% endif %} {% if i.seeker_email %}<a
-        class="btn ghost"
-        href="mailto:{{ i.seeker_email }}"
-        >Email</a
-      >{% endif %}
-    </div>
-  </article>
-  {% else %}
-  <div class="empty">No enquiries yet. They will show up here.</div>
-  {% endfor %}
-</div>
-{% endblock %}
+
+      <nav class="menu" id="menuPanel" aria-label="Mobile navigation" hidden>
+        <a href="{{ url_for('rent_page') }}">Rent</a>
+        <a href="{{ url_for('buy_page') }}">Buy</a>
+        <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+        <a href="{{ url_for('invest_page') }}">Invest</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+        <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+        <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+        <a href="{{ url_for('dashboard') }}">My dashboard</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero d">
+        <div class="wrap">
+          <div class="eyebrow">Your account</div>
+
+          <h1>Your <em>dashboard.</em></h1>
+
+          <p>Manage your listings, vacancies and enquiries in one place.</p>
+
+          <a class="dhero-action" href="{{ url_for('add_property') }}"
+            >List a property</a
+          >
+        </div>
+      </section>
+
+      <!-- DASHBOARD CONTENT -->
+      <section class="sec d">
+        <div class="wrap">
+          <!-- STATS -->
+          <div class="dstats">
+            <div class="card dstat">
+              <strong>{{ total_properties }}</strong><span>Listings</span>
+            </div>
+            <div class="card dstat">
+              <strong>{{ active_listings }}</strong><span>Live now</span>
+            </div>
+            <div class="card dstat">
+              <strong>{{ new_inquiries }}</strong><span>New enquiries</span>
+            </div>
+            <div class="card dstat">
+              <strong>{{ total_inquiries }}</strong><span>All enquiries</span>
+            </div>
+            <div class="card dstat">
+              <strong>{{ vacant_units }}</strong><span>Vacant units</span>
+            </div>
+            <div class="card dstat">
+              <strong>{{ occupied_units }}</strong><span>Occupied units</span>
+            </div>
+          </div>
+
+          <!-- LISTINGS -->
+          <h2 class="dtitle">Your listings</h2>
+
+          <div class="dstack">
+            {% for p in properties %}
+            <article class="card drow">
+              <div class="dphoto">
+                {% if p.cover_image %}
+                <img
+                  src="{{ p.cover_image|photo_url }}"
+                  alt="{{ p.title }}"
+                  loading="lazy"
+                />
+                {% else %}
+                <div class="nophoto">No photo</div>
+                {% endif %}
+              </div>
+
+              <div class="dbody">
+                <div class="dhead">
+                  <div>
+                    <h3>{{ p.title }}</h3>
+                    <p class="dmuted">
+                      {{ p.property_type|replace('_', ' ')|title }} · KSh {{
+                      "{:,.0f}".format(p.price) }}{% if p.listing_type == 'rent'
+                      %} / month{% endif %} · {{ p.location }}
+                    </p>
+                  </div>
+
+                  <div class="dpills">
+                    <span class="dpill st-{{ p.status }}"
+                      >{{ p.status|title }}</span
+                    >
+                    {% if p.is_verified %}<span class="dpill ok">Verified</span
+                    >{% endif %}
+                  </div>
+                </div>
+
+                {% if p.status == 'pending' %}
+                <p class="dnote">
+                  Waiting for review. It will go live once it has been approved.
+                </p>
+                {% elif p.status == 'rejected' %}
+                <p class="dnote bad">
+                  Not approved{% if p.rejection_reason %}: {{ p.rejection_reason
+                  }}{% endif %}. Edit the listing and it will be reviewed again.
+                </p>
+                {% endif %} {% if p.listing_type == 'rent' %}
+                <form
+                  class="dqty"
+                  method="post"
+                  action="{{ url_for('update_property_availability', property_id=p.id) }}"
+                >
+                  <label>
+                    Total units
+                    <input
+                      type="number"
+                      name="total_units"
+                      min="1"
+                      value="{{ p.total_units }}"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Vacant units
+                    <input
+                      type="number"
+                      name="vacant_units"
+                      min="0"
+                      value="{{ p.vacant_units }}"
+                      required
+                    />
+                  </label>
+
+                  <button class="dbtn ghost" type="submit">
+                    Update vacancy
+                  </button>
+                </form>
+                {% endif %}
+
+                <div class="dlinks">
+                  <a
+                    class="dbtn"
+                    href="{{ url_for('edit_property', property_id=p.id) }}"
+                    >Edit</a
+                  >
+                  <a
+                    class="dbtn ghost"
+                    href="{{ url_for('property_details', property_id=p.id) }}"
+                    >View page</a
+                  >
+                  <form
+                    method="post"
+                    action="{{ url_for('delete_property', property_id=p.id) }}"
+                    onsubmit='return confirm({{ ("Delete " ~ p.title ~ "? This cannot be undone.")|tojson }});'
+                    style="display: contents"
+                  >
+                    <button
+                      class="dbtn ghost"
+                      type="submit"
+                      style="color: #b42318; border-color: #f3b8b8"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </article>
+            {% else %}
+            <div class="dempty">
+              You have not listed anything yet.<br /><br />
+              <a class="dbtn" href="{{ url_for('add_property') }}"
+                >List your first property</a
+              >
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- ENQUIRIES -->
+          <h2 class="dtitle">Recent enquiries</h2>
+
+          <div class="dstack">
+            {% for i in inquiries %}
+            <article class="card denq">
+              <div class="dhead">
+                <div>
+                  <h3>{{ i.seeker_name }}</h3>
+                  <p class="dmuted">
+                    About
+                    <a
+                      class="dlink"
+                      href="{{ url_for('property_details', property_id=i.property_id) }}"
+                      >{{ i.property_title }}</a
+                    >{% if i.created_at %} · {{ i.created_at.strftime('%d %b
+                    %Y') }}{% endif %}
+                  </p>
+                </div>
+
+                <span
+                  class="dpill {{ 'st-pending' if i.status == 'new' else '' }}"
+                  >{{ i.status|title }}</span
+                >
+              </div>
+
+              <p class="dmessage">{{ i.message }}</p>
+
+              <div class="dlinks">
+                {% if i.seeker_phone %}
+                <a class="dbtn ghost" href="tel:{{ i.seeker_phone }}"
+                  >Call {{ i.seeker_phone }}</a
+                >
+                {% endif %} {% if i.seeker_email %}
+                <a class="dbtn ghost" href="mailto:{{ i.seeker_email }}"
+                  >Email</a
+                >
+                {% endif %}
+              </div>
+            </article>
+            {% else %}
+            <div class="dempty">No enquiries yet. They will show up here.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="contact" id="contact">
+        <div class="wrap">
+          <div>
+            <h3>Contact Us</h3>
+            <p>We’re here to help. Get in touch with us.</p>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
+            <div>
+              +254 768387842
+              <small>Call or WhatsApp</small>
+            </div>
+          </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </div>
+
+          <div class="soc" aria-label="Social links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="X">𝕏</a>
+            <a href="#" aria-label="Instagram">ig</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Primary navigation">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a href="{{ url_for('hospitality_page') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Stay &amp; Dine
+      </a>
+
+      <a class="on" href="{{ url_for('dashboard') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="{{ url_for('add_property') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-plus" />
+        </svg>
+        List Property
+      </a>
+    </nav>
+
+    <!-- JAVASCRIPT -->
+    <script>
+      (() => {
+        "use strict";
+
+        const menuBtn = document.getElementById("menuBtn");
+        const menuPanel = document.getElementById("menuPanel");
+
+        if (!menuBtn || !menuPanel) return;
+
+        menuBtn.addEventListener("click", () => {
+          const isOpening = menuPanel.hidden;
+
+          menuPanel.hidden = !isOpening;
+          menuBtn.setAttribute("aria-expanded", String(isOpening));
+          menuBtn.setAttribute(
+            "aria-label",
+            isOpening ? "Close menu" : "Open menu",
+          );
+        });
+
+        document.addEventListener("click", (event) => {
+          if (
+            !menuPanel.hidden &&
+            !menuPanel.contains(event.target) &&
+            !menuBtn.contains(event.target)
+          ) {
+            menuPanel.hidden = true;
+            menuBtn.setAttribute("aria-expanded", "false");
+            menuBtn.setAttribute("aria-label", "Open menu");
+          }
+        });
+
+        menuPanel.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            menuPanel.hidden = true;
+            menuBtn.setAttribute("aria-expanded", "false");
+            menuBtn.focus();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

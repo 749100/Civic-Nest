@@ -6,569 +6,353 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+
     <title>Manage Stay &amp; Dine | CivicNest Admin</title>
+
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#1456d8" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
     />
+
     <style>
-      :root {
-        --blue: #1e4fa3;
-        --blue2: #2d63c8;
-        --navy: #0a2260;
-        --tint: #e1ebfa;
-        --bg: #f3f7fd;
-        --line: #d9e3f3;
-        --ink: #14213d;
-        --muted: #55627a;
-        --lift:
-          0 1px 2px rgba(20, 33, 61, 0.05), 0 10px 28px rgba(30, 79, 163, 0.09);
-      }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        scroll-behavior: smooth;
-      }
-      body {
-        overflow-x: hidden;
-        font-family: "DM Sans", sans-serif;
-        color: var(--ink);
-        background: var(--bg);
-        padding-bottom: calc(112px + env(safe-area-inset-bottom));
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      button {
-        font-family: inherit;
-      }
-      :focus-visible {
-        outline: 3px solid #9dc0ff;
-        outline-offset: 2px;
-      }
-      .wrap {
-        position: relative;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 0 22px;
-      }
-      svg.i {
-        width: 20px;
-        height: 20px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex: none;
+      /* =====================================================
+         CIVICNEST AFRICA — ADMIN: MANAGE STAY & DINE
+         Design matched to the Travel and Stay & Dine pages.
+         ===================================================== */
+
+      .hero.m {
+        padding-bottom: 56px;
       }
 
-      /* blue stage */
-      .stage {
-        position: relative;
-        overflow: hidden;
-        color: #fff;
-        padding-bottom: 40px;
-        border-radius: 0 0 40px 40px;
-        background:
-          radial-gradient(
-            700px 420px at 92% 4%,
-            rgba(120, 175, 255, 0.4),
-            transparent 70%
-          ),
-          radial-gradient(
-            600px 400px at 0 70%,
-            rgba(45, 99, 200, 0.55),
-            transparent 70%
-          ),
-          linear-gradient(
-            180deg,
-            rgba(7, 24, 72, 0.8) 0,
-            rgba(14, 52, 128, 0.82) 55%,
-            rgba(8, 30, 86, 0.94) 100%
-          ),
-          url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85")
-            center/cover #0e3478;
-      }
-      .stage::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.22) 1.1px,
-            transparent 1.6px
-          )
-          0 0/24px 24px;
-        -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
-        mask-image: linear-gradient(180deg, #000, transparent 70%);
-      }
-      .top {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 76px;
-        padding-top: 6px;
-      }
-      .icon-btn {
-        width: 46px;
-        height: 46px;
-        border-radius: 23px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.32);
-        -webkit-backdrop-filter: blur(10px);
-        backdrop-filter: blur(10px);
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .brand-mark {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        background: #fff;
-        color: var(--blue);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-      }
-      .brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1;
-      }
-      .brand-name {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 25px;
-        color: #fff;
-      }
-      .brand-sub {
-        margin-top: 3px;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.78);
-      }
-      h1 {
-        position: relative;
-        margin: clamp(14px, 4vw, 32px) 0 8px;
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(34px, 6vw, 56px);
-        line-height: 1.06;
-        letter-spacing: -0.02em;
-        text-shadow: 0 6px 30px rgba(3, 12, 40, 0.45);
-      }
-      .sub {
-        color: rgba(255, 255, 255, 0.82);
-        font-size: 15px;
-        max-width: 46ch;
+      .sec.m {
+        padding-top: 34px;
       }
 
-      /* glass stat tiles */
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 24px;
+      .m a:focus-visible,
+      .m button:focus-visible {
+        outline: 3px solid #8fc2ff;
+        outline-offset: 3px;
       }
-      .tile {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        padding: 14px 16px;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.11);
-        border: 1px solid rgba(255, 255, 255, 0.26);
-        border-radius: 20px;
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        box-shadow:
-          0 14px 34px rgba(3, 12, 40, 0.22),
-          inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      }
-      .tile .num {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: 30px;
-        line-height: 1.1;
-      }
-      .tile small {
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.82);
-      }
-      .btn-white {
+
+      /* Hero action */
+      .mhero-action {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        min-height: 50px;
-        padding: 0 26px;
-        margin-top: 22px;
-        border-radius: 15px;
+        margin-top: 16px;
+        padding: 12px 18px;
+        border-radius: 12px;
         background: #fff;
-        color: var(--navy);
-        font-weight: 700;
-        font-size: 15px;
-        box-shadow: 0 10px 22px rgba(3, 12, 40, 0.3);
-        transition: transform 0.2s;
-      }
-      .btn-white:hover {
-        transform: scale(1.03);
+        color: #0047ff;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
       }
 
-      /* listings */
-      .listings {
-        position: relative;
-        padding: 48px 0 8px;
-        background: radial-gradient(
-            circle,
-            rgba(30, 79, 163, 0.1) 1.1px,
-            transparent 1.5px
-          )
-          0 0/24px 24px;
+      /* Stats */
+      .mstats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 8px;
       }
-      .listings h2 {
-        font-family: "Fraunces", serif;
-        font-weight: 600;
-        font-size: clamp(26px, 4vw, 38px);
-        color: var(--navy);
+
+      @media (min-width: 960px) {
+        .mstats {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
       }
-      .count {
+
+      .mstat {
+        padding: 16px;
+      }
+
+      .mstat strong {
+        display: block;
+        color: #1456d8;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .mstat span {
+        display: block;
         margin-top: 4px;
-        color: var(--muted);
-        font-size: 15px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
       }
-      .flash {
-        padding: 12px 16px;
-        border-radius: 14px;
-        margin-top: 16px;
-        font-size: 14px;
-        font-weight: 500;
+
+      .mtitle {
+        margin: 30px 0 4px;
+        color: #001b5e;
+        font-size: 18px;
+        font-weight: 800;
       }
-      .flash.success {
-        background: #e3f6ec;
-        color: #0f7a55;
+
+      .mcount {
+        margin: 0 0 4px;
+        color: #405578;
+        font-size: 11px;
+        font-weight: 700;
       }
-      .flash.error {
-        background: #fde8e8;
+
+      /* Flash messages */
+      .mflash {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #e6eeff;
+        color: #1456d8;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .mflash.success {
+        background: #dcf5e6;
+        color: #0b7a3b;
+      }
+
+      .mflash.error,
+      .mflash.danger {
+        background: #ffe1e1;
         color: #b42318;
       }
 
-      /* compact cards: 2 per row on phone, 3 on laptop */
-      .plist {
+      /* Grid of places */
+      .mlist {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
-        margin-top: 18px;
+        margin-top: 16px;
       }
-      .card {
+
+      @media (min-width: 960px) {
+        .mlist {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+        }
+      }
+
+      .mlist .card {
         display: flex;
+        min-width: 0;
         flex-direction: column;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 16px;
         overflow: hidden;
-        box-shadow: var(--lift);
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
       }
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 26px 50px rgba(30, 79, 163, 0.2);
-      }
-      .card.off {
+
+      .mlist .card.off {
         opacity: 0.7;
       }
-      .photo {
+
+      .mphoto {
         position: relative;
-        height: 110px;
-        background: linear-gradient(135deg, #c9d8f2, #e1ebfa);
+        min-height: 130px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(143, 194, 255, 0.38),
+            transparent 38%
+          ),
+          linear-gradient(135deg, #0066ff, #001b5e);
       }
-      .photo::after {
-        content: "";
+
+      @media (min-width: 960px) {
+        .mphoto {
+          min-height: 165px;
+        }
+      }
+
+      .mphoto img {
         position: absolute;
         inset: 0;
-        pointer-events: none;
-        background: linear-gradient(
-          180deg,
-          rgba(10, 34, 96, 0.2),
-          transparent 35%,
-          rgba(10, 34, 96, 0.5)
-        );
-      }
-      .photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        display: block;
       }
-      .no-photo {
-        height: 100%;
+
+      .mphoto .nophoto {
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--muted);
-        font-size: 13px;
-        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        font-weight: 800;
       }
-      .badge {
+
+      .mpill {
         position: absolute;
-        left: 8px;
         z-index: 2;
-        padding: 3px 8px;
-        border-radius: 8px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #1456d8;
         font-size: 10px;
-        font-weight: 600;
-        color: #fff;
+        font-weight: 800;
       }
-      .badge.v {
+
+      .mpill.v {
         top: 8px;
-        background: var(--blue);
+        left: 8px;
       }
-      .badge.a {
-        bottom: 8px;
-        background: #0f7a55;
-      }
-      .badge.h {
+
+      .mpill.h {
         top: 8px;
         right: 8px;
-        left: auto;
         background: #6b7280;
+        color: #fff;
       }
-      .info {
+
+      .mpill.c {
+        bottom: 8px;
+        left: 8px;
+        background: #0f7a55;
+        color: #fff;
+      }
+
+      .mlist .info {
         display: flex;
-        flex-direction: column;
+        min-width: 0;
         flex: 1;
-        padding: 10px 12px 12px;
+        flex-direction: column;
       }
-      .price {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--blue);
+
+      .mlist .info h3 {
+        overflow-wrap: anywhere;
       }
-      .price span {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--muted);
+
+      .mlist .price small {
+        color: #405578;
+        font-size: 10px;
+        font-weight: 700;
       }
-      .info h3 {
-        margin-top: 4px;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1.25;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+
+      .mlist .loc {
+        overflow-wrap: anywhere;
       }
-      .loc {
-        margin-top: 2px;
-        font-size: 12px;
-        color: var(--muted);
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .acts {
+
+      .macts {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
         margin-top: auto;
         padding-top: 12px;
       }
-      .acts form {
+
+      .macts form {
         display: contents;
       }
-      .sbtn {
-        flex: 1;
+
+      .mbtn {
+        display: inline-flex;
         min-width: 56px;
         min-height: 36px;
-        padding: 0 10px;
-        border-radius: 10px;
-        border: 0;
-        background: var(--tint);
-        color: var(--blue);
-        font-weight: 600;
-        font-size: 12px;
-        cursor: pointer;
-        display: inline-flex;
+        flex: 1;
         align-items: center;
         justify-content: center;
+        padding: 0 10px;
+        border: 1px solid #1456d8;
+        border-radius: 10px;
+        background: #fff;
+        color: #1456d8;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
       }
-      .sbtn:hover {
-        background: #cfdef7;
+
+      .mbtn:hover {
+        background: #e6eeff;
       }
-      .sbtn.danger {
-        background: #fde8e8;
+
+      .mbtn.danger {
+        border-color: #f3b8b8;
+        background: #ffe1e1;
         color: #b42318;
       }
-      .sbtn.danger:hover {
-        background: #fbd5d5;
-      }
-      .empty {
-        grid-column: 1/-1;
-        padding: 44px 20px;
-        text-align: center;
-        background: #fff;
-        border: 1px dashed #9db4dd;
-        border-radius: 22px;
-      }
-      .empty h3 {
-        font-size: 18px;
-        margin-bottom: 6px;
-      }
-      .empty p {
-        color: var(--muted);
-        font-size: 14px;
-        max-width: 420px;
-        margin: auto;
+
+      .mbtn.danger:hover {
+        background: #fbd0d0;
       }
 
-      footer {
-        padding: 36px 0 8px;
-      }
-      footer p {
-        text-align: center;
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      /* bottom nav */
-      .tabbar {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 40;
-        max-width: 520px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        height: 68px;
-        padding: 0 8px;
-        background: rgba(255, 255, 255, 0.9);
-        -webkit-backdrop-filter: blur(16px);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(201, 214, 236, 0.9);
-        border-radius: 24px;
-        box-shadow: 0 18px 44px rgba(5, 15, 50, 0.3);
-      }
-      .tab {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        min-width: 76px;
-        padding: 7px 14px;
+      .mempty {
+        grid-column: 1 / -1;
+        padding: 36px 18px;
+        border: 1px dashed #d3e0f5;
         border-radius: 18px;
+        background: #f2f7fd;
+        text-align: center;
+      }
+
+      .mempty h3 {
+        margin: 0 0 8px;
+        color: #001b5e;
+      }
+
+      .mempty p {
+        max-width: 420px;
+        margin: 0 auto;
+        color: #405578;
         font-size: 12px;
-        font-weight: 500;
-        color: var(--muted);
-      }
-      .tab.on {
-        background: var(--tint);
-        color: var(--blue);
-        font-weight: 600;
-      }
-      .tab svg.i {
-        width: 22px;
-        height: 22px;
+        line-height: 1.7;
       }
 
-      @keyframes rise {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      h1 {
-        animation: rise 0.7s 0.05s both;
-      }
-      .sub,
-      .stage .grid,
-      .btn-white {
-        animation: rise 0.7s 0.2s both;
-      }
-
-      @media (min-width: 900px) {
-        .plist {
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-        }
-        .photo {
-          height: 160px;
-        }
-        .info {
-          padding: 14px 16px 16px;
-        }
-        .price {
-          font-size: 20px;
-        }
-        .info h3 {
-          font-size: 16px;
-        }
-        .loc {
-          font-size: 13px;
-        }
-      }
-      @media (min-width: 1000px) {
-        .grid {
-          grid-template-columns: repeat(4, 1fr);
-        }
-      }
       @media (prefers-reduced-motion: reduce) {
-        * {
-          transition: none !important;
-          animation: none !important;
+        .m *,
+        .m *::before,
+        .m *::after {
           scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
         }
       }
     </style>
   </head>
+
   <body>
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <!-- ICONS -->
+    <svg
+      width="0"
+      height="0"
+      style="position: absolute"
+      aria-hidden="true"
+      focusable="false"
+    >
       <symbol id="i-house" viewBox="0 0 24 24">
         <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
       </symbol>
+
       <symbol id="i-back" viewBox="0 0 24 24">
         <path d="M19 12H5M11 6l-6 6 6 6" />
       </symbol>
+
       <symbol id="i-plus" viewBox="0 0 24 24">
-        <path d="M12 5v14M5 12h14" />
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
       </symbol>
-      <symbol id="i-user" viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-      </symbol>
+
       <symbol id="i-bed" viewBox="0 0 24 24">
-        <path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />
-        <circle cx="7" cy="11" r="1.5" />
+        <path
+          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
+        />
       </symbol>
+
       <symbol id="i-dash" viewBox="0 0 24 24">
         <rect x="3" y="3" width="7" height="9" rx="1" />
         <rect x="14" y="3" width="7" height="5" rx="1" />
@@ -577,84 +361,105 @@
       </symbol>
     </svg>
 
-    <main>
-      <div class="stage">
-        <div class="wrap">
-          <header class="top">
-            <a
-              class="icon-btn"
-              href="{{ url_for('admin_dashboard') }}"
-              aria-label="Back to admin dashboard"
-              ><svg class="i" width="22" height="22"><use href="#i-back" /></svg
-            ></a>
-            <a class="brand" href="/" aria-label="CivicNest Africa home">
-              <span class="brand-mark"
-                ><svg class="i"><use href="#i-house" /></svg
-              ></span>
-              <span class="brand-text"
-                ><span class="brand-name">CivicNest</span
-                ><span class="brand-sub">Admin</span></span
-              >
-            </a>
-            <a
-              class="icon-btn"
-              href="{{ url_for('admin_place_add') }}"
-              aria-label="Add place"
-              ><svg class="i" width="22" height="22"><use href="#i-plus" /></svg
-            ></a>
-          </header>
+    <!-- HEADER -->
+    <header class="nav">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="{{ url_for('home') }}"
+          aria-label="CivicNest Africa home"
+        >
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
+          <span>CivicNest<small>Admin</small></span>
+        </a>
 
-          <h1>Manage Stay &amp; Dine</h1>
-          <p class="sub">
+        <nav class="links" aria-label="Admin navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a class="on" href="{{ url_for('admin_places') }}" aria-current="page"
+            >Places</a
+          >
+          <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+        </nav>
+
+        <div class="right">
+          <a class="t" href="{{ url_for('admin_dashboard') }}">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-back" />
+            </svg>
+            Back
+          </a>
+
+          <a class="signin" href="{{ url_for('admin_place_add') }}"
+            >Add place</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main class="m">
+      <!-- HERO -->
+      <section class="hero m">
+        <div class="wrap">
+          <div class="eyebrow">Admin</div>
+
+          <h1>Manage <em>Stay &amp; Dine.</em></h1>
+
+          <p>
             Add, edit, hide or remove guest houses, motels, resorts and
             restaurants.
           </p>
 
-          <div class="grid">
-            <div class="tile">
-              <span class="num">{{ places|length }}</span
-              ><small>Total places</small>
+          <a class="mhero-action" href="{{ url_for('admin_place_add') }}">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-plus" />
+            </svg>
+            Add place
+          </a>
+        </div>
+      </section>
+
+      <!-- CONTENT -->
+      <section class="sec m" aria-labelledby="listingsTitle">
+        <div class="wrap">
+          <!-- STATS -->
+          <div class="mstats">
+            <div class="card mstat">
+              <strong>{{ places|length }}</strong><span>Total places</span>
             </div>
-            <div class="tile">
-              <span class="num"
-                >{{ places|selectattr('is_active')|list|length }}</span
-              ><small>Visible</small>
+            <div class="card mstat">
+              <strong>{{ places|selectattr('is_active')|list|length }}</strong
+              ><span>Visible</span>
             </div>
-            <div class="tile">
-              <span class="num"
-                >{{ places|rejectattr('is_active')|list|length }}</span
-              ><small>Hidden</small>
+            <div class="card mstat">
+              <strong>{{ places|rejectattr('is_active')|list|length }}</strong
+              ><span>Hidden</span>
             </div>
-            <div class="tile">
-              <span class="num"
-                >{{ places|selectattr('is_verified')|list|length }}</span
-              ><small>Verified</small>
+            <div class="card mstat">
+              <strong>{{ places|selectattr('is_verified')|list|length }}</strong
+              ><span>Verified</span>
             </div>
           </div>
 
-          <a class="btn-white" href="{{ url_for('admin_place_add') }}">
-            <svg class="i"><use href="#i-plus" /></svg> Add place
-          </a>
-        </div>
-      </div>
+          <h2 class="mtitle" id="listingsTitle">All places</h2>
 
-      <section class="listings" aria-labelledby="listingsTitle">
-        <div class="wrap">
-          <h2 id="listingsTitle">All places</h2>
-          <p class="count">
+          <p class="mcount">
             {{ places|length }} {{ 'place' if places|length == 1 else 'places'
             }}
           </p>
 
           {% with messages = get_flashed_messages(with_categories=true) %} {%
           for cat, msg in messages %}
-          <div class="flash {{ cat }}">{{ msg }}</div>
+          <div class="mflash {{ cat }}" role="alert">{{ msg }}</div>
           {% endfor %} {% endwith %}
 
-          <div class="plist">
+          <div class="mlist">
             {% for p in places %}
             <article class="card {{ '' if p.is_active else 'off' }}">
-              <div class="photo">
+              <div class="mphoto">
                 {% if p.cover_image %}
                 <img
                   src="{{ p.cover_image if p.cover_image.startswith('http') else url_for('static', filename='uploads/places/' + p.cover_image) }}"
@@ -667,54 +472,64 @@
                   loading="lazy"
                 />
                 {% else %}
-                <div class="no-photo">No photo</div>
-                {% endif %} {% if p.is_verified %}<span class="badge v"
+                <div class="nophoto">No photo</div>
+                {% endif %} {% if p.is_verified %}<span class="mpill v"
                   >Verified</span
-                >{% endif %} {% if not p.is_active %}<span class="badge h"
+                >{% endif %} {% if not p.is_active %}<span class="mpill h"
                   >Hidden</span
                 >{% endif %}
-                <span class="badge a"
+                <span class="mpill c"
                   >{{ categories.get(p.category, p.category) }}</span
                 >
               </div>
+
               <div class="info">
                 <div class="price">
                   {% if p.price %}KSh {{ "{:,.0f}".format(p.price) }}
-                  <span
+                  <small
                     >{{ '/ meal' if p.category == 'restaurant' else '/ night'
-                    }}</span
+                    }}</small
                   >
-                  {% else %}<span>No price set</span>{% endif %}
+                  {% else %}<small>No price set</small>{% endif %}
                 </div>
-                <h3>{{ p.name }}</h3>
-                <div class="loc">{{ p.location }}</div>
 
-                <div class="acts">
+                <h3>{{ p.name }}</h3>
+
+                <div class="loc">
+                  <svg class="i" aria-hidden="true">
+                    <use href="#i-bed" />
+                  </svg>
+                  <span>{{ p.location }}</span>
+                </div>
+
+                <div class="macts">
                   <a
-                    class="sbtn"
+                    class="mbtn"
                     href="{{ url_for('admin_place_edit', place_id=p.id) }}"
                     >Edit</a
                   >
+
                   <form
                     method="post"
                     action="{{ url_for('admin_place_toggle', place_id=p.id) }}"
                   >
-                    <button class="sbtn" type="submit">
+                    <button class="mbtn" type="submit">
                       {{ 'Hide' if p.is_active else 'Show' }}
                     </button>
                   </form>
+
                   <form
                     method="post"
                     action="{{ url_for('admin_place_delete', place_id=p.id) }}"
                     onsubmit='return confirm({{ ("Delete " ~ p.name ~ "? This cannot be undone.")|tojson }});'
                   >
-                    <button class="sbtn danger" type="submit">Delete</button>
+                    <button class="mbtn danger" type="submit">Delete</button>
                   </form>
                 </div>
               </div>
             </article>
             {% else %}
-            <div class="empty">
+            <div class="mempty">
               <h3>No places yet</h3>
               <p>
                 Tap “Add place” to create the first guest house, motel, resort
@@ -727,18 +542,38 @@
       </section>
     </main>
 
-    <footer>{% include "_footer.html" %}</footer>
+    <!-- FOOTER -->
+    <footer class="foot">
+      <div class="wrap">
+        <span>
+          © {{ current_year }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
+      </div>
+    </footer>
 
-    <nav class="tabbar" aria-label="Admin">
-      <a class="tab" href="/"
-        ><svg class="i"><use href="#i-house" /></svg>Home</a
-      >
-      <a class="tab on" href="{{ url_for('admin_places') }}" aria-current="page"
-        ><svg class="i"><use href="#i-bed" /></svg>Places</a
-      >
-      <a class="tab" href="{{ url_for('admin_dashboard') }}"
-        ><svg class="i"><use href="#i-dash" /></svg>Admin</a
-      >
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bnav" aria-label="Admin">
+      <a href="{{ url_for('home') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-house" />
+        </svg>
+        Home
+      </a>
+
+      <a class="on" href="{{ url_for('admin_places') }}" aria-current="page">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-bed" />
+        </svg>
+        Places
+      </a>
+
+      <a href="{{ url_for('admin_dashboard') }}">
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-dash" />
+        </svg>
+        Admin
+      </a>
     </nav>
   </body>
 </html>

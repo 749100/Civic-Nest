@@ -1,19 +1,61 @@
-{% extends "base.html" %} {% from "_roommate_form.html" import fields %} {%
-block title %}Create roommate profile{% endblock %} {% block stage_class
-%}compact{% endblock %} {% block page_title %}Create your roommate profile.{%
-endblock %} {% block page_sub %}
-<p class="page-sub">
-  Tell other students what you are looking for so you can find a compatible
-  roommate.
-</p>
-{% endblock %} {% block content %}
-<div class="rm-wrap">
-  <form method="post">
-    {{ fields(form) }}
-    <div class="form-actions">
-      <a class="btn ghost" href="{{ url_for('roommate_finder') }}">Cancel</a>
-      <button class="btn" type="submit">Create profile</button>
-    </div>
-  </form>
-</div>
-{% endblock %}
+{% from "_roommate_form.html" import fields %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Create roommate profile | CivicNest Africa</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='roommates.css') }}?v=1"
+    />
+  </head>
+  <body>
+    {% include "_site_nav.html" %}
+
+    <main>
+      <section class="hero rm" style="padding-bottom: 44px">
+        <div class="wrap">
+          <div class="eyebrow">Roommate finder</div>
+          <h1>Create your roommate <em>profile.</em></h1>
+          <p>
+            Tell other students what you are looking for so you can find a
+            compatible roommate.
+          </p>
+        </div>
+      </section>
+
+      <section class="sec rm" style="padding-top: 30px">
+        <div class="wrap">
+          <div class="rm-wrap">
+            <form method="post">
+              {{ fields(form) }}
+              <div class="form-actions">
+                <a class="rbtn ghost" href="{{ url_for('roommate_finder') }}"
+                  >Cancel</a
+                >
+                <button class="rbtn" type="submit">Create profile</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {% include "_site_foot.html" %}
+  </body>
+</html>

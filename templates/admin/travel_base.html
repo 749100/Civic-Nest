@@ -1,0 +1,554 @@
+{% extends "site_base.html" %} {% set active_page = 'travel' %} {% block title
+%}Travel Admin{% endblock %} {% block robots %}noindex, nofollow{% endblock %}
+{% block hero_eyebrow %}Travel administration{% endblock %} {% block hero_title
+%}Manage <em>travel.</em>{% endblock %} {% block hero_sub %}
+<p>
+  Review trips, transport companies, routes and passenger requests. Keep
+  passenger information private.
+</p>
+{% endblock %} {% block content_class %}am{% endblock %} {% block head %}
+<style>
+  /* =====================================================
+     CIVICNEST AFRICA — TRAVEL ADMIN
+     Same design as the public pages.
+     ===================================================== */
+
+  .anav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .anav a {
+    padding: 9px 14px;
+    border: 1px solid #d3e0f5;
+    border-radius: 999px;
+    background: #fff;
+    color: #1456d8;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .anav a:hover {
+    background: #e6eeff;
+  }
+
+  .anav a.on {
+    background: #1456d8;
+    border-color: #1456d8;
+    color: #fff;
+  }
+
+  .am {
+    color: #14213d;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .am a {
+    color: #1456d8;
+  }
+
+  .am .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .am .eyebrow {
+    display: block;
+    margin: 0 0 5px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: #1456d8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .am h1 {
+    margin: 0 0 6px;
+    color: #001b5e;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .am h2 {
+    margin: 0 0 4px;
+    color: #001b5e;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .am h3 {
+    margin: 0 0 8px;
+    color: #001b5e;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .am .sub,
+  .am .muted {
+    color: #405578;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .am .sub {
+    margin: 0;
+  }
+
+  /* Buttons */
+  .am .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid #1456d8;
+    border-radius: 10px;
+    background: #1456d8;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .am .btn:hover {
+    background: #001b5e;
+    border-color: #001b5e;
+    color: #fff;
+  }
+
+  .am .btn.secondary {
+    background: #fff;
+    border-color: #1456d8;
+    color: #1456d8;
+  }
+
+  .am .btn.secondary:hover {
+    background: #e6eeff;
+    color: #1456d8;
+  }
+
+  .am .btn.good {
+    background: #0f7a55;
+    border-color: #0f7a55;
+  }
+
+  .am .btn.danger {
+    background: #ffe1e1;
+    border-color: #ffc9c4;
+    color: #b42318;
+  }
+
+  .am .btn.danger:hover {
+    background: #ffd2cd;
+    color: #b42318;
+  }
+
+  .am .btn.small {
+    min-height: 34px;
+    padding: 6px 10px;
+    border-radius: 9px;
+    font-size: 11px;
+  }
+
+  /* Stat cards */
+  .am .stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .am .stats.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .am .stat,
+  .am .summary {
+    padding: 16px;
+    border: 1px solid #d3e0f5;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgba(0, 27, 94, 0.04);
+  }
+
+  .am .stat span,
+  .am .summary span {
+    display: block;
+    color: #405578;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  .am .stat strong,
+  .am .summary strong {
+    display: block;
+    margin-top: 6px;
+    color: #001b5e;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .am .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  /* Panels */
+  .am .panel {
+    margin-bottom: 18px;
+    overflow: hidden;
+    border: 1px solid #d3e0f5;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgba(0, 27, 94, 0.04);
+  }
+
+  .am .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #e3ecf8;
+  }
+
+  .am .panel-body {
+    padding: 18px;
+  }
+
+  .am .panel > .actions {
+    padding: 14px 18px 18px;
+  }
+
+  /* Tables */
+  .am .table-wrap {
+    overflow-x: auto;
+  }
+
+  .am table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+  }
+
+  .am th,
+  .am td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2fa;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .am th {
+    background: #f2f7fd;
+    color: #405578;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+
+  .am tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .am tbody tr:hover {
+    background: #f8fbff;
+  }
+
+  .am .route {
+    color: #001b5e;
+    font-weight: 800;
+  }
+
+  .am .route small {
+    display: block;
+    color: #405578;
+    font-weight: 500;
+  }
+
+  .am .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .am .actions form {
+    margin: 0;
+  }
+
+  /* Badges */
+  .am .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #e6eeff;
+    color: #1456d8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: capitalize;
+  }
+
+  .am .badge.open,
+  .am .badge.paid,
+  .am .badge.availability_confirmed {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .am .badge.pending {
+    background: #fff4d6;
+    color: #8a5a00;
+  }
+
+  .am .badge.confirmed,
+  .am .badge.booking_confirmed {
+    background: #e6eeff;
+    color: #1456d8;
+  }
+
+  .am .badge.cancelled,
+  .am .badge.unavailable {
+    background: #ffe1e1;
+    color: #b42318;
+  }
+
+  .am .badge.closed {
+    background: #edf0f5;
+    color: #5b6880;
+  }
+
+  /* Empty state */
+  .am .empty {
+    padding: 36px 18px;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    text-align: center;
+  }
+
+  .am .empty strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #001b5e;
+    font-size: 15px;
+  }
+
+  .am .empty p {
+    margin: 0;
+    color: #405578;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  /* Forms */
+  .am .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .am .field {
+    display: grid;
+    gap: 6px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .am .field.full {
+    grid-column: 1 / -1;
+  }
+
+  .am .field label {
+    color: #405578;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .am .field input,
+  .am .field select,
+  .am .field textarea,
+  .am textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #d3e0f5;
+    border-radius: 10px;
+    background: #fff;
+    color: #001b5e;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .am .field textarea,
+  .am textarea {
+    min-height: 96px;
+    line-height: 1.6;
+    resize: vertical;
+  }
+
+  .am .help {
+    margin: 0;
+    color: #405578;
+    font-size: 11px;
+  }
+
+  .am .checkrow {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #d3e0f5;
+    border-radius: 12px;
+    background: #f2f7fd;
+  }
+
+  .am .checkrow input {
+    width: 17px;
+    min-height: 0;
+    height: 17px;
+    margin-top: 3px;
+  }
+
+  .am .checkrow label {
+    color: #001b5e;
+    font-weight: 800;
+  }
+
+  .am .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 22px;
+  }
+
+  .am .status-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .am .status-form input {
+    width: 125px;
+    min-width: 0;
+    min-height: 34px;
+    padding: 6px 8px;
+    border: 1px solid #d3e0f5;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .am .stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .am .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .am .stats,
+    .am .stats.three {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .am .page-head > .btn,
+    .am .page-head > .actions {
+      width: 100%;
+    }
+
+    .am .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .am .field.full {
+      grid-column: auto;
+    }
+
+    .am .panel-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .am .form-actions > * {
+      flex: 1;
+    }
+
+    .am .status-form {
+      flex-wrap: wrap;
+    }
+
+    .am .status-form input {
+      width: 100%;
+    }
+  }
+</style>
+
+{% block page_head %}{% endblock %} {% endblock %} {% block subnav %}
+<nav class="anav" aria-label="Travel admin navigation">
+  <a
+    href="{{ url_for('admin_trips') }}"
+    class="{% if request.endpoint == 'admin_trips' %}on{% endif %}"
+  >
+    Trips overview
+  </a>
+
+  <a
+    href="{{ url_for('admin_trip_form_new') }}"
+    class="{% if request.endpoint == 'admin_trip_form_new' %}on{% endif %}"
+  >
+    Create trip
+  </a>
+
+  <a
+    href="/admin/transport"
+    class="{% if request.path.startswith('/admin/transport') and not request.path.startswith('/admin/transport/requests') %}on{% endif %}"
+  >
+    Transport companies &amp; routes
+  </a>
+
+  <a
+    href="/admin/transport/requests"
+    class="{% if request.path.startswith('/admin/transport/requests') %}on{% endif %}"
+  >
+    Availability requests
+  </a>
+
+  <a href="{{ url_for('travel_page') }}" target="_blank" rel="noopener">
+    Public travel page ↗
+  </a>
+</nav>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% set ep = request.endpoint %} {% include "_admin_bar.html" %}
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+  <symbol id="i-house" viewBox="0 0 24 24">
+    <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24">
+    <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </symbol>
+  <symbol id="i-users" viewBox="0 0 24 24">
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5" />
+    <path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.8c2.2.6 3.5 2.3 3.5 5.2" />
+  </symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24">
+    <path d="M21 3L3 10.5l6.5 2.5 2.5 6.5z" />
+    <path d="M9.5 13L21 3" />
+  </symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24">
+    <path
+      d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
+    />
+  </symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24">
+    <path d="M4 5h16v11H9l-5 4z" />
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-4-4" />
+  </symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24">
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24">
+    <path
+      d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+    />
+  </symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 7l9 6 9-6" />
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v8M8 12h8" />
+  </symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a
+      class="brand"
+      href="{{ url_for('home') }}"
+      aria-label="CivicNest Africa home"
+    >
+      <span class="mk"
+        ><svg class="i"><use href="#i-house" /></svg
+      ></span>
+      <span>CivicNest<small>Africa</small></span>
+    </a>
+
+    <nav class="links" aria-label="Main">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('rent_page') }}">Properties</a>
+      <a
+        href="{{ url_for('roommate_finder') }}"
+        {%
+        if
+        ep
+        in
+        ['roommate_finder','roommate_profile','roommate_requests','create_roommate_profile','edit_roommate_profile']
+        %}class="on"
+        aria-current="page"
+        {%
+        endif
+        %}
+        >Roommates</a
+      >
+      <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+      <a href="{{ url_for('travel_page') }}">Travel</a>
+      <a href="{{ url_for('sell_page') }}">List Property</a>
+    </nav>
+
+    <div class="right">
+      <a class="t" href="{{ url_for('home') }}#properties"
+        ><svg class="i"><use href="#i-heart" /></svg>Saved</a
+      >
+      <a
+        class="t"
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+      >
+      {% if current_user.is_authenticated %}
+      <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+      {% else %}
+      <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
+      {% endif %}
+      <button
+        class="burger"
+        id="menuBtn"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="menuPanel"
+      >
+        <svg class="i" style="width: 24px; height: 24px">
+          <use href="#i-menu" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="menu" id="menuPanel" aria-label="Menu" hidden>
+    <a href="{{ url_for('rent_page') }}">Rent</a>
+    <a href="{{ url_for('buy_page') }}">Buy</a>
+    <a href="{{ url_for('sell_page') }}">Sell / list a property</a>
+    <a href="{{ url_for('invest_page') }}">Invest</a>
+    <a href="{{ url_for('roommate_finder') }}">Roommate finder</a>
+    <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
+    <a href="{{ url_for('travel_page') }}">Travel With Us</a>
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('dashboard') }}">My account</a>
+    <a href="{{ url_for('logout') }}">Sign out</a>
+    {% else %}
+    <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
+    <a href="{{ url_for('register') }}">Create account</a>
+    {% endif %}
+  </nav>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%}
+<div class="flashbar">
+  {% for category, message in messages %}
+  <div class="rflash {{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %} {% endwith %}
