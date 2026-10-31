@@ -12,6 +12,8 @@ load_dotenv()  # Ensure .env is loaded and overrides any existing environment va
 
 import os
 import re
+import html
+import threading
 import json
 import requests
 import psycopg
@@ -594,39 +596,86 @@ def test_supabase():
         if connection:
             connection.close()
 
-def _send_telegram(text):
+# =========================================================
+# TELEGRAM NOTIFICATIONS
+# =========================================================
+
+def _send_telegram(message):
+    """
+    Send a Telegram message to the configured admin chat.
+    Returns True if Telegram accepts the message, otherwise False.
+    """
+
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
     if not token or not chat_id:
+        app.logger.warning(
+            "Telegram notification skipped: bot token or chat ID is missing."
+        )
         return False
+
     url = f"https://api.telegram.org/bot{token}/sendMessage"
+
     try:
-        response = requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
-        return response.status_code == 200
-    except Exception as e:
-        print("TELEGRAM ERROR:", e)
+        response = requests.post(
+            url,
+            json={
+                "chat_id": chat_id,
+                "text": message,
+                "parse_mode": "HTML",
+            },
+            timeout=10,
+        )
+
+        if response.status_code != 200:
+            app.logger.error(
+                "Telegram API error: %s",
+                response.text[:1000]
+            )
+            return False
+
+        result = response.json()
+
+        if not result.get("ok"):
+            app.logger.error("Telegram rejected message: %s", result)
+            return False
+
+        return True
+
+    except requests.RequestException:
+        app.logger.exception("TELEGRAM CONNECTION ERROR")
         return False
+
+    except ValueError:
+        app.logger.exception("TELEGRAM INVALID RESPONSE")
+        return False
+
 
 def notify_admin_listing(property_title, landlord_name, location):
-    text = (
-        f"🚨 <b>New Property Pending Approval!</b>\n\n"
-        f"<b>Title:</b> {property_title}\n"
-        f"<b>Landlord:</b> {landlord_name}\n"
-        f"<b>Location:</b> {location}\n\n"
-        f"Log into the CivicNest admin dashboard to review and publish it."
+    esc = lambda value: html.escape(str(value or ""))
+
+    message = (
+        "🚨 <b>NEW PROPERTY PENDING APPROVAL!</b>\n\n"
+        f"🏠 <b>Title:</b> {esc(property_title)}\n"
+        f"👤 <b>Landlord:</b> {esc(landlord_name)}\n"
+        f"📍 <b>Location:</b> {esc(location)}\n\n"
+        "Log into the CivicNest admin dashboard to review and publish it."
     )
-    _send_telegram(text)   
 
-import requests
+    return _send_telegram(message)
 
-def notify_tenant_lead(property_title, landlord_name, contact_method,
-                       tenant_phone=None, tenant_info=None, message_text=None):
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if not token or not chat_id:
-        return
 
-    esc = lambda v: html.escape(str(v or ""))
+def notify_tenant_lead(
+    property_title,
+    landlord_name,
+    contact_method,
+    tenant_phone=None,
+    tenant_info=None,
+    message_text=None
+):
+    esc = lambda value: html.escape(str(value or ""))
+
     lines = [
         "🚨 <b>NEW TENANT LEAD!</b>",
         "",
@@ -634,25 +683,100 @@ def notify_tenant_lead(property_title, landlord_name, contact_method,
         f"👤 <b>Landlord:</b> {esc(landlord_name)}",
         f"📞 <b>Method:</b> {esc(contact_method)}",
     ]
+
     if tenant_info:
         lines.append(f"🙋 <b>Tenant:</b> {esc(tenant_info)}")
+
     if tenant_phone:
         lines.append(f"📱 <b>Tenant Contact:</b> {esc(tenant_phone)}")
-    if message_text:
-        lines.append(f"💬 <b>Message:</b> {esc(message_text[:500])}")
 
-    try:
-        requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={
-                "chat_id": chat_id,
-                "text": "\n".join(lines),
-                "parse_mode": "HTML",
-            },
-            timeout=5,
+    if message_text:
+        lines.append(
+            f"💬 <b>Message:</b> {esc(str(message_text)[:500])}"
         )
-    except Exception:
-        app.logger.exception("TELEGRAM LEAD ERROR")        
+
+    return _send_telegram("\n".join(lines))  
+
+def notify_admin_transport_request(
+    *,
+    request_id,
+    original_request_id,
+    student_name,
+    student_phone,
+    student_whatsapp,
+    student_email,
+    company_name,
+    company_phone,
+    route_from,
+    route_to,
+    travel_date,
+    departure_time,
+    passengers,
+    price,
+    total,
+    boarding_point,
+    dropoff_point,
+    vehicle_type,
+    pickup_location,
+    dropoff_location,
+    note,
+    admin_url,
+):
+    esc = lambda value: html.escape(str(value or "—"))
+
+    lines = [
+        f"🚌 <b>NEW TRANSPORT REQUEST CN-{request_id}</b>",
+    ]
+
+    if original_request_id:
+        lines.append(
+            f"🔁 <b>Alternative for:</b> CN-{original_request_id}"
+        )
+
+    lines += [
+        "",
+        "👤 <b>STUDENT</b>",
+        f"Name: {esc(student_name)}",
+        f"Phone: {esc(student_phone)}",
+        f"WhatsApp: https://wa.me/{esc(student_whatsapp)}",
+        f"Email: {esc(student_email)}",
+        "",
+        "🏢 <b>TRANSPORT COMPANY (call to check seats)</b>",
+        f"Company: {esc(company_name)}",
+        f"📞 Company phone: {esc(company_phone or 'Not registered')}",
+        "",
+        "🛣️ <b>JOURNEY</b>",
+        f"Route: {esc(route_from)} → {esc(route_to)}",
+        f"Date: {esc(travel_date)}",
+        f"Departure: {esc(departure_time)}",
+        f"Passengers: {esc(passengers)}",
+        f"Vehicle: {esc(vehicle_type)}",
+        f"Company boarding point: {esc(boarding_point)}",
+        f"Company drop-off point: {esc(dropoff_point)}",
+        "",
+        "📍 <b>STUDENT'S PICKUP / DROP-OFF</b>",
+        f"Pickup: {esc(pickup_location)}",
+        f"Drop-off: {esc(dropoff_location)}",
+    ]
+
+    if note:
+        lines.append(f"Note: {esc(str(note)[:500])}")
+
+    lines += [
+        "",
+        f"💰 Fare each: KSh {float(price or 0):,.2f}",
+        f"💵 Estimated total: KSh {float(total or 0):,.2f}",
+        "",
+        "➡️ Call the company, then mark Available or Unavailable here:",
+        admin_url,
+    ]
+
+    # Background thread so a slow Telegram response never delays the student.
+    threading.Thread(
+        target=_send_telegram,
+        args=("\n".join(lines),),
+        daemon=True,
+    ).start()
 
 
 def allowed_file(filename):
@@ -3860,6 +3984,25 @@ def admin_update_property(property_id):
         if connection:
             connection.close()
 
+@app.route("/admin/properties/<int:property_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_property(property_id):
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute(
+                "delete from civicnest.reports where property_id = %s",
+                (property_id,),
+            )
+            cur.execute(
+                "delete from civicnest.properties where id = %s",
+                (property_id,),
+            )
+        flash("Listing deleted.", "success")
+    except Exception:
+        app.logger.exception("Admin could not delete the listing.")
+        flash("Could not delete the listing. It may still be linked to other records.", "error")
+    return redirect(url_for("admin_dashboard") + "#properties")            
+
 
 @app.route("/admin/users/<int:user_id>/verification", methods=["POST"])
 @admin_required
@@ -4216,12 +4359,55 @@ def notify_admin_booking(trip, name, phone, seats, pickup):
 
 @app.route("/travel")
 def travel_page():
+    previous_requests = []
+
+    if current_user.is_authenticated and _transport_customer_required():
+        conn = None
+        try:
+            conn = get_db_connection()
+
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        id,
+                        original_request_id,
+                        travel_date,
+                        passenger_count,
+                        full_name,
+                        company_name_snapshot AS company_name,
+                        route_from_snapshot AS route_from,
+                        route_to_snapshot AS route_to,
+                        departure_time_snapshot AS departure_time,
+                        price_per_passenger_snapshot AS price_per_passenger,
+                        estimated_total,
+                        status,
+                        admin_note
+                    FROM civicnest.transport_booking_requests
+                    WHERE user_id = %s
+                    ORDER BY created_at DESC
+                """, (current_user.id,))
+
+                previous_requests = _transport_rows(cur)
+
+            for item in previous_requests:
+                item["departure_time"] = _fmt_time(item["departure_time"])
+
+        except Exception:
+            app.logger.exception("Could not load previous travel requests.")
+            flash("Your previous travel requests could not be loaded.", "error")
+
+        finally:
+            if conn:
+                conn.close()
+
     return render_template(
         "travel.html",
         trips=[],
-        travel_error=False
+        travel_error=False,
+        previous_requests=previous_requests,
+        alternative_search=None,
+        current_year=datetime.now().year
     )
-
 
 
 @app.route("/travel/<int:trip_id>/book", methods=["POST"])
@@ -4942,16 +5128,32 @@ def _transport_fetchone(cursor):
 
 @app.route("/travel/search", methods=["GET"])
 def transport_search():
+    from datetime import date, datetime, time
+
     origin = (request.args.get("from") or "").strip()
     destination = (request.args.get("to") or "").strip()
     travel_date = (request.args.get("date") or "").strip()
     preferred_time = (request.args.get("time") or "").strip()
     passengers = request.args.get("passengers", "1")
 
+    original_request_id = request.args.get(
+        "original_request_id",
+        type=int
+    )
+
+    # -----------------------------
+    # Validate required search data
+    # -----------------------------
     if not origin or not destination or not travel_date:
         return jsonify({
             "success": False,
             "message": "Enter your departure, destination and travel date."
+        }), 400
+
+    if origin.casefold() == destination.casefold():
+        return jsonify({
+            "success": False,
+            "message": "Departure and destination cannot be the same."
         }), 400
 
     try:
@@ -4981,7 +5183,8 @@ def transport_search():
     if preferred_time:
         try:
             target_time = datetime.strptime(
-                preferred_time, "%H:%M"
+                preferred_time,
+                "%H:%M"
             ).time()
         except ValueError:
             return jsonify({
@@ -4994,13 +5197,116 @@ def transport_search():
     try:
         conn = get_db_connection()
 
+        unavailable_departure_ids = []
+
         with conn.cursor() as cur:
-            cur.execute(
-                """
+
+            # ------------------------------------------
+            # Validate alternative search ownership
+            # ------------------------------------------
+            if original_request_id:
+
+                if not current_user.is_authenticated:
+                    return jsonify({
+                        "success": False,
+                        "message": "Please sign in to search for alternative departures."
+                    }), 401
+
+                if not _transport_customer_required():
+                    return jsonify({
+                        "success": False,
+                        "message": "You are not allowed to search these alternatives."
+                    }), 403
+
+                cur.execute("""
+                    SELECT
+                        id,
+                        original_request_id,
+                        route_from_snapshot,
+                        route_to_snapshot,
+                        travel_date,
+                        passenger_count
+                    FROM civicnest.transport_booking_requests
+                    WHERE id = %s
+                      AND user_id = %s
+                      AND status = 'unavailable'
+                      AND original_request_id IS NULL
+                    LIMIT 1
+                """, (
+                    original_request_id,
+                    current_user.id
+                ))
+
+                root_request = _transport_fetchone(cur)
+
+                if not root_request:
+                    return jsonify({
+                        "success": False,
+                        "message": "The original unavailable request could not be found."
+                    }), 403
+
+                root_date = root_request["travel_date"]
+
+                if hasattr(root_date, "isoformat"):
+                    root_date = root_date.isoformat()
+                else:
+                    root_date = str(root_date)[:10]
+
+                if (
+                    origin.casefold() !=
+                    str(root_request["route_from_snapshot"]).strip().casefold()
+                    or destination.casefold() !=
+                    str(root_request["route_to_snapshot"]).strip().casefold()
+                    or selected_date.isoformat() != root_date
+                    or passenger_count != int(root_request["passenger_count"])
+                ):
+                    return jsonify({
+                        "success": False,
+                        "message": (
+                            "Alternative searches must use the original "
+                            "route, travel date and passenger count."
+                        )
+                    }), 400
+
+                # Find departures already marked unavailable
+                # in the original request and its alternative requests.
+                cur.execute("""
+                    SELECT DISTINCT departure_id
+                    FROM civicnest.transport_booking_requests
+                    WHERE user_id = %s
+                      AND status = 'unavailable'
+                      AND (
+                          id = %s
+                          OR original_request_id = %s
+                      )
+                      AND departure_id IS NOT NULL
+                """, (
+                    current_user.id,
+                    original_request_id,
+                    original_request_id
+                ))
+
+                unavailable_rows = _transport_rows(cur)
+
+                unavailable_departure_ids = [
+                    int(row["departure_id"])
+                    for row in unavailable_rows
+                    if row["departure_id"] is not None
+                ]
+
+            # ------------------------------------------
+            # Find active departures for the route
+            #
+            # Your current schema has no date or weekday
+            # schedule field. Active departures therefore
+            # appear as daily departures.
+            # ------------------------------------------
+            cur.execute("""
                 SELECT
                     d.id AS departure_id,
                     d.departure_time,
                     d.price_per_passenger,
+
                     r.id AS route_id,
                     r.route_from,
                     r.route_to,
@@ -5008,47 +5314,68 @@ def transport_search():
                     r.boarding_point,
                     r.dropoff_point,
                     r.vehicle_type,
+
                     c.id AS company_id,
                     c.company_name,
                     c.logo_url,
                     c.vehicle_image_url
+
                 FROM civicnest.transport_departures d
+
                 INNER JOIN civicnest.transport_routes r
                     ON r.id = d.route_id
+
                 INNER JOIN civicnest.transport_companies c
                     ON c.id = r.company_id
-                WHERE
-                    c.is_active IS TRUE
-                    AND r.is_active IS TRUE
-                    AND d.is_active IS TRUE
-                    AND LOWER(TRIM(r.route_from)) = LOWER(TRIM(%s))
-                    AND LOWER(TRIM(r.route_to)) = LOWER(TRIM(%s))
+
+                WHERE c.is_active IS TRUE
+                  AND r.is_active IS TRUE
+                  AND d.is_active IS TRUE
+
+                  AND LOWER(TRIM(r.route_from)) =
+                      LOWER(TRIM(%s))
+
+                  AND LOWER(TRIM(r.route_to)) =
+                      LOWER(TRIM(%s))
+
                 ORDER BY
-                    c.company_name,
-                    d.departure_time
-                """,
-                (origin, destination),
-            )
+                    c.company_name ASC,
+                    d.departure_time ASC
+            """, (
+                origin,
+                destination
+            ))
 
             departures = _transport_rows(cur)
 
-        # Preferred time changes the order, not which departures appear.
-        if target_time and departures:
+        # ------------------------------------------
+        # Sort by closeness to preferred time
+        # ------------------------------------------
+        def as_time(value):
+            if isinstance(value, time):
+                return value
 
+            if isinstance(value, str):
+                for fmt in ("%H:%M:%S", "%H:%M"):
+                    try:
+                        return datetime.strptime(value, fmt).time()
+                    except ValueError:
+                        continue
+
+            return time(0, 0)
+
+        if target_time:
             target_minutes = (
-                target_time.hour * 60 + target_time.minute
+                target_time.hour * 60
+                + target_time.minute
             )
 
             def time_distance(item):
-                departure = item["departure_time"]
-
-                if isinstance(departure, str):
-                    departure = datetime.strptime(
-                        departure, "%H:%M:%S"
-                    ).time()
+                departure = as_time(item["departure_time"])
 
                 departure_minutes = (
-                    departure.hour * 60 + departure.minute
+                    departure.hour * 60
+                    + departure.minute
                 )
 
                 difference = abs(
@@ -5059,21 +5386,18 @@ def transport_search():
 
             departures.sort(key=time_distance)
 
+        # ------------------------------------------
+        # Prepare JSON-safe departure results
+        # ------------------------------------------
         results = []
 
         for item in departures:
-            departure_time = item["departure_time"]
-
-            if isinstance(departure_time, str):
-                departure_time = datetime.strptime(
-                    departure_time, "%H:%M:%S"
-                ).time()
-
-            price = float(item["price_per_passenger"])
+            departure_time = as_time(item["departure_time"])
+            price = float(item["price_per_passenger"] or 0)
 
             results.append({
-                "departure_id": item["departure_id"],
-                "company": item["company_name"],
+                "departure_id": int(item["departure_id"]),
+                "company": item["company_name"] or "Transport company",
                 "logo_url": item["logo_url"],
                 "vehicle_image_url": item["vehicle_image_url"],
                 "from": item["route_from"],
@@ -5084,7 +5408,7 @@ def transport_search():
                 "boarding_point": item["boarding_point"],
                 "dropoff_point": item["dropoff_point"],
                 "intermediate_stops": item["intermediate_stops"],
-                "vehicle_type": item["vehicle_type"],
+                "vehicle_type": item["vehicle_type"]
             })
 
         return jsonify({
@@ -5092,6 +5416,7 @@ def transport_search():
             "travel_date": selected_date.isoformat(),
             "passengers": passenger_count,
             "departures": results,
+            "unavailable_departure_ids": unavailable_departure_ids,
             "count": len(results),
             "message": (
                 "Departures found."
@@ -5105,13 +5430,209 @@ def transport_search():
 
         return jsonify({
             "success": False,
-            "message": "Unable to search transport departures right now. Please try again."
+            "message": (
+                "Unable to search transport departures right now. "
+                "Please try again."
+            )
         }), 500
 
     finally:
         if conn is not None:
             conn.close()
 
+
+# =========================================================
+# CUSTOMER: SEARCH ALTERNATIVE TRANSPORT DEPARTURES
+# =========================================================
+
+@app.route("/travel/alternatives/<int:request_id>")
+@login_required
+def transport_alternatives(request_id):
+
+    # Only customers and students can search for alternatives.
+    if not _transport_customer_required():
+        abort(403)
+
+    conn = None
+
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+
+            # -------------------------------------------------
+            # 1. Find the unavailable request belonging to
+            #    the currently logged-in customer.
+            # -------------------------------------------------
+            cur.execute("""
+                SELECT
+                    id,
+                    original_request_id,
+                    departure_id,
+                    travel_date,
+                    passenger_count,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    departure_time_snapshot,
+                    company_name_snapshot,
+                    status
+
+                FROM civicnest.transport_booking_requests
+
+                WHERE id = %s
+                  AND user_id = %s
+                  AND status = 'unavailable'
+
+                LIMIT 1
+            """, (
+                request_id,
+                current_user.id
+            ))
+
+            unavailable_request = _transport_fetchone(cur)
+
+            if not unavailable_request:
+                flash(
+                    "That unavailable transport request could not be found.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("my_transport_requests")
+                )
+
+            # -------------------------------------------------
+            # 2. Identify the original/root request.
+            #    All alternative requests must belong to
+            #    this original booking chain.
+            # -------------------------------------------------
+            root_request_id = (
+                unavailable_request["original_request_id"]
+                or unavailable_request["id"]
+            )
+
+            # -------------------------------------------------
+            # 3. Verify that the original request belongs to
+            #    this customer and is still unavailable.
+            # -------------------------------------------------
+            cur.execute("""
+                SELECT
+                    id,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    travel_date,
+                    passenger_count,
+                    departure_time_snapshot
+
+                FROM civicnest.transport_booking_requests
+
+                WHERE id = %s
+                  AND user_id = %s
+                  AND status = 'unavailable'
+                  AND original_request_id IS NULL
+
+                LIMIT 1
+            """, (
+                root_request_id,
+                current_user.id
+            ))
+
+            root_request = _transport_fetchone(cur)
+
+            if not root_request:
+                flash(
+                    "The original unavailable request could not be verified.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("my_transport_requests")
+                )
+
+            # -------------------------------------------------
+            # 4. Restore the original journey information.
+            #    Use the root request so every alternative
+            #    search starts from the same original journey.
+            # -------------------------------------------------
+            travel_date_value = root_request["travel_date"]
+
+            if hasattr(travel_date_value, "isoformat"):
+                travel_date_value = travel_date_value.isoformat()
+            elif travel_date_value:
+                travel_date_value = str(travel_date_value)[:10]
+            else:
+                travel_date_value = ""
+
+            departure_time_value = (
+                root_request["departure_time_snapshot"]
+            )
+
+            if hasattr(departure_time_value, "strftime"):
+                departure_time_value = (
+                    departure_time_value.strftime("%H:%M")
+                )
+            elif departure_time_value:
+                departure_time_value = str(
+                    departure_time_value
+                )[:5]
+            else:
+                departure_time_value = ""
+
+            # -------------------------------------------------
+            # 5. Prepare the information expected by
+            #    travel.html.
+            # -------------------------------------------------
+            alternative_search = {
+                "id": root_request_id,
+
+                "route_from": (
+                    root_request["route_from_snapshot"] or ""
+                ),
+
+                "route_to": (
+                    root_request["route_to_snapshot"] or ""
+                ),
+
+                "travel_date": travel_date_value,
+
+                "passengers": (
+                    root_request["passenger_count"] or 1
+                ),
+
+                "time": departure_time_value
+            }
+
+        # -----------------------------------------------------
+        # 6. Render the travel search page with the original
+        #    journey details already populated.
+        # -----------------------------------------------------
+        return render_template(
+            "travel.html",
+            trips=[],
+            travel_error=False,
+            alternative_search=alternative_search,
+            current_year=datetime.now().year
+        )
+
+    except Exception:
+        app.logger.exception(
+            "TRANSPORT ALTERNATIVES ERROR | Request ID: %s | User ID: %s",
+            request_id,
+            current_user.id
+        )
+
+        flash(
+            "Unable to load alternative departures right now. Please try again.",
+            "error"
+        )
+
+        return redirect(
+            url_for("my_transport_requests")
+        )
+
+    finally:
+        if conn is not None:
+            conn.close()
 # ------------------------------------------------------------
 # 2. CUSTOMER SUBMITS A BOOKING / AVAILABILITY REQUEST
 # POST /travel/request
@@ -5139,7 +5660,11 @@ def transport_submit_request():
     # --------------------------------------------------
     departure_id = request.form.get("departure_id", type=int)
     travel_date = (request.form.get("travel_date") or "").strip()
-    passenger_count = request.form.get("passengers", type=int)
+
+    passenger_count = (
+        request.form.get("passenger_count", type=int)
+        or request.form.get("passengers", type=int)
+    )
 
     full_name = (request.form.get("full_name") or "").strip()
     phone = (request.form.get("phone") or "").strip()
@@ -5188,7 +5713,9 @@ def transport_submit_request():
             raise ValueError("Travel date cannot be in the past.")
 
         if not 1 <= passenger_count <= 10:
-            raise ValueError("Passenger count must be between 1 and 10.")
+            raise ValueError(
+                "Passenger count must be between 1 and 10."
+            )
 
     except (ValueError, TypeError):
         flash(
@@ -5222,11 +5749,80 @@ def transport_submit_request():
 
         with conn.cursor() as cur:
 
+            root_request = None
+
             # --------------------------------------------------
-            # 7. Verify selected departure is active
+            # 7. Validate original/root request for alternatives
             # --------------------------------------------------
-            cur.execute(
-                """
+            if original_request_id:
+
+                cur.execute("""
+                    SELECT
+                        id,
+                        user_id,
+                        status,
+                        original_request_id,
+                        travel_date,
+                        passenger_count,
+                        route_from_snapshot,
+                        route_to_snapshot
+
+                    FROM civicnest.transport_booking_requests
+
+                    WHERE id = %s
+                      AND user_id = %s
+                      AND status = 'unavailable'
+                      AND original_request_id IS NULL
+
+                    LIMIT 1
+                """, (
+                    original_request_id,
+                    current_user.id
+                ))
+
+                root_request = _transport_fetchone(cur)
+
+                if not root_request:
+                    flash(
+                        "Your original unavailable request could not "
+                        "be verified. Please search again.",
+                        "error"
+                    )
+                    return redirect(
+                        url_for("my_transport_requests")
+                    )
+
+                # Make sure the alternative uses the original
+                # travel date, passenger count and route.
+                root_date = root_request["travel_date"]
+
+                if hasattr(root_date, "isoformat"):
+                    root_date = root_date.isoformat()
+                else:
+                    root_date = str(root_date)
+
+                if (
+                    selected_date.isoformat() != root_date
+                    or passenger_count != int(
+                        root_request["passenger_count"]
+                    )
+                ):
+                    flash(
+                        "Your alternative request must use the "
+                        "original travel date and passenger count.",
+                        "error"
+                    )
+                    return redirect(
+                        url_for(
+                            "transport_alternatives",
+                            request_id=original_request_id
+                        )
+                    )
+
+            # --------------------------------------------------
+            # 8. Verify selected departure is active and load it
+            # --------------------------------------------------
+            cur.execute("""
                 SELECT
                     d.id AS departure_id,
                     d.departure_time,
@@ -5240,7 +5836,8 @@ def transport_submit_request():
                     r.vehicle_type,
 
                     c.id AS company_id,
-                    c.company_name
+                    c.company_name,
+                    c.company_phone
 
                 FROM civicnest.transport_departures d
 
@@ -5257,9 +5854,7 @@ def transport_submit_request():
                     AND c.is_active IS TRUE
 
                 LIMIT 1
-                """,
-                (departure_id,)
-            )
+            """, (departure_id,))
 
             departure = _transport_fetchone(cur)
 
@@ -5268,36 +5863,96 @@ def transport_submit_request():
                     "That departure is no longer available for requests.",
                     "error"
                 )
+
+                if original_request_id:
+                    return redirect(
+                        url_for(
+                            "transport_alternatives",
+                            request_id=original_request_id
+                        )
+                    )
+
                 return redirect(url_for("travel_page"))
 
             # --------------------------------------------------
-            # 8. Verify original request for alternatives
+            # 9. Make sure selected alternative follows the
+            #    original route.
             # --------------------------------------------------
             if original_request_id:
 
-                cur.execute(
-                    """
+                original_from = str(
+                    root_request["route_from_snapshot"]
+                ).strip().lower()
+
+                original_to = str(
+                    root_request["route_to_snapshot"]
+                ).strip().lower()
+
+                selected_from = str(
+                    departure["route_from"]
+                ).strip().lower()
+
+                selected_to = str(
+                    departure["route_to"]
+                ).strip().lower()
+
+                if (
+                    selected_from != original_from
+                    or selected_to != original_to
+                ):
+                    flash(
+                        "Please select a departure for your original route.",
+                        "error"
+                    )
+
+                    return redirect(
+                        url_for(
+                            "transport_alternatives",
+                            request_id=original_request_id
+                        )
+                    )
+
+                # --------------------------------------------------
+                # 10. Prevent selecting any departure already
+                #     marked unavailable in this request chain.
+                # --------------------------------------------------
+                cur.execute("""
                     SELECT id
                     FROM civicnest.transport_booking_requests
                     WHERE
-                        id = %s
-                        AND user_id = %s
+                        user_id = %s
+                        AND departure_id = %s
                         AND status = 'unavailable'
+                        AND (
+                            id = %s
+                            OR original_request_id = %s
+                        )
                     LIMIT 1
-                    """,
-                    (
-                        original_request_id,
-                        current_user.id
+                """, (
+                    current_user.id,
+                    departure_id,
+                    original_request_id,
+                    original_request_id
+                ))
+
+                previously_unavailable = _transport_fetchone(cur)
+
+                if previously_unavailable:
+                    flash(
+                        "This departure was already marked unavailable. "
+                        "Please choose another departure.",
+                        "error"
                     )
-                )
 
-                original_request = cur.fetchone()
-
-                if not original_request:
-                    abort(403)
+                    return redirect(
+                        url_for(
+                            "transport_alternatives",
+                            request_id=original_request_id
+                        )
+                    )
 
             # --------------------------------------------------
-            # 9. Calculate estimated total
+            # 11. Calculate estimated total
             # --------------------------------------------------
             price = Decimal(
                 str(departure["price_per_passenger"])
@@ -5308,10 +5963,9 @@ def transport_submit_request():
             ).quantize(Decimal("0.01"))
 
             # --------------------------------------------------
-            # 10. Save customer request
+            # 12. Save customer request
             # --------------------------------------------------
-            cur.execute(
-                """
+            cur.execute("""
                 INSERT INTO civicnest.transport_booking_requests (
                     user_id,
                     departure_id,
@@ -5347,32 +6001,33 @@ def transport_submit_request():
                 )
 
                 RETURNING id
-                """,
-                (
-                    current_user.id,
-                    departure_id,
-                    original_request_id,
+            """, (
+                current_user.id,
+                departure_id,
 
-                    selected_date,
-                    passenger_count,
+                # Always store the ROOT request ID.
+                # For a normal request this remains None.
+                original_request_id,
 
-                    full_name,
-                    phone,
-                    normalized_phone,
+                selected_date,
+                passenger_count,
 
-                    departure["company_name"],
-                    departure["route_from"],
-                    departure["route_to"],
-                    departure["departure_time"],
+                full_name,
+                phone,
+                normalized_phone,
 
-                    price,
-                    departure["boarding_point"],
-                    departure["dropoff_point"],
-                    departure["vehicle_type"],
+                departure["company_name"],
+                departure["route_from"],
+                departure["route_to"],
+                departure["departure_time"],
 
-                    estimated_total
-                )
-            )
+                price,
+                departure["boarding_point"],
+                departure["dropoff_point"],
+                departure["vehicle_type"],
+
+                estimated_total
+            ))
 
             inserted = cur.fetchone()
 
@@ -5384,16 +6039,65 @@ def transport_submit_request():
             request_id = inserted[0]
 
         # --------------------------------------------------
-        # 11. Commit successful request
+        # 13. Commit successful request
         # --------------------------------------------------
         conn.commit()
 
         app.logger.info(
-            "Transport request %s submitted by user %s",
+            "Transport request %s submitted by user %s "
+            "(original request: %s)",
             request_id,
-            current_user.id
+            current_user.id,
+            original_request_id
         )
 
+        # --------------------------------------------------
+        # 14. Telegram alert to the admin
+        #     (never blocks or breaks the student's request)
+        # --------------------------------------------------
+        try:
+            notify_admin_transport_request(
+                request_id=request_id,
+                original_request_id=original_request_id,
+                student_name=full_name,
+                student_phone=phone,
+                student_whatsapp=normalized_phone,
+                student_email=current_user.email,
+                company_name=departure["company_name"],
+                company_phone=departure["company_phone"],
+                route_from=departure["route_from"],
+                route_to=departure["route_to"],
+                travel_date=selected_date.isoformat(),
+                departure_time=_fmt_time(departure["departure_time"]),
+                passengers=passenger_count,
+                price=price,
+                total=estimated_total,
+                boarding_point=departure["boarding_point"],
+                dropoff_point=departure["dropoff_point"],
+                vehicle_type=departure["vehicle_type"],
+                pickup_location=(
+                    request.form.get("pickup_location") or ""
+                ).strip(),
+                dropoff_location=(
+                    request.form.get("dropoff_location") or ""
+                ).strip(),
+                note=(
+                    request.form.get("customer_note") or ""
+                ).strip(),
+                admin_url=url_for(
+                    "admin_transport_requests",
+                    _external=True
+                ),
+            )
+        except Exception:
+            app.logger.exception(
+                "Transport request %s saved, but Telegram alert failed.",
+                request_id
+            )
+
+        # --------------------------------------------------
+        # 15. Notify customer
+        # --------------------------------------------------
         flash(
             "Your travel request has been submitted. "
             "We will check availability and update your account.",
@@ -5427,8 +6131,6 @@ def transport_submit_request():
     finally:
         if conn:
             conn.close()
-
-
 
 # ------------------------------------------------------------
 # 3. CUSTOMER'S OWN REQUEST HISTORY
@@ -5520,9 +6222,23 @@ def admin_transport_requests():
             cur.execute("""
                 SELECT
                     r.*,
-                    u.email AS customer_email
+                    u.email AS customer_email,
+                    c.company_phone AS company_phone
+
                 FROM civicnest.transport_booking_requests r
-                JOIN civicnest.users u ON u.id = r.user_id
+
+                JOIN civicnest.users u
+                    ON u.id = r.user_id
+
+                LEFT JOIN civicnest.transport_departures d
+                    ON d.id = r.departure_id
+
+                LEFT JOIN civicnest.transport_routes rt
+                    ON rt.id = d.route_id
+
+                LEFT JOIN civicnest.transport_companies c
+                    ON c.id = rt.company_id
+
                 ORDER BY
                     CASE WHEN r.status = 'pending' THEN 0 ELSE 1 END,
                     r.created_at DESC
@@ -5550,16 +6266,18 @@ def admin_transport_requests():
 )
 @admin_required
 def admin_transport_availability(request_id):
+
     app.logger.info(
-    "TRANSPORT AVAILABILITY FORM: %r",
-    request.form.to_dict()
-)
+        "TRANSPORT AVAILABILITY FORM: %r",
+        request.form.to_dict()
+    )
 
     decision = (
-    request.form.get("decision")
-    or request.form.get("availability")
-    or ""
-).strip().lower()
+        request.form.get("decision")
+        or request.form.get("availability")
+        or ""
+    ).strip().lower()
+
     admin_note = (request.form.get("admin_note") or "").strip()
 
     if decision not in ("available", "unavailable"):
@@ -5572,6 +6290,7 @@ def admin_transport_availability(request_id):
     )
 
     conn = get_db_connection()
+    updated_request = None
 
     try:
         with conn.cursor() as cur:
@@ -5585,7 +6304,17 @@ def admin_transport_availability(request_id):
                     updated_at = NOW()
                 WHERE id = %s
                   AND status = 'pending'
-                RETURNING id
+                RETURNING
+                    id,
+                    full_name,
+                    phone,
+                    company_name_snapshot,
+                    route_from_snapshot,
+                    route_to_snapshot,
+                    travel_date,
+                    departure_time_snapshot,
+                    passenger_count,
+                    estimated_total
             """, (
                 new_status,
                 admin_note or None,
@@ -5593,9 +6322,9 @@ def admin_transport_availability(request_id):
                 request_id
             ))
 
-            updated = cur.fetchone()
+            rows = _transport_rows(cur)
 
-            if not updated:
+            if not rows:
                 conn.rollback()
                 flash(
                     "This request has already been reviewed or does not exist.",
@@ -5603,7 +6332,49 @@ def admin_transport_availability(request_id):
                 )
                 return redirect(url_for("admin_transport_requests"))
 
+            updated_request = rows[0]
+
         conn.commit()
+
+        # Send Telegram notification only after the database commits.
+        try:
+            r = updated_request
+            esc = lambda value: html.escape(str(value or "N/A"))
+
+            if decision == "available":
+                heading = "🟢 <b>TRAVEL AVAILABILITY CONFIRMED</b>"
+                result = "The requested departure is available."
+            else:
+                heading = "🔴 <b>TRAVEL REQUEST UNAVAILABLE</b>"
+                result = "The requested departure is unavailable."
+
+            message = (
+                f"{heading}\n\n"
+                f"🧾 <b>Reference:</b> CN-{r['id']}\n"
+                f"👤 <b>Passenger:</b> {esc(r['full_name'])}\n"
+                f"📞 <b>Phone:</b> {esc(r['phone'])}\n"
+                f"🏢 <b>Company:</b> {esc(r['company_name_snapshot'])}\n"
+                f"🛣️ <b>Route:</b> {esc(r['route_from_snapshot'])} "
+                f"→ {esc(r['route_to_snapshot'])}\n"
+                f"📅 <b>Date:</b> {esc(r['travel_date'])}\n"
+                f"🕒 <b>Departure:</b> {esc(r['departure_time_snapshot'])}\n"
+                f"👥 <b>Passengers:</b> {r['passenger_count']}\n"
+                f"💰 <b>Estimated total:</b> "
+                f"KSh {float(r['estimated_total'] or 0):,.2f}\n\n"
+                f"<b>Decision:</b> {result}\n"
+                f"<b>Admin note:</b> {esc(admin_note or 'None')}"
+            )
+
+            if not _send_telegram(message):
+                app.logger.warning(
+                    "Availability updated for CN-%s, but Telegram delivery failed.",
+                    r["id"]
+                )
+
+        except Exception:
+            app.logger.exception(
+                "Availability saved, but Telegram notification failed."
+            )
 
         flash(
             "Availability decision saved.",
@@ -5626,8 +6397,6 @@ def admin_transport_availability(request_id):
 )
 @admin_required
 def admin_transport_confirm_booking(request_id):
-    import html
-
     conn = get_db_connection()
     confirmed_request = None
 
@@ -5668,33 +6437,42 @@ def admin_transport_confirm_booking(request_id):
 
             confirmed_request = rows[0]
 
+        # Save the confirmation before sending the notification.
         conn.commit()
 
-        # Notify the administrator through Telegram.
+        r = confirmed_request
+        esc = lambda value: html.escape(str(value or "N/A"))
+
         try:
-            r = confirmed_request
+            fare = float(r["price_per_passenger_snapshot"] or 0)
+            total = float(r["estimated_total"] or 0)
 
             message = (
                 "✅ <b>TRANSPORT BOOKING CONFIRMED</b>\n\n"
-                f"<b>Reference:</b> CN-{r['id']}\n"
-                f"<b>Company:</b> {html.escape(str(r['company_name_snapshot'] or 'N/A'))}\n"
-                f"<b>Route:</b> {html.escape(str(r['route_from_snapshot']))} "
-                f"→ {html.escape(str(r['route_to_snapshot']))}\n"
-                f"<b>Travel date:</b> {html.escape(str(r['travel_date']))}\n"
-                f"<b>Departure:</b> {html.escape(str(r['departure_time_snapshot']))}\n"
-                f"<b>Passenger:</b> {html.escape(str(r['full_name']))}\n"
-                f"<b>Phone:</b> {html.escape(str(r['phone']))}\n"
-                f"<b>Passengers:</b> {r['passenger_count']}\n"
-                f"<b>Fare each:</b> KSh {float(r['price_per_passenger_snapshot']):,.2f}\n"
-                f"<b>Total:</b> KSh {float(r['estimated_total']):,.2f}\n\n"
+                f"🧾 <b>Reference:</b> CN-{r['id']}\n"
+                f"🏢 <b>Company:</b> {esc(r['company_name_snapshot'])}\n"
+                f"🛣️ <b>Route:</b> {esc(r['route_from_snapshot'])} "
+                f"→ {esc(r['route_to_snapshot'])}\n"
+                f"📅 <b>Travel date:</b> {esc(r['travel_date'])}\n"
+                f"🕒 <b>Departure:</b> {esc(r['departure_time_snapshot'])}\n\n"
+                f"👤 <b>Passenger:</b> {esc(r['full_name'])}\n"
+                f"📞 <b>Phone:</b> {esc(r['phone'])}\n"
+                f"👥 <b>Passengers:</b> {r['passenger_count']}\n\n"
+                f"💰 <b>Fare each:</b> KSh {fare:,.2f}\n"
+                f"💵 <b>Total:</b> KSh {total:,.2f}\n\n"
                 "The booking is finally confirmed on CivicNest."
             )
 
-            _send_telegram(message)
+            if not _send_telegram(message):
+                app.logger.warning(
+                    "Booking CN-%s confirmed, but Telegram notification was not delivered.",
+                    r["id"]
+                )
 
         except Exception:
             app.logger.exception(
-                "Booking confirmed, but Telegram notification failed."
+                "Booking CN-%s confirmed, but Telegram notification failed.",
+                r["id"]
             )
 
         flash(
@@ -5710,9 +6488,9 @@ def admin_transport_confirm_booking(request_id):
     finally:
         conn.close()
 
-    return redirect(url_for("admin_transport_requests"))   
+    return redirect(url_for("admin_transport_requests"))  
 
-@app.route("/my-travel-requests/<int:request_id>/receipt")
+@app.route("/my-travel-requests/<int:request_id>/receipt", methods=["GET"])
 @login_required
 def my_transport_receipt(request_id):
 
@@ -5720,6 +6498,7 @@ def my_transport_receipt(request_id):
         abort(403)
 
     conn = None
+
     try:
         conn = get_db_connection()
 
@@ -5752,7 +6531,7 @@ def my_transport_receipt(request_id):
 
         if not booking:
             flash(
-                "Receipt is available only for your finally confirmed bookings.",
+                "Receipt not found. It is available only for your confirmed bookings.",
                 "error"
             )
             return redirect(url_for("my_transport_requests"))
@@ -5760,6 +6539,7 @@ def my_transport_receipt(request_id):
         booking["departure_time_snapshot"] = _fmt_time(
             booking["departure_time_snapshot"]
         )
+
         booking["reference"] = f"CN-{booking['id']}"
 
         return render_template(
@@ -5768,14 +6548,17 @@ def my_transport_receipt(request_id):
         )
 
     except Exception:
-        app.logger.exception("Could not load transport receipt.")
-        flash("Could not load your receipt.", "error")
+        app.logger.exception(
+            "Could not load transport receipt for booking %s.",
+            request_id
+        )
+
+        flash("Could not load your receipt. Please try again.", "error")
         return redirect(url_for("my_transport_requests"))
 
     finally:
         if conn:
             conn.close()
-
 
 # =========================================================
 # ADMIN: TRANSPORT COMPANY, ROUTE AND DEPARTURE MANAGEMENT

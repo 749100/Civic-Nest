@@ -46,6 +46,60 @@ requests{% endblock %} {% block page_head %}
     overflow-wrap: anywhere;
   }
 
+  .ta-detail a {
+    color: #1456d8;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .ta-call {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 14px 0 0;
+    padding: 14px;
+    border: 1px solid #bcd3ff;
+    border-radius: 14px;
+    background: #eaf2ff;
+    color: #001b5e;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .ta-call.warn {
+    border-color: #f1d18a;
+    background: #fff8e8;
+    color: #744500;
+  }
+
+  .ta-call-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 11px;
+    color: #fff;
+    background: linear-gradient(135deg, #1475ff, #003bd9);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .ta-alt {
+    display: inline-flex;
+    margin-top: 6px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #ffedc2;
+    color: #744500;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
   .ta-note {
     margin: 14px 0 0;
     padding: 12px 14px;
@@ -86,7 +140,8 @@ requests{% endblock %} {% block page_head %}
     }
 
     .ta-actions form,
-    .ta-actions .btn {
+    .ta-actions .btn,
+    .ta-call-btn {
       width: 100%;
     }
   }
@@ -102,8 +157,8 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
     <p class="eyebrow">Transport</p>
     <h1>Transport availability requests</h1>
     <p class="sub">
-      Review customer requests, check departure availability and confirm
-      bookings.
+      Review customer requests, call the transport company to check seats, then
+      confirm bookings.
     </p>
   </div>
 </section>
@@ -128,6 +183,8 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
 {% if requests %}
 <div class="ta-list">
   {% for item in requests %} {% set status = item.status|default('pending') %}
+  {% set company_tel = (item.company_phone or '')|replace(' ', '') %} {% set
+  customer_tel = (item.phone or '')|replace(' ', '') %}
 
   <article class="panel">
     <div class="panel-body">
@@ -135,9 +192,14 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
         <div>
           <h2>{{ item.company_name_snapshot or 'Transport company' }}</h2>
           <div class="muted">
-            Request #{{ item.id }} · Customer: {{ item.full_name }} · {{
+            CN-{{ item.id }} · Customer: {{ item.full_name }} · {{
             item.customer_email }}
           </div>
+          {% if item.original_request_id %}
+          <span class="ta-alt"
+            >Alternative for CN-{{ item.original_request_id }}</span
+          >
+          {% endif %}
         </div>
 
         <span class="badge {{ status }}">{{ status|replace('_', ' ') }}</span>
@@ -171,13 +233,35 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
         </div>
 
         <div class="ta-detail">
-          <small>Customer phone</small>
-          <strong>{{ item.phone }}</strong>
+          <small>Company phone</small>
+          <strong>
+            {% if company_tel %}
+            <a href="tel:{{ company_tel }}">{{ item.company_phone }}</a>
+            {% else %} Not registered {% endif %}
+          </strong>
         </div>
 
         <div class="ta-detail">
-          <small>WhatsApp</small>
-          <strong>{{ item.whatsapp_phone or 'Not provided' }}</strong>
+          <small>Customer phone</small>
+          <strong>
+            {% if customer_tel %}
+            <a href="tel:{{ customer_tel }}">{{ item.phone }}</a>
+            {% else %} — {% endif %}
+          </strong>
+        </div>
+
+        <div class="ta-detail">
+          <small>Customer WhatsApp</small>
+          <strong>
+            {% if item.whatsapp_phone %}
+            <a
+              href="https://wa.me/{{ item.whatsapp_phone }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Chat on WhatsApp</a
+            >
+            {% else %} Not provided {% endif %}
+          </strong>
         </div>
 
         <div class="ta-detail">
@@ -219,7 +303,24 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
         </div>
       </div>
 
-      {% if item.admin_note %}
+      {% if status == 'pending' %} {% if company_tel %}
+      <div class="ta-call">
+        <div>
+          📞 Call <strong>{{ item.company_name_snapshot }}</strong> on
+          <strong>{{ item.company_phone }}</strong> to confirm seats for {{
+          item.passenger_count }} passenger(s) on {{ item.travel_date }} at {{
+          item.departure_time_snapshot }}, then record the decision below.
+        </div>
+        <a class="ta-call-btn" href="tel:{{ company_tel }}">Call company</a>
+      </div>
+      {% else %}
+      <div class="ta-call warn">
+        <div>
+          No phone number is registered for this company. Add it under Transport
+          management so you can call them for future requests.
+        </div>
+      </div>
+      {% endif %} {% endif %} {% if item.admin_note %}
       <div class="ta-note">
         <strong>Admin note:</strong> {{ item.admin_note }}
       </div>

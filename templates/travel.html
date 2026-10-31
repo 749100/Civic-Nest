@@ -6,11 +6,14 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Travel With Us | Trips Across Kenya | CivicNest Africa</title>
+
+    <title>Find Transport | Travel With Us | CivicNest Africa</title>
+
     <meta
       name="description"
-      content="Compare registered transport companies, departure times and fares across Kenya with CivicNest Africa."
+      content="Search transport departures, compare fares and request your seat with CivicNest Africa."
     />
+    <meta name="author" content="CivicNest Africa" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1456d8" />
 
@@ -20,100 +23,139 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='home.css') }}?v=1"
+      href="{{ url_for('static', filename='home.css') }}?v=4"
     />
 
     <style>
+      /* =====================================================
+         CIVICNEST AFRICA — TRAVEL PAGE
+         Layout matches the Stay & Dine page.
+         ===================================================== */
+
       .hero.h {
-        padding-bottom: 190px;
+        padding-bottom: 150px;
       }
 
-      .search.s4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        bottom: -115px;
+      .search.s6 {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        bottom: -80px;
       }
 
-      .search.s4 .field,
-      .search.s4 .go {
-        grid-column: auto;
+      .search.s6 .field select {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
       }
 
-      .search.s4 .go {
-        grid-column: 1 / -1;
+      .search.s6 .field input[type="date"],
+      .search.s6 .field input[type="time"] {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .search.s6 .go:disabled {
+        opacity: 0.6;
+        cursor: wait;
       }
 
       .sec.h {
-        padding-top: 145px;
+        padding-top: 112px;
       }
 
       @media (min-width: 600px) {
         .hero.h {
-          padding-bottom: 145px;
+          padding-bottom: 110px;
         }
-        .search.s4 {
-          bottom: -75px;
-        }
-        .sec.h {
-          padding-top: 105px;
-        }
-      }
-
-      @media (min-width: 960px) {
-        .search.s4 {
-          grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+        .search.s6 {
           bottom: -48px;
-        }
-        .search.s4 .go {
-          grid-column: auto;
         }
         .sec.h {
           padding-top: 85px;
         }
       }
 
+      @media (min-width: 960px) {
+        .search.s6 {
+          grid-template-columns:
+            minmax(0, 1.2fr)
+            minmax(0, 1.2fr)
+            minmax(0, 1fr)
+            minmax(0, 0.9fr)
+            minmax(0, 0.9fr)
+            auto;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .search.s6 {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .search.s6 .field,
+        .search.s6 .go {
+          grid-column: 1 / -1;
+        }
+      }
+
       .h a:focus-visible,
       .h button:focus-visible,
       .h input:focus-visible,
-      .h select:focus-visible {
+      .h select:focus-visible,
+      .h textarea:focus-visible,
+      .search.s6 button:focus-visible,
+      .search.s6 input:focus-visible,
+      .search.s6 select:focus-visible {
         outline: 3px solid #8fc2ff;
         outline-offset: 3px;
       }
 
-      .tlist {
+      /* Listing grid (same as Stay & Dine) */
+      .hlist {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
         gap: 14px;
-        margin-top: 20px;
+        margin-top: 18px;
       }
 
       @media (min-width: 600px) {
-        .tlist {
+        .hlist {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
 
       @media (min-width: 960px) {
-        .tlist {
+        .hlist {
           grid-template-columns: repeat(3, minmax(0, 1fr));
         }
       }
 
-      .tlist .card {
+      .hlist .card {
         min-width: 0;
         overflow: hidden;
       }
 
-      .tphoto {
-        position: relative;
+      .hlist .card.unavailable {
+        border-color: #f1c6c6;
+        background: #fffafa;
+      }
+
+      .hphoto {
         display: flex;
-        min-height: 155px;
-        align-items: center;
-        justify-content: center;
+        min-height: 130px;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px;
+        color: #fff;
+        position: relative;
         overflow: hidden;
-        padding: 12px;
-        color: white;
         background:
           radial-gradient(
             circle at 85% 15%,
@@ -123,289 +165,377 @@
           linear-gradient(135deg, #0066ff, #001b5e);
       }
 
-      .tphoto img.vehicle {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .tphoto .date-badge {
-        position: absolute;
-        z-index: 2;
-        top: 12px;
-        left: 12px;
-        padding: 7px 10px;
-        border-radius: 9px;
-        background: rgba(0, 20, 70, 0.78);
-        color: white;
-        font-size: 10px;
-        font-weight: 800;
-      }
-
-      .tphoto .vehicle-placeholder {
-        font-size: 43px;
-        opacity: 0.9;
-      }
-
-      .company-row {
+      .hphoto .hicon {
         display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-        margin-bottom: 12px;
-      }
-
-      .company-logo {
-        display: flex;
-        flex: 0 0 43px;
-        width: 43px;
-        height: 43px;
+        width: 46px;
+        height: 46px;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border: 1px solid #dce7f7;
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 13px;
-        background: #e6eeff;
-        color: #1456d8;
-        font-size: 13px;
+        background: rgba(255, 255, 255, 0.15);
+        font-size: 18px;
         font-weight: 800;
       }
 
-      .company-logo img {
+      .hphoto .hicon img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
-        background: white;
+        object-fit: cover;
+        display: block;
       }
 
-      .company-name {
-        min-width: 0;
-        color: #001b5e;
-        font-size: 14px;
+      .hphoto .hcategory {
+        align-self: flex-start;
+        max-width: 100%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.17);
+        color: #fff;
+        font-size: 10px;
         font-weight: 800;
         overflow-wrap: anywhere;
       }
 
-      .route-title {
-        margin: 0 0 8px;
-        color: #14213d;
-        font-size: 15px;
+      .hphoto .hstatus {
+        position: absolute;
+        top: 13px;
+        right: 13px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #e6f9ef;
+        color: #087343;
+        font-size: 10px;
         font-weight: 800;
       }
 
-      .route-detail {
+      .hphoto .hstatus.off {
+        background: #ffe8e8;
+        color: #a32323;
+      }
+
+      .hlist .info {
+        min-width: 0;
+      }
+
+      .hlist .info h3 {
+        overflow-wrap: anywhere;
+      }
+
+      .hlist .loc {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .hlist .price {
+        overflow-wrap: anywhere;
+      }
+
+      .hlist .price small {
+        font-size: 10px;
+        color: #405578;
+        font-weight: 700;
+      }
+
+      .tdetails {
         display: grid;
-        gap: 6px;
-        margin: 12px 0;
+        gap: 5px;
+        margin: 9px 0 12px;
         color: #405578;
         font-size: 11px;
         line-height: 1.6;
       }
 
-      .route-detail span {
-        overflow-wrap: anywhere;
+      .tdetails strong {
+        color: #001b5e;
       }
 
-      .departure-price {
-        margin: 8px 0;
-        color: #1456d8;
-        font-size: 20px;
-        font-weight: 800;
+      .tnote {
+        margin: 0 0 10px;
+        color: #a32323;
+        font-size: 11px;
       }
 
-      .departure-price small {
-        color: #66758e;
-        font-size: 10px;
-        font-weight: 600;
-      }
-
-      .departure-time {
+      .hlist .more {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
-        margin: 4px 0 8px;
-        padding: 7px 10px;
-        border-radius: 9px;
-        background: #e6eeff;
-        color: #1456d8;
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      .request-select {
-        display: block;
-        width: 100%;
-        margin-top: 12px;
-        padding: 12px;
         border: 0;
-        border-radius: 11px;
-        background: #1456d8;
-        color: white;
-        font: inherit;
-        font-size: 12px;
-        font-weight: 800;
         cursor: pointer;
+        font-family: inherit;
+        text-decoration: none;
       }
 
-      .request-select:hover {
-        background: #0a2a6b;
+      .hlist .more:hover {
+        text-decoration: none;
       }
 
-      .trip-empty {
-        padding: 30px 18px;
-        text-align: center;
-      }
-
-      .trip-empty h3 {
-        margin-bottom: 8px;
-        color: #001b5e;
-      }
-
-      .trip-empty p {
-        color: #405578;
-        font-size: 12px;
-        line-height: 1.7;
-      }
-
-      .tflash {
-        margin-top: 16px;
-        padding: 12px 14px;
-        border-radius: 12px;
+      .hlist .more:disabled {
+        color: #8d3434;
         background: #ffe1e1;
-        color: #b42318;
-        font-size: 12px;
-        font-weight: 700;
+        cursor: not-allowed;
       }
 
-      .tflash.success {
-        background: #dcfce7;
-        color: #166534;
-      }
-
-      .request-panel {
-        display: none;
-        margin-top: 28px;
-        padding: 22px;
-        border: 1px solid #dce7f7;
-        border-radius: 18px;
-        background: white;
-        box-shadow: 0 12px 35px rgba(20, 50, 100, 0.08);
-      }
-
-      .request-panel.show {
-        display: block;
-      }
-
-      .request-panel h3 {
-        margin: 0 0 6px;
-        color: #001b5e;
-        font-size: 19px;
-      }
-
-      .request-panel .request-subtitle {
-        margin-bottom: 18px;
-        color: #66758e;
-        font-size: 12px;
-        line-height: 1.7;
-      }
-
-      .request-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-
-      @media (min-width: 650px) {
-        .request-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
-
-      .request-grid label {
-        display: grid;
-        gap: 6px;
+      .hcount {
+        margin-top: 7px;
         color: #405578;
         font-size: 11px;
         font-weight: 700;
       }
 
-      .request-grid input {
-        width: 100%;
-        min-width: 0;
-        padding: 12px;
-        border: 1px solid #dce7f7;
-        border-radius: 10px;
-        background: #f8faff;
-        color: #14213d;
-        font: inherit;
-        font-size: 13px;
+      /* Empty / loading */
+      .tstate {
+        display: none;
+        margin-top: 18px;
+        padding: 30px 18px;
+        text-align: center;
       }
 
-      .honesty-notice {
-        margin: 18px 0 12px;
-        padding: 11px 13px;
-        border-left: 3px solid #8caeea;
-        border-radius: 7px;
-        background: #f5f8ff;
-        color: #66758e;
-        font-size: 10px;
+      .tstate.visible {
+        display: block;
+      }
+
+      .tstate h3 {
+        margin-bottom: 8px;
+        color: #001b5e;
+      }
+
+      .tstate p {
+        color: #405578;
+        font-size: 12px;
         line-height: 1.7;
       }
 
-      .request-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 9px;
-        margin-top: 12px;
+      .spinner {
+        width: 25px;
+        height: 25px;
+        margin: 0 auto 13px;
+        border: 3px solid #d9e6ff;
+        border-top-color: #1456d8;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
       }
 
-      .request-submit,
-      .request-cancel {
-        padding: 12px 17px;
-        border: 0;
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Notices */
+      .notice {
+        display: none;
+        margin-top: 16px;
+        padding: 13px 15px;
+        border-radius: 12px;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .notice.visible {
+        display: block;
+      }
+      .notice.error {
+        color: #922626;
+        background: #fff0f0;
+        border: 1px solid #ffd1d1;
+      }
+      .notice.success {
+        color: #075d39;
+        background: #e9fff3;
+        border: 1px solid #bcebd0;
+      }
+      .notice.info {
+        color: #174a9b;
+        background: #edf5ff;
+        border: 1px solid #cfe1ff;
+      }
+
+      /* Alternative banner */
+      .alternative-banner {
+        display: none;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid #f1d18a;
+        border-radius: 14px;
+        background: #fff8e8;
+        color: #744500;
+      }
+
+      .alternative-banner.visible {
+        display: flex;
+      }
+
+      .alternative-icon {
+        flex: 0 0 35px;
+        width: 35px;
+        height: 35px;
+        display: grid;
+        place-items: center;
         border-radius: 10px;
+        background: #ffedc2;
+        font-size: 18px;
+      }
+
+      .alternative-banner strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+
+      .alternative-banner p {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      /* Request form */
+      .request-section {
+        display: none;
+        margin-top: 28px;
+        padding: 20px;
+      }
+
+      .request-section.visible {
+        display: block;
+      }
+
+      .request-section h2 {
+        font-size: 18px;
+      }
+
+      .selected-summary {
+        margin: 12px 0 18px;
+        padding: 13px 15px;
+        border: 1px solid #d6e5ff;
+        border-radius: 12px;
+        background: #f3f7ff;
+        color: #29456f;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .request-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 13px;
+      }
+
+      @media (min-width: 700px) {
+        .request-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .request-field.full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .request-field label {
+        display: block;
+        margin: 0 0 7px 2px;
+        color: #52627e;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .request-field input,
+      .request-field textarea {
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 11px 12px;
+        border: 1px solid #d6e1f4;
+        border-radius: 11px;
+        outline: none;
+        color: #071a42;
+        background: #f8faff;
+        font: inherit;
+        font-size: 12px;
+      }
+
+      .request-field textarea {
+        min-height: 75px;
+        resize: vertical;
+      }
+
+      .request-field input:focus,
+      .request-field textarea:focus {
+        border-color: #0047ff;
+        box-shadow: 0 0 0 3px rgba(0, 71, 255, 0.1);
+      }
+
+      .submit-button {
+        width: 100%;
+        min-height: 46px;
+        margin-top: 16px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 11px;
+        color: #fff;
+        background: linear-gradient(135deg, #1475ff, #003bd9);
+        box-shadow: 0 6px 15px rgba(0, 71, 255, 0.2);
         font: inherit;
         font-size: 12px;
         font-weight: 800;
         cursor: pointer;
       }
 
-      .request-submit {
-        background: #1456d8;
-        color: white;
+      .submit-button:disabled {
+        opacity: 0.6;
+        cursor: wait;
       }
 
-      .request-cancel {
-        background: #edf2fa;
+      .form-footnote {
+        margin: 11px 0 0;
         color: #405578;
-      }
-
-      .search-note {
-        grid-column: 1 / -1;
-        margin-top: 3px;
-        color: #66758e;
         font-size: 10px;
+        line-height: 1.7;
+        text-align: center;
       }
 
-      .tsteps {
+      /* History */
+      .hpolicy {
+        margin-top: 24px;
+        padding: 16px;
+      }
+
+      .hpolicy b {
+        color: #001b5e;
+        font-size: 13px;
+      }
+
+      .hpolicy p {
+        color: #405578;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .hpolicy .more {
+        display: inline-flex;
+        margin-top: 8px;
+      }
+
+      /* How it works */
+      .hsteps {
         display: grid;
         gap: 12px;
         margin-top: 34px;
       }
 
       @media (min-width: 700px) {
-        .tsteps {
+        .hsteps {
           grid-template-columns: repeat(3, minmax(0, 1fr));
         }
       }
 
-      .tstep {
+      .hstep {
         padding: 16px;
       }
 
-      .tstep .ic {
+      .hstep .ic {
         display: flex;
         width: 40px;
         height: 40px;
@@ -418,33 +548,30 @@
         font-weight: 800;
       }
 
-      .tstep b {
+      .hstep b {
         display: block;
         margin-bottom: 4px;
         color: #001b5e;
         font-size: 13px;
       }
 
-      .tstep p {
+      .hstep p {
         color: #405578;
         font-size: 11px;
         line-height: 1.7;
       }
 
-      .t-disclaimer {
-        margin-top: 15px;
-        color: #66758e;
-        font-size: 10px;
-        line-height: 1.7;
-      }
-
-      @media (max-width: 380px) {
-        .search.s4 {
-          grid-template-columns: minmax(0, 1fr);
-        }
-        .search.s4 .field,
-        .search.s4 .go {
-          grid-column: 1 / -1;
+      @media (prefers-reduced-motion: reduce) {
+        .h *,
+        .h *::before,
+        .h *::after,
+        .search.s6 *,
+        .search.s6 *::before,
+        .search.s6 *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
         }
       }
     </style>
@@ -453,6 +580,7 @@
   <body>
     {% include "_admin_bar.html" %}
 
+    <!-- ICONS -->
     <svg
       width="0"
       height="0"
@@ -463,51 +591,74 @@
       <symbol id="i-house" viewBox="0 0 24 24">
         <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
       </symbol>
+
       <symbol id="i-pin" viewBox="0 0 24 24">
         <path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
         <circle cx="12" cy="10" r="2.5" />
       </symbol>
+
       <symbol id="i-heart" viewBox="0 0 24 24">
         <path
           d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"
         />
       </symbol>
+
       <symbol id="i-chat" viewBox="0 0 24 24">
         <path d="M4 5h16v11H9l-5 4z" />
       </symbol>
+
       <symbol id="i-search" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="7" />
         <path d="M20 20l-4-4" />
       </symbol>
+
       <symbol id="i-menu" viewBox="0 0 24 24">
         <path d="M4 7h16M4 12h16M4 17h16" />
       </symbol>
+
       <symbol id="i-arrow" viewBox="0 0 24 24">
         <path d="M5 12h14M13 6l6 6-6 6" />
       </symbol>
+
       <symbol id="i-phone" viewBox="0 0 24 24">
         <path
           d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
         />
       </symbol>
+
       <symbol id="i-mail" viewBox="0 0 24 24">
         <rect x="3" y="5" width="18" height="14" rx="2" />
         <path d="M3 7l9 6 9-6" />
       </symbol>
+
       <symbol id="i-plus" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9" />
         <path d="M12 8v8M8 12h8" />
       </symbol>
+
       <symbol id="i-bed" viewBox="0 0 24 24">
         <path
           d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
         />
       </symbol>
-      <symbol id="i-plane" viewBox="0 0 24 24">
-        <path d="M2 16l20-8-8 14-2-6z" />
+
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 10h18M8 3v4M16 3v4" />
+      </symbol>
+
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </symbol>
+
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3.5" />
+        <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5" />
       </symbol>
     </svg>
 
+    <!-- HEADER AND NAVIGATION -->
     <header class="nav">
       <div class="wrap">
         <a
@@ -515,9 +666,11 @@
           href="{{ url_for('home') }}"
           aria-label="CivicNest Africa home"
         >
-          <span class="mk"
-            ><svg class="i" aria-hidden="true"><use href="#i-house" /></svg
-          ></span>
+          <span class="mk">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-house" />
+            </svg>
+          </span>
           <span>CivicNest<small>Africa</small></span>
         </a>
 
@@ -525,29 +678,41 @@
           <a href="{{ url_for('home') }}">Home</a>
           <a href="{{ url_for('rent_page') }}">Properties</a>
           <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
-          <a class="on" href="{{ url_for('travel_page') }}" aria-current="page"
-            >Travel</a
+          <a
+            class="on"
+            href="{{ url_for('travel_page') }}"
+            aria-current="page"
           >
+            Travel
+          </a>
           <a href="{{ url_for('sell_page') }}">List Property</a>
           <a href="{{ url_for('about_page') }}">About</a>
         </nav>
 
         <div class="right">
           <a class="t" href="{{ url_for('home') }}#properties">
-            <svg class="i" aria-hidden="true"><use href="#i-heart" /></svg>
+            <svg class="i" aria-hidden="true">
+              <use href="#i-heart" />
+            </svg>
             Saved
           </a>
+
           <a
             class="t"
             href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
           >
-            <svg class="i" aria-hidden="true"><use href="#i-chat" /></svg> Chats
+            <svg class="i" aria-hidden="true">
+              <use href="#i-chat" />
+            </svg>
+            Chats
           </a>
+
           {% if current_user.is_authenticated %}
           <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
           {% else %}
           <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
           {% endif %}
+
           <button
             class="burger"
             id="menuBtn"
@@ -577,256 +742,317 @@
     </header>
 
     <main>
+      <!-- HERO AND TRANSPORT SEARCH -->
       <section class="hero h">
         <div class="wrap">
-          <div class="eyebrow">Going somewhere?</div>
-          <h1>Travel with us and <em>go further.</em></h1>
+          <div class="eyebrow">CivicNest Travel</div>
+
+          <h1>Find your next <em>departure.</em></h1>
+
           <p>
-            Compare registered transport companies and departure options across
-            Kenya.
+            Search transport, compare departure times and fares, and send a
+            booking request directly through CivicNest Africa.
           </p>
         </div>
 
-        <form
-          class="search s4"
-          id="tripSearchForm"
-          role="search"
-          data-search-url="{{ url_for('transport_search') }}"
-        >
+        <form class="search s6" id="searchForm" role="search" autocomplete="off">
           <label class="field">
-            <svg class="i" aria-hidden="true"><use href="#i-pin" /></svg>
+            <svg class="i" aria-hidden="true">
+              <use href="#i-pin" />
+            </svg>
             <input
+              id="fromInput"
               type="text"
-              id="tripFrom"
               name="from"
-              placeholder="Travelling from"
-              aria-label="Departure location"
+              placeholder="From (departure town)"
+              aria-label="Departure town"
               required
-              autocomplete="off"
+              value="{{ alternative_search.route_from if alternative_search else '' }}"
             />
           </label>
 
           <label class="field">
-            <svg class="i" aria-hidden="true"><use href="#i-plane" /></svg>
+            <svg class="i" aria-hidden="true">
+              <use href="#i-pin" />
+            </svg>
             <input
+              id="toInput"
               type="text"
-              id="tripTo"
               name="to"
-              placeholder="Travelling to"
-              aria-label="Destination"
+              placeholder="To (destination town)"
+              aria-label="Destination town"
               required
-              autocomplete="off"
+              value="{{ alternative_search.route_to if alternative_search else '' }}"
             />
           </label>
 
           <label class="field">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-calendar" />
+            </svg>
             <input
+              id="dateInput"
               type="date"
-              id="tripDate"
               name="date"
               aria-label="Travel date"
+              title="Travel date"
               required
+              min="{{ kenya_today().isoformat() if kenya_today is defined else '' }}"
+              value="{{ alternative_search.travel_date if alternative_search else '' }}"
             />
           </label>
 
           <label class="field">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-clock" />
+            </svg>
             <input
+              id="timeInput"
               type="time"
-              id="tripTime"
               name="time"
-              aria-label="Preferred departure time"
+              aria-label="Preferred time (optional)"
+              title="Preferred time (optional)"
+              value="{{ alternative_search.time if alternative_search else '' }}"
             />
           </label>
 
           <label class="field">
-            <input
-              type="number"
-              id="tripPassengers"
-              name="passengers"
-              min="1"
-              max="10"
-              value="1"
-              aria-label="Number of passengers"
-              required
-            />
+            <svg class="i" aria-hidden="true">
+              <use href="#i-users" />
+            </svg>
+            {% set chosen_passengers = (alternative_search.passengers|int) if alternative_search else 1 %}
+            <select id="passengersInput" name="passengers" aria-label="Passengers">
+              {% for number in range(1, 11) %}
+              <option value="{{ number }}" {{ 'selected' if number == chosen_passengers else '' }}>{{ number }} passenger{{ '' if number == 1 else 's' }}</option>
+              {% endfor %}
+            </select>
           </label>
 
           <button class="go" type="submit" id="searchButton">
-            <svg class="i" aria-hidden="true"><use href="#i-search" /></svg>
+            <svg class="i" aria-hidden="true">
+              <use href="#i-search" />
+            </svg>
             Search
           </button>
-
-          <p class="search-note">
-            Preferred time helps sort departures. Other registered times will
-            still be shown.
-          </p>
         </form>
       </section>
 
+      <!-- DEPARTURES -->
       <section class="sec h">
         <div class="wrap">
           <div class="eb">Travel</div>
-          <h2 id="tripHeading">Find your journey</h2>
-          <p
-            class="sub tcount"
-            id="tripCount"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            Enter your journey details above to compare transport companies.
+
+          <h2 id="resultsTitle">Available departures</h2>
+
+          <p class="sub" id="resultsSubtitle" aria-live="polite" aria-atomic="true">
+            Search for transport to see matching departures.
           </p>
 
-          <div id="searchMessage" role="status" aria-live="polite"></div>
+          <div class="hcount" id="resultCount"></div>
 
-          <div class="tlist" id="tripList"></div>
+          <div
+            class="alternative-banner {% if alternative_search %}visible{% endif %}"
+            id="alternativeBanner"
+          >
+            <div class="alternative-icon">↗</div>
+            <div>
+              <strong>Find another departure</strong>
+              <p>
+                Your original departure was marked unavailable. Your journey
+                details have been restored. Select another departure below to
+                submit a new request.
+              </p>
+            </div>
+          </div>
 
-          <div class="empty trip-empty" id="tripEmpty">
-            <h3>Ready to travel?</h3>
-            <p>
-              Enter your departure, destination and travel date to see
-              registered transport companies and their departure times.
+          <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+          <div class="card tstate" id="loadingState">
+            <div class="spinner"></div>
+            <h3>Searching departures...</h3>
+            <p>Please wait while we look for matching transport.</p>
+          </div>
+
+          <div class="hlist" id="resultsGrid"></div>
+
+          <div class="card tstate visible" id="emptyState">
+            <h3 id="emptyTitle">No departures to display</h3>
+            <p id="emptyMessage">
+              Enter your route and travel date above, then search.
             </p>
           </div>
 
-          <section
-            class="request-panel"
-            id="requestPanel"
-            aria-labelledby="requestHeading"
-          >
-            <h3 id="requestHeading">Request availability</h3>
-            <p class="request-subtitle" id="selectedDepartureText">
-              Complete your details to request this departure.
+          <!-- BOOKING REQUEST FORM -->
+          <section class="card request-section" id="requestSection">
+            <h2>Request this departure</h2>
+            <p class="sub">
+              Complete your details to send a transport booking request.
             </p>
+
+            <div class="selected-summary" id="selectedSummary">
+              Select a departure to continue.
+            </div>
 
             <form
               method="POST"
               action="{{ url_for('transport_submit_request') }}"
-              id="transportRequestForm"
+              id="requestForm"
             >
+              {# Add your csrf_token() field here if your app uses Flask-WTF. #}
+
+              <input type="hidden" name="departure_id" id="selectedDepartureId" />
+              <input type="hidden" name="travel_date" id="selectedTravelDate" />
+              <input type="hidden" name="passenger_count" id="selectedPassengers" />
               <input
                 type="hidden"
-                name="departure_id"
-                id="selectedDepartureId"
+                name="original_request_id"
+                id="originalRequestId"
+                value="{{ alternative_search.id if alternative_search else '' }}"
               />
-              <input type="hidden" name="travel_date" id="requestTravelDate" />
-              <input type="hidden" name="passengers" id="requestPassengers" />
 
               <div class="request-grid">
-                <label>
-                  Full name
+                <div class="request-field">
+                  <label for="fullName">FULL NAME</label>
                   <input
                     type="text"
                     name="full_name"
-                    minlength="2"
-                    maxlength="120"
-                    required
+                    id="fullName"
+                    placeholder="Your full name"
                     autocomplete="name"
+                    required
                   />
-                </label>
+                </div>
 
-                <label>
-                  Phone number
+                <div class="request-field">
+                  <label for="phone">PHONE NUMBER</label>
                   <input
                     type="tel"
                     name="phone"
-                    maxlength="30"
+                    id="phone"
+                    placeholder="e.g. 07XXXXXXXX"
+                    autocomplete="tel"
                     required
-                    autocomplete="tel"
-                    placeholder="+254..."
                   />
-                </label>
+                </div>
 
-                <label>
-                  WhatsApp number
+                <div class="request-field">
+                  <label for="pickupLocation">PICKUP LOCATION</label>
                   <input
-                    type="tel"
-                    name="whatsapp_phone"
-                    maxlength="30"
-                    autocomplete="tel"
-                    placeholder="Same as phone if applicable"
+                    type="text"
+                    name="pickup_location"
+                    id="pickupLocation"
+                    placeholder="Where should you be picked up?"
                   />
-                </label>
+                </div>
+
+                <div class="request-field">
+                  <label for="dropoffLocation">DROP-OFF LOCATION</label>
+                  <input
+                    type="text"
+                    name="dropoff_location"
+                    id="dropoffLocation"
+                    placeholder="Where should you be dropped off?"
+                  />
+                </div>
+
+                <div class="request-field full">
+                  <label for="requestNote">ADDITIONAL INFORMATION (OPTIONAL)</label>
+                  <textarea
+                    name="customer_note"
+                    id="requestNote"
+                    placeholder="Any other information about your trip?"
+                  ></textarea>
+                </div>
               </div>
 
-              <div class="honesty-notice">
-                <strong>Honesty and Accuracy Notice:</strong>
-                By submitting this request, you confirm that your details are
-                truthful and accurate. Misleading requests are not permitted.
-                CivicNest Africa may reject dishonest requests or restrict
-                repeated misuse. Please respect transport providers and other
-                travellers.
-              </div>
+              <button type="submit" class="submit-button" id="submitRequestButton">
+                Submit transport request
+              </button>
 
-              <div class="request-actions">
-                <button class="request-submit" type="submit">
-                  Submit availability request
-                </button>
-                <button class="request-cancel" type="button" id="cancelRequest">
-                  Cancel
-                </button>
-              </div>
-              <p class="t-disclaimer">
-                This is an availability request, not a confirmed seat or a
-                payment. Our team will check with the transport company and
-                update your account.
+              <p class="form-footnote">
+                This is a booking request, not an instant confirmed booking.
+                Your request will be reviewed before it is confirmed.
               </p>
             </form>
           </section>
 
-          <p class="t-disclaimer">
-            Departure times and fares are provided from company route
-            registrations. They do not represent live seat availability. Your
-            request must be checked before a booking can be confirmed.
-          </p>
+          {% if current_user.is_authenticated %}
+          <section class="card hpolicy">
+            <b>Your transport requests</b>
+            <p>
+              Track your requests, check availability decisions and find
+              alternative departures when a requested trip is unavailable.
+            </p>
+            <a href="{{ url_for('my_transport_requests') }}" class="more">
+              View my transport requests →
+            </a>
+          </section>
+          {% endif %}
 
-          <section class="tsteps" aria-label="How travel works">
-            <div class="card tstep">
+          <!-- HOW IT WORKS -->
+          <section class="hsteps" aria-label="How Travel works">
+            <div class="card hstep">
               <div class="ic" aria-hidden="true">1</div>
               <b>Search your route</b>
               <p>
-                Enter your departure, destination, travel date and passenger
-                count.
+                Enter where you are leaving from, where you are going and your
+                travel date.
               </p>
             </div>
-            <div class="card tstep">
+
+            <div class="card hstep">
               <div class="ic" aria-hidden="true">2</div>
               <b>Compare departures</b>
               <p>
-                Compare transport companies, registered departure times and
-                fares.
+                Check departure times, vehicles and fares to find a suitable
+                option.
               </p>
             </div>
-            <div class="card tstep">
+
+            <div class="card hstep">
               <div class="ic" aria-hidden="true">3</div>
-              <b>Request availability</b>
+              <b>Send your request</b>
               <p>
-                Submit your preferred departure. We will check availability and
-                update your account.
+                Select a departure and submit your details. Your request is
+                reviewed before it is confirmed.
               </p>
             </div>
           </section>
         </div>
       </section>
 
+      <!-- CONTACT -->
       <section class="contact" id="contact">
         <div class="wrap">
           <div>
             <h3>Contact Us</h3>
             <p>We’re here to help. Get in touch with us.</p>
           </div>
+
           <div class="ci">
-            <svg class="i" aria-hidden="true"><use href="#i-phone" /></svg>
-            <div>+254 768387842 <small>Call or WhatsApp</small></div>
-          </div>
-          <div class="ci">
-            <svg class="i" aria-hidden="true"><use href="#i-mail" /></svg>
+            <svg class="i" aria-hidden="true">
+              <use href="#i-phone" />
+            </svg>
+
             <div>
-              www.mokuajoshuaongeri@gmail.com<small
-                >We’ll respond within 24 hours</small
-              >
+              +254 768387842
+              <small>Call or WhatsApp</small>
             </div>
           </div>
+
+          <div class="ci">
+            <svg class="i" aria-hidden="true">
+              <use href="#i-mail" />
+            </svg>
+
+            <div>
+              www.mokuajoshuaongeri@gmail.com
+              <small>We’ll respond within 24 hours</small>
+            </div>
+          </div>
+
           <div class="soc" aria-label="Social links">
+            <!-- Replace # with your real social profile URLs. -->
             <a href="#" aria-label="Facebook">f</a>
             <a href="#" aria-label="X">𝕏</a>
             <a href="#" aria-label="Instagram">ig</a>
@@ -836,15 +1062,17 @@
       </section>
     </main>
 
+    <!-- FOOTER -->
     <footer class="foot">
       <div class="wrap">
-        <span
-          >© {{ current_year }} CivicNest Africa. Developed by
-          <a class="dev" href="#">Mabel Technologies</a>.</span
-        >
+        <span>
+          © {{ current_year|default(2026) }} CivicNest Africa. Developed by
+          <a class="dev" href="#">Mabel Technologies</a>.
+        </span>
       </div>
     </footer>
 
+    <!-- MOBILE BOTTOM NAVIGATION -->
     <nav class="bnav" aria-label="Primary navigation">
       <a href="{{ url_for('home') }}">
         <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
@@ -852,18 +1080,23 @@
         </svg>
         Home
       </a>
-      <a href="{{ url_for('hospitality_page') }}">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-bed" />
-        </svg>
-        Stay &amp; Dine
-      </a>
+
       <a class="on" href="{{ url_for('travel_page') }}" aria-current="page">
         <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-plane" />
+          <use href="#i-pin" />
         </svg>
         Travel
       </a>
+
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+      >
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
+          <use href="#i-chat" />
+        </svg>
+        Chats
+      </a>
+
       <a href="{{ url_for('sell_page') }}">
         <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
           <use href="#i-plus" />
@@ -872,400 +1105,506 @@
       </a>
     </nav>
 
+    <!-- JAVASCRIPT -->
     <script>
       (() => {
         "use strict";
 
+        // MOBILE NAVIGATION
         const menuBtn = document.getElementById("menuBtn");
         const menuPanel = document.getElementById("menuPanel");
 
         if (menuBtn && menuPanel) {
           menuBtn.addEventListener("click", () => {
-            const opening = menuPanel.hidden;
-            menuPanel.hidden = !opening;
-            menuBtn.setAttribute("aria-expanded", String(opening));
+            const isOpening = menuPanel.hidden;
+
+            menuPanel.hidden = !isOpening;
+            menuBtn.setAttribute("aria-expanded", String(isOpening));
             menuBtn.setAttribute(
               "aria-label",
-              opening ? "Close menu" : "Open menu",
+              isOpening ? "Close menu" : "Open menu"
             );
           });
 
-          document.addEventListener("click", (e) => {
+          document.addEventListener("click", (event) => {
             if (
               !menuPanel.hidden &&
-              !menuPanel.contains(e.target) &&
-              !menuBtn.contains(e.target)
+              !menuPanel.contains(event.target) &&
+              !menuBtn.contains(event.target)
             ) {
               menuPanel.hidden = true;
               menuBtn.setAttribute("aria-expanded", "false");
               menuBtn.setAttribute("aria-label", "Open menu");
             }
           });
-        }
 
-        const form = document.getElementById("tripSearchForm");
-        const from = document.getElementById("tripFrom");
-        const to = document.getElementById("tripTo");
-        const travelDate = document.getElementById("tripDate");
-        const preferredTime = document.getElementById("tripTime");
-        const passengers = document.getElementById("tripPassengers");
-        const list = document.getElementById("tripList");
-        const count = document.getElementById("tripCount");
-        const empty = document.getElementById("tripEmpty");
-        const message = document.getElementById("searchMessage");
-        const heading = document.getElementById("tripHeading");
-        const searchButton = document.getElementById("searchButton");
-
-        const requestPanel = document.getElementById("requestPanel");
-        const selectedDepartureId = document.getElementById(
-          "selectedDepartureId",
-        );
-        const requestTravelDate = document.getElementById("requestTravelDate");
-        const requestPassengers = document.getElementById("requestPassengers");
-        const selectedDepartureText = document.getElementById(
-          "selectedDepartureText",
-        );
-        const cancelRequest = document.getElementById("cancelRequest");
-
-        let lastResults = [];
-
-        // Use the visitor's local calendar date as the minimum date.
-        const now = new Date();
-        const localToday = [
-          now.getFullYear(),
-          String(now.getMonth() + 1).padStart(2, "0"),
-          String(now.getDate()).padStart(2, "0"),
-        ].join("-");
-        travelDate.min = localToday;
-
-        function make(tag, className, text) {
-          const node = document.createElement(tag);
-          if (className) node.className = className;
-          if (text !== undefined && text !== null) node.textContent = text;
-          return node;
-        }
-
-        function safeImageUrl(value) {
-          if (typeof value !== "string") return "";
-          try {
-            const url = new URL(value, window.location.origin);
-            return ["http:", "https:"].includes(url.protocol) ? url.href : "";
-          } catch (_) {
-            return "";
-          }
-        }
-
-        function initials(name) {
-          const words = String(name || "")
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-          if (!words.length) return "CN";
-          if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-          return (words[0][0] + words[1][0]).toUpperCase();
-        }
-
-        function formatMoney(value) {
-          return Number(value || 0).toLocaleString("en-KE", {
-            maximumFractionDigits: 2,
+          menuPanel.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              menuPanel.hidden = true;
+              menuBtn.setAttribute("aria-expanded", "false");
+              menuBtn.focus();
+            }
           });
         }
 
-        function showMessage(text, type) {
-          message.textContent = text || "";
-          message.className = text ? "tflash " + (type || "") : "";
+        // TRANSPORT SEARCH
+        const SEARCH_URL = {{ url_for('transport_search')|tojson }};
+
+        const fromInput = document.getElementById("fromInput");
+        const toInput = document.getElementById("toInput");
+        const dateInput = document.getElementById("dateInput");
+        const timeInput = document.getElementById("timeInput");
+        const passengersInput = document.getElementById("passengersInput");
+
+        const searchForm = document.getElementById("searchForm");
+        const searchButton = document.getElementById("searchButton");
+        const resultsGrid = document.getElementById("resultsGrid");
+        const resultCount = document.getElementById("resultCount");
+        const resultsTitle = document.getElementById("resultsTitle");
+        const resultsSubtitle = document.getElementById("resultsSubtitle");
+
+        const notice = document.getElementById("notice");
+        const loadingState = document.getElementById("loadingState");
+        const emptyState = document.getElementById("emptyState");
+        const emptyTitle = document.getElementById("emptyTitle");
+        const emptyMessage = document.getElementById("emptyMessage");
+
+        const requestSection = document.getElementById("requestSection");
+        const requestForm = document.getElementById("requestForm");
+        const selectedDepartureId = document.getElementById("selectedDepartureId");
+        const selectedTravelDate = document.getElementById("selectedTravelDate");
+        const selectedPassengers = document.getElementById("selectedPassengers");
+        const originalRequestId = document.getElementById("originalRequestId");
+        const selectedSummary = document.getElementById("selectedSummary");
+        const submitRequestButton = document.getElementById("submitRequestButton");
+
+        const reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        let lastResults = [];
+        let lastUnavailableIds = new Set();
+        let selectedDeparture = null;
+
+        function escapeHTML(value) {
+          return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+          })[char]);
         }
 
-        function makeCompanyLogo(item) {
-          const logo = make("div", "company-logo");
-          const url = safeImageUrl(item.logo_url);
-
-          if (url) {
-            const img = document.createElement("img");
-            img.src = url;
-            img.alt = item.company + " logo";
-            img.loading = "lazy";
-            img.onerror = () => {
-              logo.textContent = initials(item.company);
-            };
-            logo.appendChild(img);
-          } else {
-            logo.textContent = initials(item.company);
+        function getValue(item, names, fallback = "") {
+          for (const name of names) {
+            if (
+              item &&
+              item[name] !== undefined &&
+              item[name] !== null &&
+              item[name] !== ""
+            ) {
+              return item[name];
+            }
           }
-
-          return logo;
+          return fallback;
         }
 
-        function makeResultCard(item) {
-          const card = make("article", "card");
-          const photo = make("div", "photo tphoto");
-          const vehicleUrl = safeImageUrl(item.vehicle_image_url);
+        function money(value) {
+          const amount = Number(value);
+          if (!Number.isFinite(amount)) return "Not available";
 
-          const dateBadge = make("span", "date-badge", travelDate.value);
-          photo.appendChild(dateBadge);
+          return (
+            "KSh " +
+            amount.toLocaleString("en-KE", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })
+          );
+        }
 
-          if (vehicleUrl) {
-            const img = document.createElement("img");
-            img.className = "vehicle";
-            img.src = vehicleUrl;
-            img.alt = "Vehicle used by " + item.company;
-            img.loading = "lazy";
-            img.onerror = () => {
-              img.remove();
-              photo.appendChild(make("span", "vehicle-placeholder", "🚌"));
-            };
-            photo.appendChild(img);
-          } else {
-            photo.appendChild(make("span", "vehicle-placeholder", "🚌"));
-          }
+        function showNotice(message, type = "info") {
+          notice.textContent = message;
+          notice.className = `notice visible ${type}`;
+        }
 
-          const info = make("div", "info");
-          info.style.padding = "15px";
+        function hideNotice() {
+          notice.textContent = "";
+          notice.className = "notice";
+        }
 
-          const companyRow = make("div", "company-row");
-          companyRow.appendChild(makeCompanyLogo(item));
-          companyRow.appendChild(make("div", "company-name", item.company));
-          info.appendChild(companyRow);
+        function showEmpty(title, message) {
+          emptyTitle.textContent = title;
+          emptyMessage.textContent = message;
+          emptyState.classList.add("visible");
+        }
 
-          info.appendChild(
-            make("h3", "route-title", item.from + " → " + item.to),
+        function hideEmpty() {
+          emptyState.classList.remove("visible");
+        }
+
+        function setLoading(loading) {
+          loadingState.classList.toggle("visible", loading);
+          searchButton.disabled = loading;
+          searchButton.lastChild.textContent = loading ? " Searching..." : " Search";
+        }
+
+        function departureId(item) {
+          return String(getValue(item, ["departure_id", "id"], ""));
+        }
+
+        function departureName(item) {
+          return getValue(item, ["company"], "Transport company");
+        }
+
+        function departureFrom(item) {
+          return getValue(item, ["from"], fromInput.value);
+        }
+
+        function departureTo(item) {
+          return getValue(item, ["to"], toInput.value);
+        }
+
+        function departureFare(item) {
+          return getValue(item, ["price"], null);
+        }
+
+        function departureTime(item) {
+          return getValue(item, ["departure_time"], "Not specified");
+        }
+
+        function departureVehicle(item) {
+          return getValue(item, ["vehicle_type"], "Transport");
+        }
+
+        function isUnavailable(item) {
+          return lastUnavailableIds.has(departureId(item));
+        }
+
+        function renderResults(items, unavailableIds = []) {
+          lastResults = Array.isArray(items) ? items : [];
+
+          lastUnavailableIds = new Set(
+            (Array.isArray(unavailableIds) ? unavailableIds : []).map(String)
           );
 
-          info.appendChild(
-            make("div", "departure-time", "Departure: " + item.departure_time),
-          );
+          resultsGrid.innerHTML = "";
+          hideEmpty();
 
-          info.appendChild(
-            make(
-              "div",
-              "departure-price",
-              "KSh " + formatMoney(item.price) + " ",
-            ),
-          );
+          resultCount.textContent = `${lastResults.length} result${
+            lastResults.length === 1 ? "" : "s"
+          }`;
 
-          const priceNote = make("small", "", "per passenger");
-          info.lastChild.appendChild(priceNote);
-
-          const details = make("div", "route-detail");
-
-          if (item.boarding_point) {
-            details.appendChild(
-              make("span", "", "Boarding: " + item.boarding_point),
+          if (!lastResults.length) {
+            showEmpty(
+              "No matching departures found",
+              "Try another preferred time or check another travel date."
             );
+            return;
           }
 
-          if (item.dropoff_point) {
-            details.appendChild(
-              make("span", "", "Drop-off: " + item.dropoff_point),
-            );
-          }
+          lastResults.forEach((item) => {
+            const id = departureId(item);
+            const unavailable = isUnavailable(item);
+            const company = departureName(item);
+            const logo = getValue(item, ["logo_url"], "");
+            const vehicle = departureVehicle(item);
+            const fare = departureFare(item);
+            const time = departureTime(item);
+            const total = getValue(item, ["estimated_total"], null);
+            const boarding = getValue(item, ["boarding_point"], "");
+            const dropoff = getValue(item, ["dropoff_point"], "");
+            const stops = getValue(item, ["intermediate_stops"], "");
+            const initial = company.slice(0, 1).toUpperCase();
 
-          if (item.intermediate_stops) {
-            details.appendChild(
-              make("span", "", "Stops: " + item.intermediate_stops),
-            );
-          }
+            const detailLines = [];
+            if (boarding) {
+              detailLines.push(
+                `<div><strong>Boarding:</strong> ${escapeHTML(boarding)}</div>`
+              );
+            }
+            if (dropoff) {
+              detailLines.push(
+                `<div><strong>Drop-off:</strong> ${escapeHTML(dropoff)}</div>`
+              );
+            }
+            if (stops) {
+              detailLines.push(
+                `<div><strong>Stops:</strong> ${escapeHTML(stops)}</div>`
+              );
+            }
+            if (total !== null) {
+              detailLines.push(
+                `<div><strong>Total for ${escapeHTML(
+                  passengersInput.value
+                )}:</strong> ${escapeHTML(money(total))}</div>`
+              );
+            }
 
-          if (item.vehicle_type) {
-            details.appendChild(
-              make("span", "", "Vehicle: " + item.vehicle_type),
-            );
-          }
+            const card = document.createElement("article");
+            card.className = `card${unavailable ? " unavailable" : ""}`;
 
-          details.appendChild(
-            make(
-              "span",
-              "",
-              "Estimated total for " +
-                passengers.value +
-                ": KSh " +
-                formatMoney(item.estimated_total),
-            ),
-          );
+            card.innerHTML = `
+              <div class="hphoto">
+                <span class="hstatus${unavailable ? " off" : ""}">
+                  ${unavailable ? "Unavailable" : "Departure listed"}
+                </span>
+                <span class="hicon" data-logo-box>${escapeHTML(initial)}</span>
+                <span class="hcategory">${escapeHTML(vehicle)}</span>
+              </div>
 
-          info.appendChild(details);
+              <div class="info">
+                <div class="price">
+                  ${escapeHTML(money(fare))} <small>per passenger</small>
+                </div>
 
-          const button = make(
-            "button",
-            "request-select",
-            "Request this departure",
-          );
-          button.type = "button";
-          button.addEventListener("click", () => selectDeparture(item));
+                <h3>${escapeHTML(company)}</h3>
 
-          info.appendChild(button);
-          card.appendChild(photo);
-          card.appendChild(info);
+                <div class="loc">
+                  <svg class="i" aria-hidden="true"><use href="#i-pin" /></svg>
+                  <span>${escapeHTML(departureFrom(item))} → ${escapeHTML(
+              departureTo(item)
+            )}</span>
+                </div>
 
-          return card;
+                <div class="meta">
+                  <span>${escapeHTML(time)}</span>
+                  <span>${escapeHTML(dateInput.value)}</span>
+                </div>
+
+                ${
+                  detailLines.length
+                    ? `<div class="tdetails">${detailLines.join("")}</div>`
+                    : ""
+                }
+
+                ${
+                  unavailable
+                    ? `<p class="tnote">This departure was already marked unavailable for your original request.</p>`
+                    : ""
+                }
+
+                <button type="button" class="more" ${
+                  unavailable || !id ? "disabled" : ""
+                }>
+                  ${unavailable ? "Not available" : "Select departure →"}
+                </button>
+              </div>
+            `;
+
+            if (logo) {
+              const logoBox = card.querySelector("[data-logo-box]");
+              const image = document.createElement("img");
+              image.src = logo;
+              image.alt = company;
+              image.addEventListener("error", () => {
+                logoBox.textContent = initial;
+              });
+              logoBox.textContent = "";
+              logoBox.appendChild(image);
+            }
+
+            if (!unavailable && id) {
+              card
+                .querySelector("button.more")
+                .addEventListener("click", () => selectDeparture(item));
+            }
+
+            resultsGrid.appendChild(card);
+          });
         }
 
         function selectDeparture(item) {
-          selectedDepartureId.value = item.departure_id;
-          requestTravelDate.value = travelDate.value;
-          requestPassengers.value = passengers.value;
-
-          selectedDepartureText.textContent =
-            item.company +
-            " — " +
-            item.from +
-            " to " +
-            item.to +
-            ", departing at " +
-            item.departure_time +
-            " on " +
-            travelDate.value +
-            ". Estimated fare: KSh " +
-            formatMoney(item.estimated_total) +
-            ".";
-
-          requestPanel.classList.add("show");
-          requestPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-
-        cancelRequest.addEventListener("click", () => {
-          requestPanel.classList.remove("show");
-          selectedDepartureId.value = "";
-        });
-
-        function renderResults(items) {
-          list.replaceChildren();
-          requestPanel.classList.remove("show");
-          selectedDepartureId.value = "";
-
-          lastResults = items || [];
-
-          if (!lastResults.length) {
-            empty.hidden = false;
-            count.textContent =
-              "No registered departures were found for this route.";
-            list.appendChild(
-              make(
-                "div",
-                "empty trip-empty t-no-results",
-                "Try checking the spelling of your locations or searching another route.",
-              ),
+          if (isUnavailable(item)) {
+            showNotice(
+              "This departure is unavailable. Please select another one.",
+              "error"
             );
             return;
           }
 
-          empty.hidden = true;
+          const id = departureId(item);
 
-          lastResults.forEach((item) => {
-            list.appendChild(makeResultCard(item));
+          if (!id) {
+            showNotice(
+              "This result does not have a valid departure ID.",
+              "error"
+            );
+            return;
+          }
+
+          selectedDeparture = item;
+
+          selectedDepartureId.value = id;
+          selectedTravelDate.value = dateInput.value;
+          selectedPassengers.value = passengersInput.value;
+
+          selectedSummary.textContent =
+            `${departureName(item)} | ` +
+            `${departureFrom(item)} → ${departureTo(item)} | ` +
+            `${dateInput.value} | ${departureTime(item)} | ` +
+            `${passengersInput.value} passenger(s) | ` +
+            `${money(departureFare(item))} per passenger`;
+
+          requestSection.classList.add("visible");
+          hideNotice();
+
+          requestSection.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "start"
           });
-
-          count.textContent =
-            lastResults.length +
-            " registered departure" +
-            (lastResults.length === 1 ? "" : "s") +
-            " found. All registered times are shown; closest to your preferred time appear first.";
         }
 
-        form.addEventListener("submit", async (event) => {
-          event.preventDefault();
-          showMessage("");
+        async function searchDepartures(event) {
+          if (event) event.preventDefault();
 
-          if (!from.value.trim() || !to.value.trim() || !travelDate.value) {
-            showMessage(
+          const from = fromInput.value.trim();
+          const to = toInput.value.trim();
+          const date = dateInput.value;
+          const time = timeInput.value;
+          const passengers = passengersInput.value;
+
+          if (!from || !to || !date) {
+            showNotice(
               "Enter your departure, destination and travel date.",
-              "error",
+              "error"
             );
             return;
           }
 
-          if (
-            from.value.trim().toLowerCase() === to.value.trim().toLowerCase()
-          ) {
-            showMessage(
-              "Your departure and destination must be different.",
-              "error",
-            );
+          if (from.toLowerCase() === to.toLowerCase()) {
+            showNotice("Departure and destination cannot be the same.", "error");
             return;
           }
 
-          const passengerCount = Number(passengers.value);
-          if (
-            !Number.isInteger(passengerCount) ||
-            passengerCount < 1 ||
-            passengerCount > 10
-          ) {
-            showMessage("Choose between 1 and 10 passengers.", "error");
-            return;
-          }
+          hideNotice();
+          requestSection.classList.remove("visible");
+          selectedDeparture = null;
+          selectedDepartureId.value = "";
+
+          resultsGrid.innerHTML = "";
+          resultCount.textContent = "";
+          hideEmpty();
+          setLoading(true);
 
           const params = new URLSearchParams({
-            from: from.value.trim(),
-            to: to.value.trim(),
-            date: travelDate.value,
-            time: preferredTime.value,
-            passengers: String(passengerCount),
+            from,
+            to,
+            date,
+            time,
+            passengers
           });
 
-          searchButton.disabled = true;
-          searchButton.textContent = "Searching...";
-          count.textContent = "Searching registered transport companies...";
-          list.replaceChildren();
-          empty.hidden = true;
+          if (originalRequestId.value) {
+            params.set("original_request_id", originalRequestId.value);
+          }
 
           try {
-            const response = await fetch(
-              form.dataset.searchUrl + "?" + params.toString(),
-              {
-                method: "GET",
-                headers: { Accept: "application/json" },
+            const response = await fetch(`${SEARCH_URL}?${params.toString()}`, {
+              method: "GET",
+              headers: {
+                Accept: "application/json",
+                "X-Requested-With": "XMLHttpRequest"
               },
-            );
+              credentials: "same-origin"
+            });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
-            if (!response.ok || !data.success) {
-              throw new Error(data.message || "Search could not be completed.");
-            }
-
-            renderResults(data.departures || []);
-
-            if (heading) {
-              heading.textContent =
-                from.value.trim() + " to " + to.value.trim();
-              heading.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-
-            if (!data.departures || !data.departures.length) {
-              showMessage(
-                "No companies have registered this route yet.",
-                "error",
+            if (!response.ok || data.success === false) {
+              throw new Error(
+                data.message || `Search failed (${response.status}).`
               );
             }
+
+            const departures = Array.isArray(data.departures)
+              ? data.departures
+              : [];
+
+            const unavailableIds = Array.isArray(data.unavailable_departure_ids)
+              ? data.unavailable_departure_ids
+              : [];
+
+            renderResults(departures, unavailableIds);
+
+            resultsTitle.textContent = originalRequestId.value
+              ? "Alternative departures"
+              : "Available departures";
+
+            resultsSubtitle.textContent = departures.length
+              ? `Matching transport from ${from} to ${to} on ${date}.`
+              : "No departures matched those travel details.";
+
+            if (data.message) {
+              showNotice(data.message, "info");
+            }
+
+            resultsTitle.scrollIntoView({
+              behavior: reduceMotion ? "auto" : "smooth",
+              block: "start"
+            });
           } catch (error) {
-            showMessage(
-              error.message || "Something went wrong. Please try again.",
-              "error",
+            console.error("Transport search error:", error);
+
+            showNotice(
+              error.message || "Unable to search departures. Please try again.",
+              "error"
             );
-            count.textContent = "We could not complete your search.";
-            empty.hidden = false;
-            empty.querySelector("h3").textContent = "Search unavailable";
-            empty.querySelector("p").textContent = "Please try again shortly.";
+
+            showEmpty(
+              "We could not complete your search",
+              "Check your connection and try again."
+            );
           } finally {
-            searchButton.disabled = false;
-            searchButton.innerHTML =
-              '<svg class="i" aria-hidden="true"><use href="#i-search"></use></svg> Search';
+            setLoading(false);
+          }
+        }
+
+        searchForm.addEventListener("submit", searchDepartures);
+
+        passengersInput.addEventListener("change", () => {
+          if (lastResults.length) {
+            renderResults(lastResults, Array.from(lastUnavailableIds));
           }
         });
 
-        // Keep the selected request's passenger count in sync if the user
-        // changes the search after choosing a departure.
-        passengers.addEventListener("change", () => {
-          if (selectedDepartureId.value) {
-            requestPassengers.value = passengers.value;
+        requestForm.addEventListener("submit", (event) => {
+          if (!selectedDepartureId.value || !selectedDeparture) {
+            event.preventDefault();
+            showNotice("Please select a departure first.", "error");
+            return;
           }
+
+          if (isUnavailable(selectedDeparture)) {
+            event.preventDefault();
+            showNotice(
+              "This departure is unavailable. Choose another departure.",
+              "error"
+            );
+            return;
+          }
+
+          selectedTravelDate.value = dateInput.value;
+          selectedPassengers.value = passengersInput.value;
+
+          const fullName = document.getElementById("fullName").value.trim();
+          const phone = document.getElementById("phone").value.trim();
+
+          if (!fullName || !phone) {
+            event.preventDefault();
+            showNotice("Enter your full name and phone number.", "error");
+            return;
+          }
+
+          submitRequestButton.disabled = true;
+          submitRequestButton.textContent = "Submitting request...";
         });
 
-        travelDate.addEventListener("change", () => {
-          if (selectedDepartureId.value) {
-            requestTravelDate.value = travelDate.value;
-          }
-        });
+        // Automatically search when opened from an unavailable request.
+        if (originalRequestId.value) {
+          document.getElementById("alternativeBanner").classList.add("visible");
+          searchDepartures();
+        }
       })();
     </script>
   </body>
