@@ -2,179 +2,437 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
-
-    <title>Manage Stay &amp; Dine | CivicNest Admin</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#1456d8" />
-
+    <title>Manage Stay &amp; Dine | CivicNest Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='home.css') }}?v=1"
-    />
-
     <style>
-      /* =====================================================
-         CIVICNEST AFRICA — ADMIN: MANAGE STAY & DINE
-         Design matched to the Travel and Stay & Dine pages.
-         ===================================================== */
-
-      .hero.m {
-        padding-bottom: 56px;
+      :root {
+        --bg: #121c38;
+        --side: #16234a;
+        --card: #1c2b55;
+        --card2: #22336a;
+        --line: #2c3d72;
+        --ink: #e9eefc;
+        --muted: #8e9cc4;
+        --green: #1fc8a0;
+        --red: #ef4444;
+        --blue: #2b9cf2;
+        --purple: #9b7fe6;
+        --amber: #f5b638;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--blue);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      button {
+        font-family: inherit;
+      }
+      :focus-visible {
+        outline: 3px solid #6aa8ff;
+        outline-offset: 2px;
       }
 
-      .sec.m {
-        padding-top: 34px;
+      /* SIDEBAR */
+      .side {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 250px;
+        padding: 20px 14px;
+        background: var(--side);
+        overflow-y: auto;
+        z-index: 50;
+        transition: transform 0.25s;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px 18px;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .logo i {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        font-style: normal;
+      }
+      .logo small {
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .me {
+        margin: 6px 0 20px;
+        padding: 18px 12px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        text-align: center;
+        background: linear-gradient(160deg, var(--card2), var(--card));
+      }
+      .ring {
+        display: grid;
+        place-items: center;
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 10px;
+        border-radius: 50%;
+        padding: 3px;
+        background: conic-gradient(
+          var(--green),
+          var(--blue),
+          var(--purple),
+          var(--green)
+        );
+      }
+      .ring span {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--side);
+        color: #fff;
+        font-size: 30px;
+        font-weight: 800;
+      }
+      .me h4 {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        word-break: break-word;
+      }
+      .me p {
+        color: var(--muted);
+        font-size: 11px;
+        word-break: break-all;
+      }
+      .role {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 3px 12px;
+        border-radius: 999px;
+        background: rgba(31, 200, 160, 0.16);
+        color: var(--green);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .menu-title {
+        margin: 16px 10px 6px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .side nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 10px;
+        color: #c5d0ee;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .side nav a:hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: #fff;
+      }
+      .side nav a.on {
+        background: rgba(43, 156, 242, 0.18);
+        color: #fff;
+      }
+      .side nav a.out {
+        color: #ff9b9b;
+      }
+      .dot {
+        min-width: 22px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: var(--red);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        text-align: center;
       }
 
-      .m a:focus-visible,
-      .m button:focus-visible {
-        outline: 3px solid #8fc2ff;
-        outline-offset: 3px;
+      /* MAIN */
+      .main {
+        margin-left: 250px;
+        min-height: 100vh;
+      }
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        background: var(--side);
+        border-bottom: 1px solid var(--line);
+      }
+      .burger {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--card);
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .top .grow {
+        flex: 1;
+      }
+      .top .who {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        font-weight: 700;
+      }
+      .top .who b {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        font-size: 13px;
+      }
+      .content {
+        padding: 24px;
+        max-width: 1300px;
       }
 
-      /* Hero action */
-      .mhero-action {
+      .welcome {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 22px;
+        padding: 22px 24px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(120deg, #1d3a8a, #4a2fa0 70%, #6d3fc0);
+      }
+      .welcome h1 {
+        color: #fff;
+        font-size: clamp(20px, 3vw, 26px);
+        font-weight: 800;
+        line-height: 1.25;
+      }
+      .welcome p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .flash {
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(43, 156, 242, 0.15);
+        color: #8cc8ff;
+      }
+      .flash.success {
+        background: rgba(31, 200, 160, 0.15);
+        color: var(--green);
+      }
+      .flash.error,
+      .flash.danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ff9b9b;
+      }
+
+      /* STATS */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 26px;
+      }
+      .stat {
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .stat span {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .stat strong {
+        display: block;
+        margin: 4px 0 10px;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .bar {
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 4px;
+      }
+      .c-blue i {
+        background: var(--blue);
+      }
+      .c-green i {
+        background: var(--green);
+      }
+      .c-purple i {
+        background: var(--purple);
+      }
+      .c-amber i {
+        background: var(--amber);
+      }
+      .c-grey i {
+        background: #6b7aa6;
+      }
+      .stat.alert strong {
+        color: var(--amber);
+      }
+
+      .block-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .block-head h2 {
+        color: #fff;
+        font-size: 17px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      .block-head p {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .count {
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(43, 156, 242, 0.16);
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        margin-top: 16px;
-        padding: 12px 18px;
-        border-radius: 12px;
-        background: #fff;
-        color: #0047ff;
-        font-size: 13px;
+        min-height: 40px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--blue);
+        color: #fff;
+        font-size: 12px;
         font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        filter: brightness(1.12);
         text-decoration: none;
       }
-
-      /* Stats */
-      .mstats {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        margin-bottom: 8px;
+      .btn.good {
+        background: var(--green);
+        color: #05241c;
+      }
+      .btn.danger {
+        background: var(--red);
+      }
+      .btn.ghost {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: #c5d0ee;
+      }
+      .btn.white {
+        background: #fff;
+        color: #1d3a8a;
       }
 
-      @media (min-width: 960px) {
-        .mstats {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-      }
-
-      .mstat {
-        padding: 16px;
-      }
-
-      .mstat strong {
-        display: block;
-        color: #1456d8;
-        font-size: 24px;
-        font-weight: 800;
-        line-height: 1.1;
-      }
-
-      .mstat span {
-        display: block;
-        margin-top: 4px;
-        color: #405578;
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      .mtitle {
-        margin: 30px 0 4px;
-        color: #001b5e;
-        font-size: 18px;
-        font-weight: 800;
-      }
-
-      .mcount {
-        margin: 0 0 4px;
-        color: #405578;
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      /* Flash messages */
-      .mflash {
-        margin-top: 12px;
-        padding: 12px 14px;
-        border-radius: 12px;
-        background: #e6eeff;
-        color: #1456d8;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      .mflash.success {
-        background: #dcf5e6;
-        color: #0b7a3b;
-      }
-
-      .mflash.error,
-      .mflash.danger {
-        background: #ffe1e1;
-        color: #b42318;
-      }
-
-      /* Grid of places */
+      /* PLACES GRID */
       .mlist {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 16px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
       }
-
-      @media (min-width: 960px) {
-        .mlist {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 14px;
-        }
-      }
-
-      .mlist .card {
+      .place {
         display: flex;
         min-width: 0;
         flex-direction: column;
         overflow: hidden;
+        border-radius: 16px;
+        background: var(--card);
       }
-
-      .mlist .card.off {
-        opacity: 0.7;
+      .place.off {
+        opacity: 0.72;
       }
-
       .mphoto {
         position: relative;
-        min-height: 130px;
+        height: 170px;
         overflow: hidden;
-        background:
-          radial-gradient(
-            circle at 85% 15%,
-            rgba(143, 194, 255, 0.38),
-            transparent 38%
-          ),
-          linear-gradient(135deg, #0066ff, #001b5e);
+        background: linear-gradient(135deg, #2b4aa8, #0e1a40);
       }
-
-      @media (min-width: 960px) {
-        .mphoto {
-          min-height: 165px;
-        }
-      }
-
       .mphoto img {
         position: absolute;
         inset: 0;
@@ -182,398 +440,420 @@
         height: 100%;
         object-fit: cover;
       }
-
-      .mphoto .nophoto {
+      .nophoto {
         position: absolute;
         inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 12px;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.8);
         font-weight: 800;
       }
-
       .mpill {
         position: absolute;
         z-index: 2;
-        padding: 4px 9px;
+        padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.92);
-        color: #1456d8;
         font-size: 10px;
         font-weight: 800;
+        background: rgba(18, 28, 56, 0.88);
+        color: #fff;
       }
-
       .mpill.v {
-        top: 8px;
-        left: 8px;
+        top: 10px;
+        left: 10px;
+        background: var(--green);
+        color: #05241c;
       }
-
       .mpill.h {
-        top: 8px;
-        right: 8px;
-        background: #6b7280;
-        color: #fff;
+        top: 10px;
+        right: 10px;
+        background: #6b7aa6;
       }
-
       .mpill.c {
-        bottom: 8px;
-        left: 8px;
-        background: #0f7a55;
-        color: #fff;
+        bottom: 10px;
+        left: 10px;
       }
-
-      .mlist .info {
+      .mpill.s {
+        bottom: 10px;
+        right: 10px;
+      }
+      .mpill.s.pending {
+        background: var(--amber);
+        color: #3b2a00;
+      }
+      .mpill.s.rejected {
+        background: var(--red);
+      }
+      .mpill.s.approved {
+        background: var(--blue);
+      }
+      .info {
         display: flex;
-        min-width: 0;
         flex: 1;
         flex-direction: column;
+        padding: 16px;
       }
-
-      .mlist .info h3 {
+      .price {
+        color: var(--green);
+        font-size: 16px;
+        font-weight: 800;
+      }
+      .price small {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .info h3 {
+        margin: 2px 0;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
         overflow-wrap: anywhere;
       }
-
-      .mlist .price small {
-        color: #405578;
-        font-size: 10px;
-        font-weight: 700;
-      }
-
-      .mlist .loc {
+      .loc {
+        color: var(--muted);
+        font-size: 12px;
         overflow-wrap: anywhere;
       }
-
+      .review {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 10px;
+        border: 1px solid rgba(245, 182, 56, 0.35);
+        border-radius: 12px;
+        background: rgba(245, 182, 56, 0.08);
+      }
+      .review form {
+        display: contents;
+      }
+      .review .btn {
+        flex: 1;
+        min-height: 36px;
+      }
       .macts {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 8px;
         margin-top: auto;
-        padding-top: 12px;
+        padding-top: 14px;
       }
-
       .macts form {
         display: contents;
       }
-
-      .mbtn {
-        display: inline-flex;
-        min-width: 56px;
-        min-height: 36px;
+      .macts .btn {
         flex: 1;
-        align-items: center;
-        justify-content: center;
+        min-width: 70px;
+        min-height: 36px;
         padding: 0 10px;
-        border: 1px solid #1456d8;
-        border-radius: 10px;
-        background: #fff;
-        color: #1456d8;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 12px;
-        font-weight: 800;
-        text-decoration: none;
       }
-
-      .mbtn:hover {
-        background: #e6eeff;
-      }
-
-      .mbtn.danger {
-        border-color: #f3b8b8;
-        background: #ffe1e1;
-        color: #b42318;
-      }
-
-      .mbtn.danger:hover {
-        background: #fbd0d0;
-      }
-
-      .mempty {
-        grid-column: 1 / -1;
+      .empty {
+        grid-column: 1/-1;
         padding: 36px 18px;
-        border: 1px dashed #d3e0f5;
-        border-radius: 18px;
-        background: #f2f7fd;
+        border: 1px dashed var(--line);
+        border-radius: 16px;
+        color: var(--muted);
         text-align: center;
       }
-
-      .mempty h3 {
-        margin: 0 0 8px;
-        color: #001b5e;
+      .empty h3 {
+        margin-bottom: 8px;
+        color: #fff;
       }
 
-      .mempty p {
-        max-width: 420px;
-        margin: 0 auto;
-        color: #405578;
-        font-size: 12px;
-        line-height: 1.7;
+      @media (max-width: 1200px) {
+        .mlist {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
-
+      @media (max-width: 1100px) {
+        .stats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 900px) {
+        .side {
+          transform: translateX(-100%);
+        }
+        .side.open {
+          transform: none;
+          box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .burger {
+          display: block;
+        }
+      }
+      @media (max-width: 640px) {
+        .content {
+          padding: 14px;
+        }
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .mlist {
+          grid-template-columns: 1fr;
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
-        .m *,
-        .m *::before,
-        .m *::after {
+        * {
           scroll-behavior: auto !important;
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
+          transition: none !important;
         }
       }
     </style>
   </head>
-
   <body>
-    <!-- ICONS -->
-    <svg
-      width="0"
-      height="0"
-      style="position: absolute"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <symbol id="i-house" viewBox="0 0 24 24">
-        <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-      </symbol>
+    {% set admin_name = (current_user.full_name or 'Admin') if
+    current_user.is_authenticated else 'Admin' %} {% set first_name =
+    admin_name.split(' ')[0] %} {% set n_total = places|length %} {% set
+    n_visible = places|selectattr('is_active')|list|length %} {% set n_hidden =
+    n_total - n_visible %} {% set n_verified =
+    places|selectattr('is_verified')|list|length %} {% set n_pending =
+    places|selectattr('status','equalto','pending')|list|length %}
 
-      <symbol id="i-back" viewBox="0 0 24 24">
-        <path d="M19 12H5M11 6l-6 6 6 6" />
-      </symbol>
+    <!-- SIDEBAR -->
+    <aside class="side" id="side">
+      <div class="logo">
+        <i>⌂</i>
+        <div>CivicNest<small>Africa</small></div>
+      </div>
 
-      <symbol id="i-plus" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v8M8 12h8" />
-      </symbol>
+      <div class="me">
+        <div class="ring"><span>{{ admin_name[:1]|upper }}</span></div>
+        <h4>{{ admin_name }}</h4>
+        <p>{{ current_user.email if current_user.is_authenticated else '' }}</p>
+        <span class="role">Administrator</span>
+      </div>
 
-      <symbol id="i-bed" viewBox="0 0 24 24">
-        <path
-          d="M3 18V5M3 15h18v6M21 18V9a2 2 0 0 0-2-2h-7v8M3 11h16a2 2 0 0 1 2 2v2"
-        />
-      </symbol>
+      <nav aria-label="Admin navigation">
+        <div class="menu-title">Console</div>
+        <a href="{{ url_for('admin_dashboard') }}">Admin console</a>
+        <a href="{{ url_for('admin_dashboard') }}#analytics">Analytics</a>
+        <a href="{{ url_for('admin_dashboard') }}#report">Performance report</a>
 
-      <symbol id="i-dash" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="9" rx="1" />
-        <rect x="14" y="3" width="7" height="5" rx="1" />
-        <rect x="14" y="12" width="7" height="9" rx="1" />
-        <rect x="3" y="16" width="7" height="5" rx="1" />
-      </symbol>
-    </svg>
-
-    <!-- HEADER -->
-    <header class="nav">
-      <div class="wrap">
-        <a
-          class="brand"
-          href="{{ url_for('home') }}"
-          aria-label="CivicNest Africa home"
+        <div class="menu-title">Manage</div>
+        <a href="{{ url_for('admin_users') }}">User management</a>
+        <a href="{{ url_for('admin_trips') }}">Trips</a>
+        <a class="on" href="{{ url_for('admin_places') }}" aria-current="page"
+          >Stay &amp; Dine {% if n_pending %}<span class="dot"
+            >{{ n_pending }}</span
+          >{% endif %}</a
         >
-          <span class="mk">
-            <svg class="i" aria-hidden="true">
-              <use href="#i-house" />
-            </svg>
-          </span>
-          <span>CivicNest<small>Admin</small></span>
-        </a>
+        <a href="{{ url_for('admin_transport_page') }}">Transport management</a>
+        <a href="{{ url_for('roommate_finder') }}">Roommates</a>
 
-        <nav class="links" aria-label="Admin navigation">
-          <a href="{{ url_for('home') }}">Home</a>
-          <a class="on" href="{{ url_for('admin_places') }}" aria-current="page"
-            >Places</a
+        <div class="menu-title">Switch view</div>
+        <a href="{{ url_for('landlord_dashboard') }}">Landlord side</a>
+        <a href="{{ url_for('home') }}">Tenant side</a>
+        <a class="out" href="{{ url_for('logout') }}">Log out</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="top">
+        <button
+          class="burger"
+          id="burger"
+          type="button"
+          aria-label="Open menu"
+          aria-controls="side"
+        >
+          ☰
+        </button>
+        <div class="grow"></div>
+        <div class="who"><b>{{ admin_name[:1]|upper }}</b>{{ admin_name }}</div>
+      </header>
+
+      <main class="content">
+        <section class="welcome">
+          <div>
+            <h1>Manage Stay &amp; Dine, {{ first_name }}</h1>
+            <p>
+              Add, edit, approve, hide or remove guest houses, motels, resorts
+              and restaurants.
+            </p>
+          </div>
+          <a class="btn white" href="{{ url_for('admin_place_add') }}"
+            >+ Add place</a
           >
-          <a href="{{ url_for('admin_dashboard') }}">Admin</a>
-        </nav>
+        </section>
 
-        <div class="right">
-          <a class="t" href="{{ url_for('admin_dashboard') }}">
-            <svg class="i" aria-hidden="true">
-              <use href="#i-back" />
-            </svg>
-            Back
-          </a>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% for
+        cat, msg in messages %}
+        <div class="flash {{ cat }}" role="alert">{{ msg }}</div>
+        {% endfor %} {% endwith %}
 
-          <a class="signin" href="{{ url_for('admin_place_add') }}"
-            >Add place</a
-          >
-        </div>
-      </div>
-    </header>
-
-    <main class="m">
-      <!-- HERO -->
-      <section class="hero m">
-        <div class="wrap">
-          <div class="eyebrow">Admin</div>
-
-          <h1>Manage <em>Stay &amp; Dine.</em></h1>
-
-          <p>
-            Add, edit, hide or remove guest houses, motels, resorts and
-            restaurants.
-          </p>
-
-          <a class="mhero-action" href="{{ url_for('admin_place_add') }}">
-            <svg class="i" aria-hidden="true">
-              <use href="#i-plus" />
-            </svg>
-            Add place
-          </a>
-        </div>
-      </section>
-
-      <!-- CONTENT -->
-      <section class="sec m" aria-labelledby="listingsTitle">
-        <div class="wrap">
-          <!-- STATS -->
-          <div class="mstats">
-            <div class="card mstat">
-              <strong>{{ places|length }}</strong><span>Total places</span>
-            </div>
-            <div class="card mstat">
-              <strong>{{ places|selectattr('is_active')|list|length }}</strong
-              ><span>Visible</span>
-            </div>
-            <div class="card mstat">
-              <strong>{{ places|rejectattr('is_active')|list|length }}</strong
-              ><span>Hidden</span>
-            </div>
-            <div class="card mstat">
-              <strong>{{ places|selectattr('is_verified')|list|length }}</strong
-              ><span>Verified</span>
+        <div class="stats">
+          <div class="stat c-blue">
+            <span>Total places</span><strong>{{ n_total }}</strong>
+            <div class="bar"><i style="width: 100%"></i></div>
+          </div>
+          <div class="stat c-green">
+            <span>Visible</span><strong>{{ n_visible }}</strong>
+            <div class="bar">
+              <i
+                style="width:{{ ((n_visible / n_total * 100) if n_total else 0)|round|int }}%"
+              ></i>
             </div>
           </div>
+          <div class="stat c-grey">
+            <span>Hidden</span><strong>{{ n_hidden }}</strong>
+            <div class="bar">
+              <i
+                style="width:{{ ((n_hidden / n_total * 100) if n_total else 0)|round|int }}%"
+              ></i>
+            </div>
+          </div>
+          <div class="stat c-purple">
+            <span>Verified</span><strong>{{ n_verified }}</strong>
+            <div class="bar">
+              <i
+                style="width:{{ ((n_verified / n_total * 100) if n_total else 0)|round|int }}%"
+              ></i>
+            </div>
+          </div>
+          <div class="stat c-amber {{ 'alert' if n_pending else '' }}">
+            <span>Waiting for review</span><strong>{{ n_pending }}</strong>
+            <div class="bar">
+              <i
+                style="width:{{ ((n_pending / n_total * 100) if n_total else 0)|round|int }}%"
+              ></i>
+            </div>
+          </div>
+        </div>
 
-          <h2 class="mtitle" id="listingsTitle">All places</h2>
+        <div class="block-head">
+          <div>
+            <h2>All places</h2>
+            <p>Places waiting for review show Approve and Reject buttons.</p>
+          </div>
+          <span class="count"
+            >{{ n_total }} {{ 'place' if n_total == 1 else 'places' }}</span
+          >
+        </div>
 
-          <p class="mcount">
-            {{ places|length }} {{ 'place' if places|length == 1 else 'places'
-            }}
-          </p>
+        <div class="mlist">
+          {% for p in places %}
+          <article class="place {{ '' if p.is_active else 'off' }}">
+            <div class="mphoto">
+              {% if p.cover_image %}
+              <img
+                src="{{ p.cover_image if p.cover_image.startswith('http') else url_for('static', filename='uploads/places/' + p.cover_image) }}"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800';
+                "
+                alt="{{ p.name }}"
+                loading="lazy"
+              />
+              {% else %}
+              <div class="nophoto">No photo</div>
+              {% endif %} {% if p.is_verified %}<span class="mpill v"
+                >Verified</span
+              >{% endif %} {% if not p.is_active %}<span class="mpill h"
+                >Hidden</span
+              >{% endif %}
+              <span class="mpill c"
+                >{{ categories.get(p.category, p.category) }}</span
+              >
+              {% if p.status %}<span class="mpill s {{ p.status }}"
+                >{{ p.status|title }}</span
+              >{% endif %}
+            </div>
 
-          {% with messages = get_flashed_messages(with_categories=true) %} {%
-          for cat, msg in messages %}
-          <div class="mflash {{ cat }}" role="alert">{{ msg }}</div>
-          {% endfor %} {% endwith %}
-
-          <div class="mlist">
-            {% for p in places %}
-            <article class="card {{ '' if p.is_active else 'off' }}">
-              <div class="mphoto">
-                {% if p.cover_image %}
-                <img
-                  src="{{ p.cover_image if p.cover_image.startswith('http') else url_for('static', filename='uploads/places/' + p.cover_image) }}"
-                  onerror="
-                    this.onerror = null;
-                    this.src =
-                      'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800';
-                  "
-                  alt="{{ p.name }}"
-                  loading="lazy"
-                />
-                {% else %}
-                <div class="nophoto">No photo</div>
-                {% endif %} {% if p.is_verified %}<span class="mpill v"
-                  >Verified</span
-                >{% endif %} {% if not p.is_active %}<span class="mpill h"
-                  >Hidden</span
-                >{% endif %}
-                <span class="mpill c"
-                  >{{ categories.get(p.category, p.category) }}</span
+            <div class="info">
+              <div class="price">
+                {% if p.price %}KSh {{ "{:,.0f}".format(p.price) }}
+                <small
+                  >{{ '/ meal' if p.category == 'restaurant' else '/ night'
+                  }}</small
                 >
+                {% else %}<small>No price set</small>{% endif %}
               </div>
+              <h3>{{ p.name }}</h3>
+              <div class="loc">{{ p.location }}</div>
 
-              <div class="info">
-                <div class="price">
-                  {% if p.price %}KSh {{ "{:,.0f}".format(p.price) }}
-                  <small
-                    >{{ '/ meal' if p.category == 'restaurant' else '/ night'
-                    }}</small
-                  >
-                  {% else %}<small>No price set</small>{% endif %}
-                </div>
-
-                <h3>{{ p.name }}</h3>
-
-                <div class="loc">
-                  <svg class="i" aria-hidden="true">
-                    <use href="#i-bed" />
-                  </svg>
-                  <span>{{ p.location }}</span>
-                </div>
-
-                <div class="macts">
-                  <a
-                    class="mbtn"
-                    href="{{ url_for('admin_place_edit', place_id=p.id) }}"
-                    >Edit</a
-                  >
-
-                  <form
-                    method="post"
-                    action="{{ url_for('admin_place_toggle', place_id=p.id) }}"
-                  >
-                    <button class="mbtn" type="submit">
-                      {{ 'Hide' if p.is_active else 'Show' }}
-                    </button>
-                  </form>
-
-                  <form
-                    method="post"
-                    action="{{ url_for('admin_place_delete', place_id=p.id) }}"
-                    onsubmit='return confirm({{ ("Delete " ~ p.name ~ "? This cannot be undone.")|tojson }});'
-                  >
-                    <button class="mbtn danger" type="submit">Delete</button>
-                  </form>
-                </div>
+              {% if p.status == 'pending' %}
+              <div class="review">
+                <form
+                  method="post"
+                  action="{{ url_for('admin_place_status', place_id=p.id, status='approved') }}"
+                >
+                  <button class="btn good" type="submit">Approve</button>
+                </form>
+                <form
+                  method="post"
+                  action="{{ url_for('admin_place_status', place_id=p.id, status='rejected') }}"
+                  onsubmit="return confirm('Reject this place?');"
+                >
+                  <button class="btn danger" type="submit">Reject</button>
+                </form>
               </div>
-            </article>
-            {% else %}
-            <div class="mempty">
-              <h3>No places yet</h3>
-              <p>
-                Tap “Add place” to create the first guest house, motel, resort
-                or restaurant.
-              </p>
+              {% endif %}
+
+              <div class="macts">
+                <a
+                  class="btn ghost"
+                  href="{{ url_for('admin_place_edit', place_id=p.id) }}"
+                  >Edit</a
+                >
+
+                <form
+                  method="post"
+                  action="{{ url_for('admin_place_toggle', place_id=p.id) }}"
+                >
+                  <button class="btn ghost" type="submit">
+                    {{ 'Hide' if p.is_active else 'Show' }}
+                  </button>
+                </form>
+
+                <form
+                  method="post"
+                  action="{{ url_for('admin_place_delete', place_id=p.id) }}"
+                  onsubmit='return confirm({{ ("Delete " ~ p.name ~ "? This cannot be undone.")|tojson }});'
+                >
+                  <button class="btn danger" type="submit">Delete</button>
+                </form>
+              </div>
             </div>
-            {% endfor %}
+          </article>
+          {% else %}
+          <div class="empty">
+            <h3>No places yet</h3>
+            <p>
+              Click “Add place” to create the first guest house, motel, resort
+              or restaurant.
+            </p>
           </div>
+          {% endfor %}
         </div>
-      </section>
-    </main>
+      </main>
+    </div>
 
-    <!-- FOOTER -->
-    <footer class="foot">
-      <div class="wrap">
-        <span>
-          © {{ current_year }} CivicNest Africa. Developed by
-          <a class="dev" href="#">Mabel Technologies</a>.
-        </span>
-      </div>
-    </footer>
+    <script>
+      (() => {
+        const side = document.getElementById("side");
+        const burger = document.getElementById("burger");
+        if (!side || !burger) return;
 
-    <!-- MOBILE BOTTOM NAVIGATION -->
-    <nav class="bnav" aria-label="Admin">
-      <a href="{{ url_for('home') }}">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-house" />
-        </svg>
-        Home
-      </a>
-
-      <a class="on" href="{{ url_for('admin_places') }}" aria-current="page">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-bed" />
-        </svg>
-        Places
-      </a>
-
-      <a href="{{ url_for('admin_dashboard') }}">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-dash" />
-        </svg>
-        Admin
-      </a>
-    </nav>
+        burger.addEventListener("click", () => side.classList.toggle("open"));
+        side.addEventListener("click", (e) => {
+          if (e.target.closest("a")) side.classList.remove("open");
+        });
+        document.addEventListener("click", (e) => {
+          if (
+            side.classList.contains("open") &&
+            !side.contains(e.target) &&
+            !burger.contains(e.target)
+          ) {
+            side.classList.remove("open");
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

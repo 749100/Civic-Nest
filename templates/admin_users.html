@@ -1,84 +1,557 @@
-{% extends "base.html" %}
+{% extends "site_base.html" %}
+{% set active_page = 'admin' %}
 
-{% block title %}Users{% endblock %}
-{% block stage_class %}compact{% endblock %}
-{% block page_title %}Manage users.{% endblock %}
-{% block page_sub %}
-<p class="page-sub">Create accounts, reset passwords, verify, suspend or delete tenants and landlords.</p>
+{% block title %}Manage users{% endblock %}
+
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block hero_eyebrow %}User administration{% endblock %}
+
+{% block hero_title %}Manage <em>users.</em>{% endblock %}
+
+{% block hero_sub %}
+<p>
+  Create accounts, reset passwords, verify, suspend or delete tenants and
+  landlords.
+</p>
 {% endblock %}
-{% block hero_extra %}
-<a class="btn light" href="{{ url_for('admin_create_user') }}">Create an account</a>
+
+{% block content_class %}am{% endblock %}
+
+{% block head %}
+<style>
+  /* =====================================================
+     CIVICNEST AFRICA — USER ADMIN
+     Same design as the travel admin pages.
+     ===================================================== */
+
+  .am {
+    color: #14213d;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .am a {
+    color: #1456d8;
+  }
+
+  .am .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .am .eyebrow {
+    display: block;
+    margin: 0 0 5px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: #1456d8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .am h2 {
+    margin: 0 0 4px;
+    color: #001b5e;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .am h3 {
+    margin: 0 0 4px;
+    color: #001b5e;
+    font-size: 15px;
+    font-weight: 800;
+    word-break: break-word;
+  }
+
+  .am .sub,
+  .am .muted {
+    margin: 0;
+    color: #405578;
+    font-size: 12px;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  /* Buttons */
+  .am .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid #1456d8;
+    border-radius: 10px;
+    background: #1456d8;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .am .btn:hover {
+    background: #001b5e;
+    border-color: #001b5e;
+    color: #fff;
+  }
+
+  .am .btn.secondary {
+    background: #fff;
+    border-color: #1456d8;
+    color: #1456d8;
+  }
+
+  .am .btn.secondary:hover {
+    background: #e6eeff;
+    color: #1456d8;
+  }
+
+  .am .btn.good {
+    background: #0f7a55;
+    border-color: #0f7a55;
+  }
+
+  .am .btn.danger {
+    background: #ffe1e1;
+    border-color: #ffc9c4;
+    color: #b42318;
+  }
+
+  .am .btn.danger:hover {
+    background: #ffd2cd;
+    color: #b42318;
+  }
+
+  /* Panels */
+  .am .panel {
+    overflow: hidden;
+    border: 1px solid #d3e0f5;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgba(0, 27, 94, 0.04);
+  }
+
+  .am .panel-body {
+    padding: 18px;
+  }
+
+  /* Search */
+  .am .search-panel {
+    margin-bottom: 14px;
+  }
+
+  .am .search-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .am .field {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+    min-width: 220px;
+  }
+
+  .am .field label,
+  .am .inline-form label {
+    color: #405578;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .am input[type="search"],
+  .am input[type="text"],
+  .am select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #d3e0f5;
+    border-radius: 10px;
+    background: #fff;
+    color: #001b5e;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .am .count {
+    margin: 0 0 18px;
+    color: #405578;
+    font-size: 12px;
+  }
+
+  /* Groups */
+  .am .group {
+    margin-bottom: 26px;
+  }
+
+  .am .group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1456d8;
+  }
+
+  .am .group-head h2 {
+    margin: 0;
+  }
+
+  .am .group-count {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #e6eeff;
+    color: #1456d8;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .am .group.admins .group-head {
+    border-bottom-color: #001b5e;
+  }
+
+  .am .group.admins .group-count {
+    background: #001b5e;
+    color: #fff;
+  }
+
+  .am .group.landlords .group-head {
+    border-bottom-color: #0f7a55;
+  }
+
+  .am .group.landlords .group-count {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .am .columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    align-items: start;
+  }
+
+  .am .columns .group {
+    margin-bottom: 0;
+  }
+
+  .am .admin-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  /* User cards */
+  .am .stack {
+    display: grid;
+    gap: 14px;
+  }
+
+  .am .row-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .am .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .am .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #e6eeff;
+    color: #1456d8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: capitalize;
+  }
+
+  .am .badge.ok {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .am .badge.suspended {
+    background: #ffe1e1;
+    color: #b42318;
+  }
+
+  .am .badge.admin {
+    background: #001b5e;
+    color: #fff;
+  }
+
+  /* Manage section */
+  .am details {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e3ecf8;
+  }
+
+  .am summary {
+    min-height: 36px;
+    color: #1456d8;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .am .manage {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .am .inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #d3e0f5;
+    border-radius: 12px;
+    background: #f2f7fd;
+  }
+
+  .am .inline-form label {
+    display: grid;
+    gap: 6px;
+  }
+
+  .am .inline-form select {
+    width: auto;
+    min-width: 150px;
+  }
+
+  .am .inline-form input[type="text"] {
+    width: 200px;
+    max-width: 100%;
+  }
+
+  /* Empty state */
+  .am .empty {
+    padding: 28px 18px;
+    border: 1px dashed #d3e0f5;
+    border-radius: 18px;
+    background: #fff;
+    color: #405578;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .am .columns,
+    .am .admin-list {
+      grid-template-columns: 1fr;
+    }
+
+    .am .columns {
+      gap: 26px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .am .page-head > .btn {
+      width: 100%;
+    }
+
+    .am .inline-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .am .inline-form select,
+    .am .inline-form input[type="text"] {
+      width: 100%;
+    }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<form class="card" method="get" action="{{ url_for('admin_users') }}" style="margin-bottom:16px">
-  <label class="f"><span>Search by name, email or phone</span>
-    <input type="search" name="q" value="{{ q }}" placeholder="e.g. mary or gmail.com">
-  </label>
-  <button class="btn" type="submit" style="margin-top:12px">Search</button>
-</form>
 
-<p class="muted" style="margin-bottom:14px">{{ users|length }} {{ 'account' if users|length == 1 else 'accounts' }}{% if q %} matching "{{ q }}"{% endif %}.</p>
-
-<div class="stack">
-  {% for u in users %}
-  <article class="card">
+{# One user card, reused for every group #}
+{% macro user_card(u) %}
+<article class="panel">
+  <div class="panel-body">
     <div class="row-head">
       <div>
         <h3>{{ u.full_name }}</h3>
-        <p class="muted">{{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+        <p class="muted">
+          {{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}
+        </p>
       </div>
-      <div>
-        <span class="pill">{{ 'Tenant' if u.role == 'student' else u.role|title }}</span>
-        {% if u.is_verified %}<span class="pill ok">Verified</span>{% endif %}
-        {% if not u.is_active %}<span class="pill st-rejected">Suspended</span>{% endif %}
+
+      <div class="badges">
+        {% if u.role == 'admin' %}
+        <span class="badge admin">Admin</span>
+        {% else %}
+        <span class="badge">{{ 'Tenant' if u.role == 'student' else u.role|title }}</span>
+        {% endif %}
+        {% if u.is_verified %}<span class="badge ok">Verified</span>{% endif %}
+        {% if not u.is_active %}<span class="badge suspended">Suspended</span>{% endif %}
       </div>
     </div>
 
     {% if u.role == 'admin' %}
-    <p class="muted" style="margin-top:10px">Administrator accounts are protected. Use create_admin.py to change them.</p>
+    <p class="muted" style="margin-top: 10px">
+      Protected account. Use create_admin.py to change it.
+    </p>
     {% else %}
-    <details style="margin-top:12px">
-      <summary style="cursor:pointer;font-weight:700;color:var(--blue);min-height:36px">Manage this account</summary>
-      <div class="stack" style="margin-top:12px">
+    <details>
+      <summary>Manage this account</summary>
 
-        <form class="qty" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
-          <label>Account type
-            <select name="role" style="min-height:44px;border:1px solid #C9D6EC;border-radius:12px;padding:0 10px">
+      <div class="manage">
+
+        <form class="inline-form" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
+          <label>
+            Account type
+            <select name="role">
               <option value="student" {{ 'selected' if u.role == 'student' else '' }}>Tenant</option>
               <option value="landlord" {{ 'selected' if u.role == 'landlord' else '' }}>Landlord</option>
             </select>
           </label>
-          <button class="btn ghost" type="submit">Change type</button>
+          <button class="btn secondary" type="submit">Change type</button>
         </form>
 
-        <form class="qty" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
+        <form class="inline-form" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
           <input type="hidden" name="is_verified" value="{{ '0' if u.is_verified else '1' }}">
-          <button class="btn {{ 'ghost' if u.is_verified else 'good' }}" type="submit">{{ 'Remove verification' if u.is_verified else 'Verify this user' }}</button>
+          <button class="btn {{ 'secondary' if u.is_verified else 'good' }}" type="submit">
+            {{ 'Remove verification' if u.is_verified else 'Verify this user' }}
+          </button>
         </form>
 
-        <form class="qty" method="post" action="{{ url_for('admin_reset_password', user_id=u.id) }}">
-          <label>New password
-            <input type="text" name="new_password" minlength="8" required placeholder="8+ characters" style="width:220px">
+        <form class="inline-form" method="post" action="{{ url_for('admin_reset_password', user_id=u.id) }}">
+          <label>
+            New password
+            <input type="text" name="new_password" minlength="8" required placeholder="8+ characters">
           </label>
-          <button class="btn ghost" type="submit">Reset password</button>
+          <button class="btn secondary" type="submit">Reset password</button>
         </form>
 
-        <form class="qty" method="post" action="{{ url_for('admin_set_user_active', user_id=u.id) }}">
+        <form class="inline-form" method="post" action="{{ url_for('admin_set_user_active', user_id=u.id) }}">
           <input type="hidden" name="is_active" value="{{ '0' if u.is_active else '1' }}">
-          <button class="btn {{ 'ghost' if u.is_active else 'good' }}" type="submit">{{ 'Suspend account' if u.is_active else 'Reactivate account' }}</button>
+          <button class="btn {{ 'secondary' if u.is_active else 'good' }}" type="submit">
+            {{ 'Suspend account' if u.is_active else 'Reactivate account' }}
+          </button>
         </form>
 
-        <form class="qty" method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all its listings permanently?');">
+        <form class="inline-form" method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all its listings permanently?');">
           <button class="btn danger" type="submit">Delete account</button>
         </form>
 
       </div>
     </details>
     {% endif %}
-  </article>
+  </div>
+</article>
+{% endmacro %}
+
+{% set admins = users | selectattr('role', 'equalto', 'admin') | list %}
+{% set landlords = users | selectattr('role', 'equalto', 'landlord') | list %}
+{% set tenants = users | selectattr('role', 'equalto', 'student') | list %}
+
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Accounts</p>
+    <h2>All users</h2>
+    <p class="sub">Search for an account, then open it to manage it.</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('admin_create_user') }}">Create an account</a>
+</section>
+
+<form class="panel search-panel" method="get" action="{{ url_for('admin_users') }}">
+  <div class="panel-body search-row">
+    <div class="field">
+      <label for="q">Search by name, email or phone</label>
+      <input
+        id="q"
+        type="search"
+        name="q"
+        value="{{ q }}"
+        placeholder="e.g. mary or gmail.com"
+      >
+    </div>
+
+    <button class="btn" type="submit">Search</button>
+  </div>
+</form>
+
+<p class="count">
+  {{ users|length }} {{ 'account' if users|length == 1 else 'accounts' }}{% if q %} matching "{{ q }}"{% endif %}.
+</p>
+
+<!-- ADMINS (TOP) -->
+<section class="group admins">
+  <div class="group-head">
+    <h2>Admins</h2>
+    <span class="group-count">{{ admins|length }}</span>
+  </div>
+
+  {% if admins %}
+  <div class="admin-list">
+    {% for u in admins %}{{ user_card(u) }}{% endfor %}
+  </div>
   {% else %}
-  <div class="empty">No accounts found.</div>
-  {% endfor %}
+  <div class="empty">No admin accounts found.</div>
+  {% endif %}
+</section>
+
+<!-- LANDLORDS AND TENANTS (SIDE BY SIDE) -->
+<div class="columns">
+
+  <section class="group landlords">
+    <div class="group-head">
+      <h2>Landlords</h2>
+      <span class="group-count">{{ landlords|length }}</span>
+    </div>
+
+    <div class="stack">
+      {% for u in landlords %}{{ user_card(u) }}
+      {% else %}
+      <div class="empty">No landlords found.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="group tenants">
+    <div class="group-head">
+      <h2>Tenants</h2>
+      <span class="group-count">{{ tenants|length }}</span>
+    </div>
+
+    <div class="stack">
+      {% for u in tenants %}{{ user_card(u) }}
+      {% else %}
+      <div class="empty">No tenants found.</div>
+      {% endfor %}
+    </div>
+  </section>
+
 </div>
 {% endblock %}

@@ -205,74 +205,15 @@
           <span>CivicNest<small>Africa</small></span>
         </a>
 
+        <!-- prettier-ignore -->
         <nav class="links" aria-label="Main navigation">
           <a href="{{ url_for('home') }}">Home</a>
-          <a
-            {%
-            if
-            active_page=""
-            ="buy"
-            %}class="on"
-            aria-current="page"
-            {%
-            endif
-            %}
-            href="{{ url_for('buy_page') }}"
-            >Buy</a
-          >
-          <a
-            {%
-            if
-            active_page=""
-            ="rent"
-            %}class="on"
-            aria-current="page"
-            {%
-            endif
-            %}
-            href="{{ url_for('rent_page') }}"
-            >Properties</a
-          >
-          <a
-            {%
-            if
-            active_page=""
-            ="stay"
-            %}class="on"
-            aria-current="page"
-            {%
-            endif
-            %}
-            href="{{ url_for('hospitality_page') }}"
-            >Stay &amp; Dine</a
-          >
-          <a
-            {%
-            if
-            active_page=""
-            ="travel"
-            %}class="on"
-            aria-current="page"
-            {%
-            endif
-            %}
-            href="{{ url_for('travel_page') }}"
-            >Travel</a
-          >
+          <a href="{{ url_for('buy_page') }}"{% if active_page == 'buy' %} class="on" aria-current="page"{% endif %}>Buy</a>
+          <a href="{{ url_for('rent_page') }}"{% if active_page == 'rent' %} class="on" aria-current="page"{% endif %}>Properties</a>
+          <a href="{{ url_for('hospitality_page') }}"{% if active_page == 'stay' %} class="on" aria-current="page"{% endif %}>Stay &amp; Dine</a>
+          <a href="{{ url_for('travel_page') }}"{% if active_page == 'travel' %} class="on" aria-current="page"{% endif %}>Travel</a>
           <a href="{{ url_for('sell_page') }}">List Property</a>
-          <a
-            {%
-            if
-            active_page=""
-            ="about"
-            %}class="on"
-            aria-current="page"
-            {%
-            endif
-            %}
-            href="{{ url_for('about_page') }}"
-            >About</a
-          >
+          <a href="{{ url_for('about_page') }}"{% if active_page == 'about' %} class="on" aria-current="page"{% endif %}>About</a>
         </nav>
 
         <div class="right">
@@ -345,14 +286,17 @@
       <!-- CONTENT -->
       <section class="sec h">
         <div class="wrap">
-          {% block subnav %}{% endblock %} {% with messages =
-          get_flashed_messages(with_categories=true) %} {% if messages %}
-          <div class="sflash-list" role="status" aria-live="polite">
-            {% for category, message in messages %}
-            <div class="sflash {{ category|e }}">{{ message }}</div>
-            {% endfor %}
-          </div>
-          {% endif %} {% endwith %}
+          {% block subnav %}{% endblock %}
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="sflash-list" role="status" aria-live="polite">
+              {% for category, message in messages %}
+              <div class="sflash {{ category|e }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
 
           <div class="{% block content_class %}{% endblock %}">
             {% block content %}{% endblock %}
@@ -425,69 +369,30 @@
     </footer>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
+    <!-- prettier-ignore -->
     <nav class="bnav" aria-label="Primary navigation">
       <a href="{{ url_for('home') }}">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-house" />
-        </svg>
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true"><use href="#i-house" /></svg>
         Home
       </a>
 
-      <a
-        {%
-        if
-        active_page=""
-        ="buy"
-        %}class="on"
-        {%
-        endif
-        %}
-        href="{{ url_for('buy_page') }}"
-      >
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-tag" />
-        </svg>
+      <a href="{{ url_for('buy_page') }}"{% if active_page == 'buy' %} class="on"{% endif %}>
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true"><use href="#i-tag" /></svg>
         Buy
       </a>
 
-      <a
-        {%
-        if
-        active_page=""
-        ="stay"
-        %}class="on"
-        {%
-        endif
-        %}
-        href="{{ url_for('hospitality_page') }}"
-      >
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-bed" />
-        </svg>
+      <a href="{{ url_for('hospitality_page') }}"{% if active_page == 'stay' %} class="on"{% endif %}>
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true"><use href="#i-bed" /></svg>
         Stay &amp; Dine
       </a>
 
-      <a
-        {%
-        if
-        active_page=""
-        ="travel"
-        %}class="on"
-        {%
-        endif
-        %}
-        href="{{ url_for('travel_page') }}"
-      >
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-plane" />
-        </svg>
+      <a href="{{ url_for('travel_page') }}"{% if active_page == 'travel' %} class="on"{% endif %}>
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true"><use href="#i-plane" /></svg>
         Travel
       </a>
 
       <a href="{{ url_for('sell_page') }}">
-        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
-          <use href="#i-plus" />
-        </svg>
+        <svg class="i" style="width: 22px; height: 22px" aria-hidden="true"><use href="#i-plus" /></svg>
         List
       </a>
     </nav>

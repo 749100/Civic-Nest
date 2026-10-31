@@ -1,12 +1,10 @@
-{% extends "admin/travel_base.html" %} {% block title %}Trip bookings{% endblock
+{% extends "admin/admin_base.html" %} {% block title %}Trip bookings{% endblock
 %} {% block content %}
 
 <section class="page-head">
   <div>
     <p class="eyebrow">Passenger management</p>
-
     <h1>{{ trip.route_from|e }} → {{ trip.route_to|e }}</h1>
-
     <p class="sub">
       {{ trip.departure_date.strftime('%a %d %b %Y') if
       trip.departure_date.strftime is defined else trip.departure_date }} · {{
@@ -19,62 +17,48 @@
     <a
       class="btn secondary"
       href="{{ url_for('admin_trip_form_edit', trip_id=trip.id) }}"
+      >Edit trip</a
     >
-      Edit trip
-    </a>
-
-    <a class="btn secondary" href="{{ url_for('admin_trips') }}">
-      ← All trips
-    </a>
+    <a class="btn secondary" href="{{ url_for('admin_trips') }}">← All trips</a>
   </div>
 </section>
 
 <section class="summary-grid">
   <div class="summary">
-    <span>Total capacity</span>
-    <strong>{{ trip.seats_total }}</strong>
+    <span>Total capacity</span><strong>{{ trip.seats_total }}</strong>
   </div>
-
+  <div class="summary"><span>Seats held</span><strong>{{ held }}</strong></div>
   <div class="summary">
-    <span>Seats held</span>
-    <strong>{{ held }}</strong>
+    <span>Paid seats</span><strong>{{ paid_seats }}</strong>
   </div>
-
   <div class="summary">
-    <span>Paid seats</span>
-    <strong>{{ paid_seats }}</strong>
-  </div>
-
-  <div class="summary">
-    <span>Seats remaining</span>
-    <strong>{{ trip.seats_total - held }}</strong>
+    <span>Seats remaining</span><strong>{{ trip.seats_total - held }}</strong>
   </div>
 </section>
 
 <section class="summary-grid">
   <div class="summary">
-    <span>Customer price per seat</span>
-    <strong>KSh {{ "{:,.2f}".format(trip.price) }}</strong>
+    <span>Customer price per seat</span
+    ><strong>KSh {{ "{:,.2f}".format(trip.price) }}</strong>
   </div>
-
   <div class="summary">
-    <span>Recorded paid-seat revenue</span>
-    <strong>KSh {{ "{:,.2f}".format(revenue) }}</strong>
+    <span>Recorded paid-seat revenue</span
+    ><strong>KSh {{ "{:,.2f}".format(revenue) }}</strong>
   </div>
-
   <div class="summary">
     <span>Estimated margin on paid seats</span>
-    <strong>
-      {% if margin is not none %} KSh {{ "{:,.2f}".format(margin) }} {% else %}
-      — {% endif %}
-    </strong>
+    <strong
+      >{% if margin is not none %}KSh {{ "{:,.2f}".format(margin) }}{% else
+      %}—{% endif %}</strong
+    >
   </div>
-
   <div class="summary">
     <span>Trip status</span>
-    <strong>
-      <span class="badge {{ trip.status|e }}"> {{ trip.status|e }} </span>
-    </strong>
+    <strong
+      ><span class="badge {{ trip.status|e }}"
+        >{{ trip.status|e }}</span
+      ></strong
+    >
   </div>
 </section>
 
@@ -82,19 +66,17 @@
   <div class="panel-head">
     <div>
       <h2>Passenger bookings</h2>
-
       <p class="sub">
         Pending bookings do not reserve seats. Confirmed and paid bookings do.
       </p>
     </div>
-
-    <span class="badge">
-      {{ bookings|length }} booking{% if bookings|length != 1 %}s{% endif %}
-    </span>
+    <span class="badge"
+      >{{ bookings|length }} booking{% if bookings|length != 1 %}s{% endif
+      %}</span
+    >
   </div>
 
   {% if bookings %}
-
   <div class="table-wrap">
     <table>
       <thead>
@@ -109,21 +91,17 @@
           <th>Update status</th>
         </tr>
       </thead>
-
       <tbody>
         {% for booking in bookings %}
         <tr>
           <td>
             <strong>{{ booking.full_name|e }}</strong>
-
-            <small class="muted" style="display: block">
-              Booking #{{ booking.id }}
-            </small>
+            <small>Booking #{{ booking.id }}</small>
           </td>
 
           <td>
             {{ booking.phone|e }} {% if booking.whatsapp_phone %}
-            <small class="muted" style="display: block">
+            <small>
               <a
                 target="_blank"
                 rel="noopener noreferrer"
@@ -135,16 +113,14 @@
             {% endif %}
           </td>
 
-          <td>
-            <strong>{{ booking.seats }}</strong>
-          </td>
+          <td><strong>{{ booking.seats }}</strong></td>
 
           <td>{{ booking.pickup_point|default('Not specified', true)|e }}</td>
 
           <td>
-            <span class="badge {{ booking.status|e }}">
-              {{ booking.status|e }}
-            </span>
+            <span class="badge {{ booking.status|e }}"
+              >{{ booking.status|e }}</span
+            >
           </td>
 
           <td>{{ booking.payment_ref|default('—', true)|e }}</td>
@@ -159,7 +135,6 @@
             <div class="actions">
               {% for next_status in booking_statuses %} {% if next_status !=
               booking.status %}
-
               <form
                 method="post"
                 action="{{ url_for('admin_booking_status', booking_id=booking.id, status=next_status) }}"
@@ -188,7 +163,6 @@
                   {{ next_status|capitalize }}
                 </button>
               </form>
-
               {% endif %} {% endfor %}
             </div>
           </td>
@@ -199,13 +173,11 @@
   </div>
 
   {% else %}
-
   <div class="empty">
     <strong>No bookings yet</strong>
     <p>Passenger bookings for this trip will appear here.</p>
   </div>
-
   {% endif %}
 </section>
 
-{% endblock %} `
+{% endblock %}

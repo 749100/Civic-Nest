@@ -4,8 +4,8 @@ nofollow{% endblock %} {% block hero_eyebrow %}Booking receipt{% endblock %} {%
 block hero_title %}Your booking is <em>confirmed.</em>{% endblock %} {% block
 hero_sub %}
 <p>
-  Reference {{ booking.reference }}. You can reopen this receipt any time from
-  My Transport Requests.
+  Reference {{ booking.reference }}. Reopen this receipt any time from My
+  Transport Requests.
 </p>
 {% endblock %} {% block head %}
 <style>
@@ -16,13 +16,11 @@ hero_sub %}
     max-width: 760px;
     margin: 0 auto 16px;
   }
-
   .rc {
     max-width: 760px;
     margin: 0 auto;
     padding: 22px;
   }
-
   .rc-head {
     display: flex;
     flex-wrap: wrap;
@@ -32,18 +30,15 @@ hero_sub %}
     padding-bottom: 16px;
     border-bottom: 1px solid #d3e0f5;
   }
-
   .rc-head h2 {
     margin: 0 0 3px;
     color: #001b5e;
     font-size: 20px;
     font-weight: 800;
   }
-
   .rc-ref {
     text-align: right;
   }
-
   .rc-ref small {
     display: block;
     color: #405578;
@@ -52,13 +47,11 @@ hero_sub %}
     letter-spacing: 0.6px;
     text-transform: uppercase;
   }
-
   .rc-ref strong {
     color: #1456d8;
     font-size: 20px;
     font-weight: 800;
   }
-
   .rc-status {
     display: inline-flex;
     margin-top: 6px;
@@ -70,7 +63,6 @@ hero_sub %}
     font-weight: 800;
     text-transform: uppercase;
   }
-
   .rc-route {
     display: flex;
     flex-wrap: wrap;
@@ -82,12 +74,10 @@ hero_sub %}
     border-radius: 14px;
     background: #f2f7fd;
   }
-
   .rc-place {
     flex: 1;
     min-width: 120px;
   }
-
   .rc-place small {
     display: block;
     margin-bottom: 4px;
@@ -95,26 +85,22 @@ hero_sub %}
     font-size: 10px;
     font-weight: 700;
   }
-
   .rc-place strong {
     display: block;
     color: #001b5e;
     font-size: 15px;
     overflow-wrap: anywhere;
   }
-
   .rc-arrow {
     color: #1456d8;
     font-size: 20px;
     font-weight: 800;
   }
-
   .rc-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
   }
-
   .rc-item small {
     display: block;
     margin-bottom: 4px;
@@ -122,14 +108,12 @@ hero_sub %}
     font-size: 10px;
     font-weight: 700;
   }
-
   .rc-item strong {
     display: block;
     color: #001b5e;
     font-size: 13px;
     overflow-wrap: anywhere;
   }
-
   .rc-total {
     display: flex;
     align-items: center;
@@ -139,77 +123,84 @@ hero_sub %}
     padding: 16px;
     border-radius: 14px;
     color: #fff;
-    background:
-      radial-gradient(
-        circle at 85% 15%,
-        rgba(143, 194, 255, 0.38),
-        transparent 38%
-      ),
-      linear-gradient(135deg, #0066ff, #001b5e);
+    background: linear-gradient(135deg, #0066ff, #001b5e);
   }
-
   .rc-total small {
     display: block;
     color: rgba(255, 255, 255, 0.8);
     font-size: 11px;
   }
-
   .rc-total strong {
     font-size: 24px;
     font-weight: 800;
   }
-
   .rc-note {
     margin: 16px 0 0;
     color: #405578;
     font-size: 11px;
     line-height: 1.8;
   }
-
+  .rc-footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px dashed #b7ceff;
+    color: #405578;
+    font-size: 10px;
+    text-align: center;
+  }
   @media (max-width: 600px) {
     .rc {
       padding: 16px;
     }
-
     .rc-ref {
       text-align: left;
     }
-
     .rc-grid {
       grid-template-columns: 1fr;
     }
-
     .rc-actions .bbtn {
       flex: 1;
+      justify-content: center;
     }
   }
-
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
   @media print {
+    body {
+      background: #fff !important;
+    }
     body.sb > *:not(main) {
       display: none !important;
     }
-
     .sb .hero,
     .sb .contact,
     .noprint {
       display: none !important;
     }
-
     .sb .sec.h {
       padding: 0 !important;
     }
-
     .rc {
       max-width: 100%;
+      margin: 0;
+      padding: 15px;
       border: 1px solid #999;
-      box-shadow: none;
+      box-shadow: none !important;
     }
-
     .rc-route,
     .rc-total,
     .rc-status {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+    }
+    .rc-total {
+      background: #001b5e !important;
+      color: #fff !important;
+    }
+    .rc-note {
+      color: #333;
     }
   }
 </style>
@@ -217,24 +208,24 @@ hero_sub %}
 
 <div class="rc-actions noprint">
   <button class="bbtn solid" type="button" onclick="window.print()">
-    Print / Save as PDF
+    Download / Print Receipt
   </button>
 
   <a class="bbtn" href="{{ url_for('my_transport_requests') }}">
-    Back to my requests
+    Back to My Requests
   </a>
 </div>
 
 <article class="card rc">
   <header class="rc-head">
     <div>
-      <div class="eb">Receipt</div>
+      <div class="eb">Official booking receipt</div>
       <h2>CivicNest Africa</h2>
       <p class="sub">Transport booking confirmation</p>
     </div>
 
     <div class="rc-ref">
-      <small>Reference</small>
+      <small>Permanent booking reference</small>
       <strong>{{ booking.reference }}</strong><br />
       <span class="rc-status">Booking confirmed</span>
     </div>
@@ -243,26 +234,26 @@ hero_sub %}
   <div class="rc-route">
     <div class="rc-place">
       <small>Departure</small>
-      <strong>{{ booking.route_from_snapshot }}</strong>
+      <strong>{{ booking.route_from_snapshot or '—' }}</strong>
     </div>
 
     <span class="rc-arrow">→</span>
 
     <div class="rc-place">
       <small>Destination</small>
-      <strong>{{ booking.route_to_snapshot }}</strong>
+      <strong>{{ booking.route_to_snapshot or '—' }}</strong>
     </div>
   </div>
 
   <div class="rc-grid">
     <div class="rc-item">
       <small>Passenger name</small>
-      <strong>{{ booking.full_name }}</strong>
+      <strong>{{ booking.full_name or '—' }}</strong>
     </div>
 
     <div class="rc-item">
       <small>Contact phone</small>
-      <strong>{{ booking.phone }}</strong>
+      <strong>{{ booking.phone or '—' }}</strong>
     </div>
 
     <div class="rc-item">
@@ -278,8 +269,9 @@ hero_sub %}
     <div class="rc-item">
       <small>Travel date</small>
       <strong>
-        {{ booking.travel_date.strftime('%A, %d %B %Y') if
-        booking.travel_date.strftime is defined else booking.travel_date }}
+        {{ booking.travel_date.strftime('%A, %d %B %Y') if booking.travel_date
+        and booking.travel_date.strftime is defined else booking.travel_date or
+        '—' }}
       </strong>
     </div>
 
@@ -300,7 +292,7 @@ hero_sub %}
 
     <div class="rc-item">
       <small>Passengers</small>
-      <strong>{{ booking.passenger_count }}</strong>
+      <strong>{{ booking.passenger_count or 1 }}</strong>
     </div>
 
     <div class="rc-item">
@@ -327,10 +319,14 @@ hero_sub %}
   </div>
 
   <p class="rc-note">
-    This receipt confirms your booking, not a payment. Keep your reference {{
-    booking.reference }} and arrive at the boarding point early. Contact
-    CivicNest Africa on 0768 387 842 if you need to change your journey.
+    This receipt confirms your transport booking, not payment. Keep your booking
+    reference {{ booking.reference }} and arrive at the boarding point early.
+    Contact CivicNest Africa on 0768 387 842 if you need to change your journey.
   </p>
+
+  <div class="rc-footer">
+    CivicNest Africa · Transport Booking Confirmation · {{ booking.reference }}
+  </div>
 </article>
 
 {% endblock %}

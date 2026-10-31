@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{% block title %}Admin{% endblock %} | CivicNest Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #121c38;
+        --side: #16234a;
+        --card: #1c2b55;
+        --card2: #22336a;
+        --line: #2c3d72;
+        --ink: #e9eefc;
+        --muted: #8e9cc4;
+        --green: #1fc8a0;
+        --red: #ef4444;
+        --blue: #2b9cf2;
+        --purple: #9b7fe6;
+        --amber: #f5b638;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--blue);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+      }
+      :focus-visible {
+        outline: 3px solid #6aa8ff;
+        outline-offset: 2px;
+      }
+
+      /* SIDEBAR */
+      .side {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 250px;
+        padding: 20px 14px;
+        background: var(--side);
+        overflow-y: auto;
+        z-index: 50;
+        transition: transform 0.25s;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px 18px;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .logo i {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        font-style: normal;
+      }
+      .logo small {
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .me {
+        margin: 6px 0 20px;
+        padding: 18px 12px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        text-align: center;
+        background: linear-gradient(160deg, var(--card2), var(--card));
+      }
+      .ring {
+        display: grid;
+        place-items: center;
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 10px;
+        border-radius: 50%;
+        padding: 3px;
+        background: conic-gradient(
+          var(--green),
+          var(--blue),
+          var(--purple),
+          var(--green)
+        );
+      }
+      .ring span {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--side);
+        color: #fff;
+        font-size: 30px;
+        font-weight: 800;
+      }
+      .me h4 {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        word-break: break-word;
+      }
+      .me p {
+        color: var(--muted);
+        font-size: 11px;
+        word-break: break-all;
+      }
+      .role {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 3px 12px;
+        border-radius: 999px;
+        background: rgba(31, 200, 160, 0.16);
+        color: var(--green);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .menu-title {
+        margin: 16px 10px 6px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .side nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 10px;
+        color: #c5d0ee;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .side nav a:hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: #fff;
+      }
+      .side nav a.on {
+        background: rgba(43, 156, 242, 0.18);
+        color: #fff;
+      }
+      .side nav a.out {
+        color: #ff9b9b;
+      }
+
+      /* MAIN */
+      .main {
+        margin-left: 250px;
+        min-height: 100vh;
+      }
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        background: var(--side);
+        border-bottom: 1px solid var(--line);
+      }
+      .burger {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--card);
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .top .grow {
+        flex: 1;
+      }
+      .top .who {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        font-weight: 700;
+      }
+      .top .who b {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        font-size: 13px;
+      }
+      .content {
+        padding: 24px;
+        max-width: 1300px;
+      }
+
+      .flash {
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(43, 156, 242, 0.15);
+        color: #8cc8ff;
+      }
+      .flash.success {
+        background: rgba(31, 200, 160, 0.15);
+        color: var(--green);
+      }
+      .flash.error,
+      .flash.danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ff9b9b;
+      }
+      .flash.warning {
+        background: rgba(245, 182, 56, 0.15);
+        color: var(--amber);
+      }
+
+      /* PAGE PARTS */
+      .page-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+        padding: 22px 24px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(120deg, #1d3a8a, #4a2fa0 70%, #6d3fc0);
+      }
+      .eyebrow {
+        display: block;
+        margin-bottom: 4px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .page-head h1 {
+        color: #fff;
+        font-size: clamp(20px, 3vw, 26px);
+        font-weight: 800;
+        line-height: 1.25;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .page-head .sub {
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 4px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      h2 {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 0 16px;
+        border: 1px solid var(--blue);
+        border-radius: 10px;
+        background: var(--blue);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        filter: brightness(1.12);
+        text-decoration: none;
+      }
+      .btn.secondary {
+        background: transparent;
+        border-color: var(--line);
+        color: #c5d0ee;
+      }
+      .btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.07);
+      }
+      .btn.good {
+        background: var(--green);
+        border-color: var(--green);
+        color: #05241c;
+      }
+      .btn.danger {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+      }
+      .btn.small {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 11px;
+      }
+      .page-head .btn.secondary {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #fff;
+      }
+
+      .stats,
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+      .summary-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .stat,
+      .summary {
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .stat span,
+      .summary span {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .stat strong,
+      .summary strong {
+        display: block;
+        margin-top: 6px;
+        color: #fff;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .panel {
+        margin-bottom: 20px;
+        overflow: hidden;
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .panel-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-body {
+        padding: 18px;
+      }
+      .panel > .actions {
+        padding: 14px 18px 18px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+      }
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      td {
+        color: var(--ink);
+      }
+      td strong {
+        color: #fff;
+      }
+      td small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .route {
+        color: #fff;
+        font-weight: 800;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .actions form {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(43, 156, 242, 0.16);
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: capitalize;
+      }
+      .badge.open,
+      .badge.paid,
+      .badge.availability_confirmed {
+        background: rgba(31, 200, 160, 0.16);
+        color: var(--green);
+      }
+      .badge.pending {
+        background: rgba(245, 182, 56, 0.16);
+        color: var(--amber);
+      }
+      .badge.confirmed,
+      .badge.booking_confirmed {
+        background: rgba(43, 156, 242, 0.16);
+        color: var(--blue);
+      }
+      .badge.cancelled,
+      .badge.unavailable {
+        background: rgba(239, 68, 68, 0.16);
+        color: #ff8a8a;
+      }
+      .badge.closed,
+      .badge.full {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+      }
+
+      .empty {
+        padding: 36px 18px;
+        text-align: center;
+      }
+      .empty strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #fff;
+        font-size: 15px;
+      }
+      .empty p {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      /* FORMS */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+      .field.full {
+        grid-column: 1/-1;
+      }
+      .field label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      input[type="text"],
+      input[type="tel"],
+      input[type="number"],
+      input[type="date"],
+      input[type="time"],
+      select,
+      textarea {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--bg);
+        color: #fff;
+        font-size: 13px;
+      }
+      td input[type="text"] {
+        width: 170px;
+        min-height: 34px;
+        font-size: 11px;
+      }
+      textarea {
+        min-height: 96px;
+        line-height: 1.6;
+        resize: vertical;
+      }
+      input[type="date"],
+      input[type="time"] {
+        color-scheme: dark;
+      }
+      .help {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .checkrow {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .checkrow input {
+        width: 17px;
+        height: 17px;
+        margin-top: 3px;
+        accent-color: var(--green);
+      }
+      .checkrow label {
+        color: #fff;
+        font-weight: 800;
+      }
+      .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 22px;
+      }
+
+      @media (max-width: 1100px) {
+        .stats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 900px) {
+        .side {
+          transform: translateX(-100%);
+        }
+        .side.open {
+          transform: none;
+          box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .burger {
+          display: block;
+        }
+      }
+      @media (max-width: 640px) {
+        .content {
+          padding: 14px;
+        }
+        .stats,
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .field.full {
+          grid-column: auto;
+        }
+        .form-actions > * {
+          flex: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% set admin_name = (current_user.full_name or 'Admin') if
+    current_user.is_authenticated else 'Admin' %} {% set ep = request.endpoint
+    or '' %}
+
+    <aside class="side" id="side">
+      <div class="logo">
+        <i>⌂</i>
+        <div>CivicNest<small>Africa</small></div>
+      </div>
+
+      <div class="me">
+        <div class="ring"><span>{{ admin_name[:1]|upper }}</span></div>
+        <h4>{{ admin_name }}</h4>
+        <p>{{ current_user.email if current_user.is_authenticated else '' }}</p>
+        <span class="role">Administrator</span>
+      </div>
+
+      <nav aria-label="Admin navigation">
+        <div class="menu-title">Console</div>
+        <a href="{{ url_for('admin_dashboard') }}">Admin console</a>
+        <a href="{{ url_for('admin_dashboard') }}#analytics">Analytics</a>
+        <a href="{{ url_for('admin_dashboard') }}#report">Performance report</a>
+
+        <div class="menu-title">Manage</div>
+        <a
+          href="{{ url_for('admin_users') }}"
+          class="{{ 'on' if ep == 'admin_users' else '' }}"
+          >User management</a
+        >
+        <a
+          href="{{ url_for('admin_trips') }}"
+          class="{{ 'on' if ep.startswith('admin_trip') or ep == 'admin_booking_status' else '' }}"
+          >Trips</a
+        >
+        <a
+          href="{{ url_for('admin_places') }}"
+          class="{{ 'on' if ep.startswith('admin_place') else '' }}"
+          >Stay &amp; Dine</a
+        >
+        <a
+          href="{{ url_for('admin_transport_page') }}"
+          class="{{ 'on' if request.path.startswith('/admin/transport') else '' }}"
+          >Transport management</a
+        >
+        <a href="{{ url_for('roommate_finder') }}">Roommates</a>
+
+        <div class="menu-title">Switch view</div>
+        <a href="{{ url_for('landlord_dashboard') }}">Landlord side</a>
+        <a href="{{ url_for('home') }}">Tenant side</a>
+        <a class="out" href="{{ url_for('logout') }}">Log out</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="top">
+        <button
+          class="burger"
+          id="burger"
+          type="button"
+          aria-label="Open menu"
+          aria-controls="side"
+        >
+          ☰
+        </button>
+        <div class="grow"></div>
+        <div class="who"><b>{{ admin_name[:1]|upper }}</b>{{ admin_name }}</div>
+      </header>
+
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% for
+        category, message in messages %}
+        <div class="flash {{ category }}" role="alert">{{ message }}</div>
+        {% endfor %} {% endwith %} {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <script>
+      (() => {
+        const side = document.getElementById("side");
+        const burger = document.getElementById("burger");
+        if (!side || !burger) return;
+        burger.addEventListener("click", () => side.classList.toggle("open"));
+        side.addEventListener("click", (e) => {
+          if (e.target.closest("a")) side.classList.remove("open");
+        });
+        document.addEventListener("click", (e) => {
+          if (
+            side.classList.contains("open") &&
+            !side.contains(e.target) &&
+            !burger.contains(e.target)
+          ) {
+            side.classList.remove("open");
+          }
+        });
+      })();
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

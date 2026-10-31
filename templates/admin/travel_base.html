@@ -527,13 +527,6 @@
   </a>
 
   <a
-    href="{{ url_for('admin_trip_form_new') }}"
-    class="{% if request.endpoint == 'admin_trip_form_new' %}on{% endif %}"
-  >
-    Create trip
-  </a>
-
-  <a
     href="/admin/transport"
     class="{% if request.path.startswith('/admin/transport') and not request.path.startswith('/admin/transport/requests') %}on{% endif %}"
   >

@@ -2,19 +2,20 @@
 %}My Transport Requests{% endblock %} {% block hero_eyebrow %}Your travel{%
 endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
 {% block hero_sub %}
-<p>Track your transport requests and view your confirmed booking receipts.</p>
+<p>
+  Track your transport requests and reopen your confirmed booking receipts
+  whenever you need them.
+</p>
 {% endblock %} {% block head %}
 <style>
   .trq-list {
     display: grid;
     gap: 16px;
   }
-
   .trq-card {
     min-width: 0;
     padding: 20px;
   }
-
   .trq-top {
     display: flex;
     flex-wrap: wrap;
@@ -23,7 +24,6 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     gap: 12px;
     margin-bottom: 16px;
   }
-
   .trq-company {
     margin: 0 0 4px;
     color: #001b5e;
@@ -31,13 +31,11 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     font-weight: 800;
     overflow-wrap: anywhere;
   }
-
   .trq-ref {
     color: #405578;
     font-size: 11px;
     font-weight: 700;
   }
-
   .trq-status {
     display: inline-flex;
     align-items: center;
@@ -48,32 +46,26 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     letter-spacing: 0.3px;
     text-transform: uppercase;
   }
-
-  .trq-status.status-pending {
+  .status-pending {
     background: #fff4d6;
     color: #8a5a00;
   }
-
-  .trq-status.status-availability_confirmed {
+  .status-availability_confirmed {
     background: #e6eeff;
     color: #1456d8;
   }
-
-  .trq-status.status-unavailable {
+  .status-unavailable {
     background: #ffe1e1;
     color: #b42318;
   }
-
-  .trq-status.status-booking_confirmed {
+  .status-booking_confirmed {
     background: #dcfce7;
     color: #166534;
   }
-
-  .trq-status.status-cancelled {
+  .status-cancelled {
     background: #edf0f5;
     color: #5b6880;
   }
-
   .trq-route {
     display: flex;
     flex-wrap: wrap;
@@ -85,44 +77,11 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     border-radius: 14px;
     background: #f2f7fd;
   }
-
   .trq-place {
     flex: 1;
     min-width: 110px;
   }
-
-  .trq-place small {
-    display: block;
-    margin-bottom: 4px;
-    color: #405578;
-    font-size: 10px;
-    font-weight: 700;
-  }
-
-  .trq-place strong {
-    display: block;
-    color: #001b5e;
-    font-size: 14px;
-    overflow-wrap: anywhere;
-  }
-
-  .trq-arrow {
-    color: #1456d8;
-    font-size: 20px;
-    font-weight: 800;
-  }
-
-  .trq-details {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-
-  .trq-detail {
-    min-width: 0;
-  }
-
+  .trq-place small,
   .trq-detail small {
     display: block;
     margin-bottom: 4px;
@@ -130,14 +89,32 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     font-size: 10px;
     font-weight: 700;
   }
-
+  .trq-place strong {
+    display: block;
+    color: #001b5e;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+  .trq-arrow {
+    color: #1456d8;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .trq-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .trq-detail {
+    min-width: 0;
+  }
   .trq-detail strong {
     display: block;
     color: #001b5e;
     font-size: 12px;
     overflow-wrap: anywhere;
   }
-
   .trq-total {
     display: flex;
     align-items: center;
@@ -147,18 +124,15 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     padding-top: 14px;
     border-top: 1px solid #d3e0f5;
   }
-
   .trq-total span {
     color: #405578;
     font-size: 12px;
   }
-
   .trq-total strong {
     color: #1456d8;
     font-size: 18px;
     font-weight: 800;
   }
-
   .trq-note {
     margin: 14px 0 0;
     padding: 12px 14px;
@@ -168,11 +142,9 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     font-size: 12px;
     line-height: 1.7;
   }
-
   .trq-card .bbtn {
     margin-top: 12px;
   }
-
   .trq-empty {
     padding: 34px 18px;
     border: 1px dashed #d3e0f5;
@@ -180,12 +152,10 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     background: #f2f7fd;
     text-align: center;
   }
-
   .trq-empty h3 {
     margin: 0 0 8px;
     color: #001b5e;
   }
-
   .trq-empty p {
     max-width: 420px;
     margin: 0 auto 14px;
@@ -193,19 +163,17 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     font-size: 12px;
     line-height: 1.7;
   }
-
   @media (max-width: 650px) {
     .trq-card {
       padding: 16px;
     }
-
     .trq-details {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .trq-card .bbtn {
       display: flex;
       width: 100%;
+      justify-content: center;
     }
   }
 </style>
@@ -213,7 +181,9 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
 
 <div class="eb">Transport</div>
 <h2>Your requests</h2>
-<p class="sub">Every request you have submitted, with its latest status.</p>
+<p class="sub">
+  Your submitted requests and confirmed bookings are saved here.
+</p>
 
 {% if requests %}
 <div class="trq-list" style="margin-top: 18px">
@@ -225,7 +195,7 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
         <h3 class="trq-company">
           {{ item.company_name or 'Transport Company' }}
         </h3>
-        <div class="trq-ref">Reference: CN-{{ item.id }}</div>
+        <div class="trq-ref">Permanent reference: CN-{{ item.id }}</div>
       </div>
 
       <span class="trq-status status-{{ status }}">
@@ -233,7 +203,7 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
         'availability_confirmed' %} Availability confirmed {% elif status ==
         'unavailable' %} Unavailable {% elif status == 'booking_confirmed' %}
         Booking confirmed {% elif status == 'cancelled' %} Cancelled {% else %}
-        {{ status|replace('_', ' ')|title }} {% endif %}
+        {{ status|replace('_',' ')|title }} {% endif %}
       </span>
     </div>
 
@@ -254,10 +224,10 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     <div class="trq-details">
       <div class="trq-detail">
         <small>Travel date</small>
-        <strong>
-          {{ item.travel_date.strftime('%d %b %Y') if item.travel_date else '—'
-          }}
-        </strong>
+        <strong
+          >{{ item.travel_date.strftime('%d %b %Y') if item.travel_date else '—'
+          }}</strong
+        >
       </div>
 
       <div class="trq-detail">
@@ -297,9 +267,9 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
 
       <div class="trq-detail">
         <small>Price per passenger</small>
-        <strong>
-          KSh {{ "{:,.2f}".format(item.price_per_passenger or 0) }}
-        </strong>
+        <strong
+          >KSh {{ "{:,.2f}".format(item.price_per_passenger or 0) }}</strong
+        >
       </div>
     </div>
 
@@ -312,23 +282,22 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
 
     <div class="trq-note">
       Your request has been submitted. The CivicNest team is checking
-      availability with the transport company. Your seat is not yet confirmed.
+      availability. Your seat is not yet confirmed.
     </div>
 
     {% elif status == 'availability_confirmed' %}
 
     <div class="trq-note">
       <strong>Availability confirmed.</strong>
-      The transport company has indicated that seats are available. Your booking
-      is waiting for final confirmation by CivicNest.
+      Your booking is waiting for final confirmation by CivicNest.
     </div>
 
     {% elif status == 'booking_confirmed' %}
 
     <div class="trq-note">
       <strong>Your booking is confirmed.</strong>
-      Keep your booking reference and journey details for your records. This
-      receipt confirms the booking, not payment.
+      Your receipt is permanently accessible from this page while your booking
+      record is retained. This receipt confirms the booking, not payment.
     </div>
 
     <a
@@ -341,12 +310,14 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     {% elif status == 'unavailable' %}
 
     <div class="trq-note">
-      <strong>Seats were not available for this request.</strong>
-      You can search for another departure. This original request remains in
-      your request history.
+      Seats were not available for this request. You can search for another
+      departure.
     </div>
 
-    <a class="bbtn solid" href="{{ url_for('travel_page') }}">
+    <a
+      class="bbtn solid"
+      href="{{ url_for('transport_alternatives', request_id=item.id) }}"
+    >
       Search Other Departures
     </a>
 
@@ -373,7 +344,6 @@ endblock %} {% block hero_title %}My transport <em>requests.</em>{% endblock %}
     You have not submitted any transport requests. Search for a departure to get
     started.
   </p>
-
   <a class="bbtn solid" href="{{ url_for('travel_page') }}">Find Transport</a>
 </div>
 

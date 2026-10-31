@@ -3,289 +3,685 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Admin console | CivicNest Africa</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--blue:#1E4FA3;--blue2:#2D63C8;--navy:#0A2260;--tint:#E1EBFA;--bg:#F3F7FD;--line:#D9E3F3;--ink:#14213D;--muted:#55627A;--ok:#0F7A55;--warn:#9A6700;--bad:#B42318}
+:root{
+  --bg:#121c38; --side:#16234a; --card:#1c2b55; --card2:#22336a; --line:#2c3d72;
+  --ink:#e9eefc; --muted:#8e9cc4; --green:#1fc8a0; --red:#ef4444; --blue:#2b9cf2;
+  --purple:#9b7fe6; --amber:#f5b638;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--bg)}
-a{color:var(--blue);text-decoration:none;font-weight:600}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.6}
+a{color:var(--blue);text-decoration:none;font-weight:700}
 a:hover{text-decoration:underline}
 button,input,select{font-family:inherit}
-:focus-visible{outline:3px solid #9DC0FF;outline-offset:2px}
-.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:3px solid #6aa8ff;outline-offset:2px}
 
-.head{padding:26px 0 22px;color:#fff;background:linear-gradient(135deg,#0A2260,#1E4FA3)}
-.head .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
-.brand{font-family:'Fraunces',serif;font-weight:600;font-size:26px}
-.brand small{display:block;margin-top:4px;font:600 10px 'DM Sans',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.8)}
-.head h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,4vw,36px)}
+/* SIDEBAR */
+.side{position:fixed;inset:0 auto 0 0;width:250px;padding:20px 14px;background:var(--side);overflow-y:auto;z-index:50;transition:transform .25s}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px 18px;color:#fff;font-size:20px;font-weight:800;letter-spacing:.5px}
+.logo i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));font-style:normal}
+.logo small{display:block;font-size:9px;font-weight:700;letter-spacing:.3em;color:var(--muted);text-transform:uppercase}
+.me{margin:6px 0 20px;padding:18px 12px;border:1px solid var(--line);border-radius:18px;text-align:center;background:linear-gradient(160deg,var(--card2),var(--card))}
+.ring{display:grid;place-items:center;width:78px;height:78px;margin:0 auto 10px;border-radius:50%;padding:3px;background:conic-gradient(var(--green),var(--blue),var(--purple),var(--green))}
+.ring span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--side);color:#fff;font-size:30px;font-weight:800}
+.me h4{color:#fff;font-size:15px;font-weight:800;word-break:break-word}
+.me p{color:var(--muted);font-size:11px;word-break:break-all}
+.role{display:inline-block;margin-top:8px;padding:3px 12px;border-radius:999px;background:rgba(31,200,160,.16);color:var(--green);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.menu-title{margin:16px 10px 6px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.side nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 12px;border-radius:10px;color:#c5d0ee;font-weight:600;text-decoration:none}
+.side nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+.side nav a.out{color:#ff9b9b}
+.dot{min-width:22px;padding:1px 7px;border-radius:999px;background:var(--red);color:#fff;font-size:10px;font-weight:800;text-align:center}
 
-main{padding-bottom:60px}
-.flash{margin-top:18px;padding:12px 16px;border-radius:12px;font-size:14px;border:1px solid transparent}
-.flash.success{background:#EAF7EF;color:#1F6B42;border-color:#CCEBD7}
-.flash.error,.flash.danger{background:#FCEEEE;color:#9C3333;border-color:#F3D4D4}
-.flash.info{background:#E8F0FC;color:var(--blue);border-color:#CFDCF3}
+/* MAIN */
+.main{margin-left:250px;min-height:100vh}
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:12px 24px;background:var(--side);border-bottom:1px solid var(--line)}
+.burger{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:#fff;font-size:18px;cursor:pointer}
+.top .grow{flex:1}
+.top .who{display:flex;align-items:center;gap:8px;color:#fff;font-weight:700}
+.top .who b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:13px}
+.content{padding:24px;max-width:1300px}
 
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:22px}
-.stat{padding:16px;background:#fff;border:1px solid var(--line);border-radius:16px}
-.stat strong{display:block;font-size:28px;font-weight:700;color:var(--navy)}
-.stat span{font-size:13px;color:var(--muted)}
-.stat.alert strong{color:var(--bad)}
+.welcome{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;padding:22px 24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,#1d3a8a,#4a2fa0 70%,#6d3fc0)}
+.welcome h1{color:#fff;font-size:clamp(20px,3vw,26px);font-weight:800;line-height:1.25}
+.welcome p{color:rgba(255,255,255,.8);font-size:12px;margin-top:4px}
+.welcome .chip{padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:800}
 
-.tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;margin:22px -20px 0;padding:10px 20px;overflow-x:auto;background:rgba(243,247,253,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.tabs a{flex:none;display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border:1px solid var(--line);border-radius:21px;background:#fff;color:var(--navy);font-size:14px}
-.tabs a:hover{background:var(--tint);text-decoration:none}
+.flash{margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:12px;font-weight:700;background:rgba(43,156,242,.15);color:#8cc8ff}
+.flash.success{background:rgba(31,200,160,.15);color:var(--green)}
+.flash.error,.flash.danger{background:rgba(239,68,68,.15);color:#ff9b9b}
+.flash.warning{background:rgba(245,182,56,.15);color:var(--amber)}
 
-section{scroll-margin-top:70px;margin-top:30px}
-section > h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--navy)}
-section > p.sub{margin:4px 0 14px;color:var(--muted);font-size:14px}
-.list{display:grid;gap:12px;margin-top:14px}
-.card{padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(20,33,61,.04),0 8px 22px rgba(30,79,163,.06)}
-.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.item h3{font-size:17px;font-weight:600}
-.meta{margin-top:3px;font-size:13px;color:var(--muted);line-height:1.5}
-.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:14px}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.stat{padding:16px;border-radius:16px;background:var(--card)}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.stat strong{display:block;margin:4px 0 10px;color:#fff;font-size:24px;font-weight:800}
+.bar{height:4px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+.c-blue i{background:var(--blue)}.c-green i{background:var(--green)}.c-purple i{background:var(--purple)}
+.c-amber i{background:var(--amber)}.c-red i{background:var(--red)}
+.stat.alert strong{color:#ff8a8a}
 
-.pill{flex:none;display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--tint);color:#2B4A82}
-.st-active,.st-resolved,.pill.ok{background:#E3F4EB;color:var(--ok)}
-.st-pending,.st-reviewed{background:#FFF3D6;color:var(--warn)}
-.st-rejected,.st-removed,.st-dismissed,.pill.bad{background:#FCE4E2;color:var(--bad)}
-.st-unavailable{background:#ECEFF4;color:var(--muted)}
+/* SECTIONS */
+.block{scroll-margin-top:80px;margin-bottom:30px}
+.block-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px}
+.block-head h2{color:#fff;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+.block-head p{color:var(--muted);font-size:12px}
+.count{padding:4px 12px;border-radius:999px;background:rgba(43,156,242,.16);color:var(--blue);font-size:11px;font-weight:800}
+.pending .count{background:rgba(245,182,56,.16);color:var(--amber)}
+.reports .count{background:rgba(239,68,68,.16);color:#ff8a8a}
 
-.actions{display:grid;gap:10px;margin-top:14px}
-form.inline{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-select,input[type=text]{min-height:44px;padding:0 12px;border:1px solid #C9D6EC;border-radius:12px;font-size:15px;color:var(--ink);background:#fff}
-input[type=text]{flex:1;min-width:180px}
-.check{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:500}
-.check input{width:20px;height:20px;accent-color:var(--blue)}
-.btn{min-height:44px;padding:0 18px;border:0;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--blue2),#173f85)}
-.btn:hover{filter:brightness(1.08)}
-.btn.good{background:var(--ok)}
-.btn.danger{background:var(--bad)}
-.btn.ghost{color:var(--navy);background:#fff;border:1px solid #C9D6EC}
+.list{display:grid;gap:14px}
+.user-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{padding:18px;border-radius:16px;background:var(--card)}
+.row{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+.card h3{color:#fff;font-size:15px;font-weight:800;word-break:break-word}
+.muted{color:var(--muted);font-size:12px;word-break:break-word}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{padding:4px 10px;border-radius:999px;background:rgba(43,156,242,.16);color:var(--blue);font-size:10px;font-weight:800;text-transform:capitalize}
+.badge.ok,.st-active,.st-resolved{background:rgba(31,200,160,.16);color:var(--green)}
+.st-pending,.st-reviewed{background:rgba(245,182,56,.16);color:var(--amber)}
+.st-rejected,.st-removed,.st-dismissed{background:rgba(239,68,68,.16);color:#ff8a8a}
+.st-unavailable{background:rgba(255,255,255,.1);color:var(--muted)}
 
-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--blue);min-height:36px;display:flex;align-items:center}
-details form{margin-top:10px}
+/* FORMS */
+.manage{display:grid;gap:10px;margin-top:14px}
+.inline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px;border-radius:12px;background:rgba(0,0,0,.18)}
+select,input[type=text]{min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:#fff;font-size:13px}
+.inline input[type=text]{flex:1;min-width:200px}
+.check{display:inline-flex;align-items:center;gap:8px;min-height:42px;font-weight:700}
+.check input{width:17px;height:17px;accent-color:var(--green)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{filter:brightness(1.12);text-decoration:none}
+.btn.good{background:var(--green);color:#05241c}
+.btn.danger{background:var(--red)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:#c5d0ee}
+.btn.small{min-height:34px;padding:0 12px;font-size:11px}
+details{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+summary{min-height:34px;color:var(--blue);font-weight:800;cursor:pointer}
+details .inline{margin-top:10px}
+.danger-zone{justify-content:space-between;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08)}
+.empty{padding:28px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);text-align:center}
 
-.empty{padding:26px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #9DB4DD;border-radius:18px;font-size:14px}
+/* ANALYTICS AND REPORT */
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.chart-card{padding:18px;border-radius:16px;background:var(--card)}
+.chart-card h3{margin-bottom:12px;color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.chart-box{position:relative;height:260px}
+.chart-card.wide{grid-column:1/-1}
+.rep-table{width:100%;border-collapse:collapse;margin-top:10px}
+.rep-table th,.rep-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+.rep-table th{color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.rep-actions{display:flex;flex-wrap:wrap;gap:10px}
+.rep-note{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.18)}
+#report .rep-body{display:none}
+#report.open .rep-body{display:block}
 
-@media(min-width:760px){.stats{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1000px){.stats{grid-template-columns:repeat(6,1fr)}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){
+  .side{transform:translateX(-100%)}
+  .side.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.5)}
+  .main{margin-left:0}.burger{display:block}
+  .user-grid,.charts{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .content{padding:14px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .inline{flex-direction:column;align-items:stretch}
+  .inline select,.inline input[type=text]{width:100%;min-width:0}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+@media print{
+  .side,.top,.welcome,.stats,.flash,.block:not(.printable),.rep-actions{display:none!important}
+  .main{margin-left:0}
+  body,.content{background:#fff!important;color:#111!important}
+  .card,.chart-card{background:#fff!important;border:1px solid #ccc}
+  h2,h3,strong,.block-head h2,.chart-card h3{color:#000!important}
+  .muted,.block-head p,.rep-table th{color:#444!important}
+  .rep-table td{color:#111!important;border-color:#ccc}
+  #report .rep-body{display:block!important}
+  .printable{break-inside:avoid}
+}
 </style>
 </head>
 <body>
 
-{% include "_admin_bar.html" ignore missing %}
+{% set admin_name = (current_user.full_name or 'Admin') if current_user.is_authenticated else 'Admin' %}
+{% set first_name = admin_name.split(' ')[0] %}
+{% set total_u = stats.total_users if stats and stats.total_users else 0 %}
+{% set total_p = stats.total_properties if stats and stats.total_properties else 0 %}
 
-<header class="head">
-  <div class="wrap">
-    <div class="brand">CivicNest<small>Africa</small></div>
-    <h1>Admin console</h1>
+<!-- SIDEBAR -->
+<aside class="side" id="side">
+  <div class="logo"><i>⌂</i><div>CivicNest<small>Africa</small></div></div>
+
+  <div class="me">
+    <div class="ring"><span>{{ admin_name[:1]|upper }}</span></div>
+    <h4>{{ admin_name }}</h4>
+    <p>{{ current_user.email if current_user.is_authenticated else '' }}</p>
+    <span class="role">Administrator</span>
   </div>
-</header>
 
-<main class="wrap">
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      <div class="flash {{ category }}" role="alert">{{ message }}</div>
-    {% endfor %}
-  {% endwith %}
-
-  {% if error %}
-  <div class="flash error" role="alert">The console could not load all its data. Check the terminal for the error.</div>
-  {% endif %}
-
-  {% if stats %}
-  <div class="stats">
-    <div class="stat"><strong>{{ stats.total_users }}</strong><span>Users</span></div>
-    <div class="stat"><strong>{{ stats.students }}</strong><span>Students</span></div>
-    <div class="stat"><strong>{{ stats.landlords }}</strong><span>Landlords</span></div>
-    <div class="stat"><strong>{{ stats.total_properties }}</strong><span>Listings</span></div>
-    <div class="stat {{ 'alert' if stats.pending_properties else '' }}"><strong>{{ stats.pending_properties }}</strong><span>Waiting for review</span></div>
-    <div class="stat {{ 'alert' if stats.pending_reports else '' }}"><strong>{{ stats.pending_reports }}</strong><span>Open reports</span></div>
-  </div>
-  {% endif %}
-
-  <nav class="tabs" aria-label="Sections">
-    <a href="#pending">Waiting for review</a>
+  <nav aria-label="Admin navigation">
+    <div class="menu-title">Console</div>
+    <a href="#pending">Waiting for review {% if stats and stats.pending_properties %}<span class="dot">{{ stats.pending_properties }}</span>{% endif %}</a>
     <a href="#properties">All listings</a>
     <a href="#users">Users</a>
-    <a href="#reports">Reports</a>
+    <a href="#reports">Reports {% if stats and stats.pending_reports %}<span class="dot">{{ stats.pending_reports }}</span>{% endif %}</a>
+    <a href="#analytics">Analytics</a>
+    <a href="#report">Performance report</a>
+
+    <div class="menu-title">Manage</div>
+    <a href="{{ url_for('admin_users') }}">User management</a>
+    <a href="{{ url_for('admin_trips') }}">Trips</a>
+    <a href="{{ url_for('admin_places') }}">Stay &amp; Dine</a>
+    <a href="{{ url_for('admin_transport_page') }}">Transport management</a>
+    <a href="{{ url_for('roommate_finder') }}">Roommates</a>
+
+    <div class="menu-title">Switch view</div>
+    <a href="{{ url_for('landlord_dashboard') }}">Landlord side</a>
+    <a href="{{ url_for('home') }}">Tenant side</a>
+    <a class="out" href="{{ url_for('logout') }}">Log out</a>
   </nav>
+</aside>
 
-  <!-- WAITING FOR REVIEW -->
-  <section id="pending">
-    <h2>Waiting for review</h2>
-    <p class="sub">New and edited listings stay hidden until you approve them.</p>
-    <div class="list">
-      {% for p in properties if p.status == 'pending' %}
-      <article class="card item">
-        <div class="item-head">
-          <div>
-            <h3>{{ p.title }}</h3>
-            <p class="meta">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }}</p>
-            <p class="meta">{{ p.location }} · posted by {{ p.landlord_name }} · listed as {{ p.ownership_role or 'not stated' }}</p>
-          </div>
-          <span class="pill st-pending">Pending</span>
-        </div>
-        <div class="links">
-          <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">Preview listing</a>
-          {% if p.proof_doc %}
-          <a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">View proof of ownership</a>
-          {% else %}
-          <span class="meta">No proof uploaded</span>
-          {% endif %}
-        </div>
-        <div class="actions">
-          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
-            <input type="hidden" name="status" value="active">
-            <input type="hidden" name="available" value="1">
-            <label class="check"><input type="checkbox" name="is_verified" value="1"> Mark as Verified</label>
-            <button class="btn good" type="submit">Approve</button>
-          </form>
-          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
-            <input type="hidden" name="status" value="rejected">
-            <input type="hidden" name="available" value="0">
-            <input type="text" name="rejection_reason" maxlength="255" required placeholder="Reason shown to the landlord">
-            <button class="btn danger" type="submit">Reject</button>
-          </form>
-        </div>
-      </article>
-      {% else %}
-      <div class="empty">Nothing is waiting for review.</div>
+<div class="main">
+  <header class="top">
+    <button class="burger" id="burger" type="button" aria-label="Open menu" aria-controls="side">☰</button>
+    <div class="grow"></div>
+    <div class="who"><b>{{ admin_name[:1]|upper }}</b>{{ admin_name }}</div>
+  </header>
+
+  <main class="content">
+
+    <!-- WELCOME -->
+    <section class="welcome">
+      <div>
+        <h1><span id="greet">Welcome back</span>, {{ first_name }} 👋</h1>
+        <p>Review listings, manage users and handle reports from one place.</p>
+      </div>
+      <span class="chip">{{ admin_name }} · Administrator</span>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}" role="alert">{{ message }}</div>
       {% endfor %}
-    </div>
-  </section>
+    {% endwith %}
 
-  <!-- ALL LISTINGS -->
-  <section id="properties">
-    <h2>All listings</h2>
-    <p class="sub">Change the status, availability or Verified badge of any listing.</p>
-    <div class="list">
-      {% for p in properties %}
-      <article class="card item">
-        <div class="item-head">
-          <div>
-            <h3>{{ p.title }}</h3>
-            <p class="meta">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }} · {{ p.location }}</p>
-            <p class="meta">By {{ p.landlord_name }}{% if p.created_at %} · {{ p.created_at.strftime('%d %b %Y') }}{% endif %}</p>
-          </div>
-          <div>
-            <span class="pill st-{{ p.status }}">{{ p.status|title }}</span>
-            {% if p.is_verified %}<span class="pill ok">Verified</span>{% endif %}
-          </div>
-        </div>
-        <div class="links">
-          <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">View</a>
-          {% if p.proof_doc %}
-          <a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">Proof of ownership</a>
-          {% endif %}
-        </div>
-        <details>
-          <summary>Manage this listing</summary>
-          <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
-            <select name="status" aria-label="Status">
-              <option value="active" {{ 'selected' if p.status == 'active' else '' }}>Active</option>
-              <option value="pending" {{ 'selected' if p.status == 'pending' else '' }}>Pending</option>
-              <option value="unavailable" {{ 'selected' if p.status == 'unavailable' else '' }}>Unavailable</option>
-              <option value="removed" {{ 'selected' if p.status == 'removed' else '' }}>Removed</option>
-              <option value="rejected" {{ 'selected' if p.status == 'rejected' else '' }}>Rejected</option>
-            </select>
-            <select name="available" aria-label="Availability">
-              <option value="1" {{ 'selected' if p.available else '' }}>Available</option>
-              <option value="0" {{ '' if p.available else 'selected' }}>Not available</option>
-            </select>
-            <label class="check"><input type="checkbox" name="is_verified" value="1" {{ 'checked' if p.is_verified else '' }}> Verified</label>
-            <input type="text" name="rejection_reason" maxlength="255" placeholder="Reason (only used when rejecting)">
-            <button class="btn" type="submit">Save</button>
-          </form>
-        </details>
-      </article>
-      {% else %}
-      <div class="empty">There are no listings yet.</div>
-      {% endfor %}
-    </div>
-  </section>
+    {% if error %}
+    <div class="flash error" role="alert">The console could not load all its data. Check the terminal for the error.</div>
+    {% endif %}
 
-  <!-- USERS -->
-  <section id="users">
-    <h2>Users</h2>
-    <p class="sub">Verify landlords after you have checked their details, and change account types.</p>
-    <div class="list">
-      {% for u in users %}
-      <article class="card item">
-        <div class="item-head">
-          <div>
-            <h3>{{ u.full_name }}</h3>
-            <p class="meta">{{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+    {% if stats %}
+    <div class="stats">
+      <div class="stat c-blue"><span>Users</span><strong>{{ stats.total_users }}</strong><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="stat c-green"><span>Tenants</span><strong>{{ stats.students }}</strong><div class="bar"><i style="width:{{ ((stats.students / total_u * 100) if total_u else 0)|round|int }}%"></i></div></div>
+      <div class="stat c-purple"><span>Landlords</span><strong>{{ stats.landlords }}</strong><div class="bar"><i style="width:{{ ((stats.landlords / total_u * 100) if total_u else 0)|round|int }}%"></i></div></div>
+      <div class="stat c-blue"><span>Listings</span><strong>{{ stats.total_properties }}</strong><div class="bar"><i style="width:100%"></i></div></div>
+      <div class="stat c-amber {{ 'alert' if stats.pending_properties else '' }}"><span>Waiting for review</span><strong>{{ stats.pending_properties }}</strong><div class="bar"><i style="width:{{ ((stats.pending_properties / total_p * 100) if total_p else 0)|round|int }}%"></i></div></div>
+      <div class="stat c-red {{ 'alert' if stats.pending_reports else '' }}"><span>Open reports</span><strong>{{ stats.pending_reports }}</strong><div class="bar"><i style="width:{{ [stats.pending_reports * 10, 100]|min }}%"></i></div></div>
+    </div>
+    {% endif %}
+
+    <!-- WAITING FOR REVIEW -->
+    <section class="block pending" id="pending">
+      <div class="block-head">
+        <div><h2>Waiting for review</h2><p>New and edited listings stay hidden until you approve them.</p></div>
+        {% if stats %}<span class="count">{{ stats.pending_properties }}</span>{% endif %}
+      </div>
+      <div class="list">
+        {% for p in properties if p.status == 'pending' %}
+        <article class="card">
+          <div class="row">
+            <div>
+              <h3>{{ p.title }}</h3>
+              <p class="muted">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }}</p>
+              <p class="muted">{{ p.location }} · posted by {{ p.landlord_name }} · listed as {{ p.ownership_role or 'not stated' }}</p>
+            </div>
+            <div class="badges"><span class="badge st-pending">Pending</span></div>
           </div>
-          <div>
-            <span class="pill">{{ u.role|title }}</span>
-            {% if u.is_verified %}<span class="pill ok">Verified</span>{% endif %}
+          <div class="links">
+            <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">Preview listing</a>
+            {% if p.proof_doc %}
+            <a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">View proof of ownership</a>
+            {% else %}
+            <span class="muted">No proof uploaded</span>
+            {% endif %}
           </div>
-        </div>
-        {% if u.role == 'admin' or u.id == current_user.id %}
-        <p class="meta" style="margin-top:10px">Administrator accounts are protected and cannot be changed here.</p>
+          <div class="manage">
+            <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+              <input type="hidden" name="status" value="active">
+              <input type="hidden" name="available" value="1">
+              <label class="check"><input type="checkbox" name="is_verified" value="1"> Mark as Verified</label>
+              <button class="btn good" type="submit">Approve</button>
+            </form>
+            <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+              <input type="hidden" name="status" value="rejected">
+              <input type="hidden" name="available" value="0">
+              <input type="text" name="rejection_reason" maxlength="255" required placeholder="Reason shown to the landlord">
+              <button class="btn danger" type="submit">Reject</button>
+            </form>
+          </div>
+        </article>
         {% else %}
-        <div class="actions">
-          <form class="inline" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
-            <select name="role" aria-label="Account type">
-              <option value="student" {{ 'selected' if u.role == 'student' else '' }}>Student</option>
-              <option value="landlord" {{ 'selected' if u.role == 'landlord' else '' }}>Landlord</option>
-            </select>
-            <button class="btn ghost" type="submit">Change type</button>
-          </form>
-          <form class="inline" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
-            <input type="hidden" name="is_verified" value="{{ '0' if u.is_verified else '1' }}">
-            <button class="btn {{ 'ghost' if u.is_verified else 'good' }}" type="submit">{{ 'Remove verification' if u.is_verified else 'Verify this user' }}</button>
-          </form>
-        </div>
-        {% endif %}
-      </article>
-      {% else %}
-      <div class="empty">There are no users yet.</div>
-      {% endfor %}
-    </div>
-  </section>
+        <div class="empty">Nothing is waiting for review.</div>
+        {% endfor %}
+      </div>
+    </section>
 
-  <!-- REPORTS -->
-  <section id="reports">
-    <h2>Reports</h2>
-    <p class="sub">Listings that people have reported.</p>
-    <div class="list">
-      {% for r in reports %}
-      <article class="card item">
-        <div class="item-head">
-          <div>
-            <h3>{{ r.reason }}</h3>
-            <p class="meta">On <a href="{{ url_for('property_details', property_id=r.property_id) }}" target="_blank" rel="noopener">{{ r.property_title }}</a> · reported by {{ r.reporter_name }}{% if r.created_at %} · {{ r.created_at.strftime('%d %b %Y') }}{% endif %}</p>
-            {% if r.details %}<p class="meta">{{ r.details }}</p>{% endif %}
+    <!-- ALL LISTINGS -->
+    <section class="block" id="properties">
+      <div class="block-head">
+        <div><h2>All listings</h2><p>Change the status, availability or Verified badge of any listing.</p></div>
+        <span class="count">{{ properties|length }}</span>
+      </div>
+      <div class="list">
+        {% for p in properties %}
+        <article class="card">
+          <div class="row">
+            <div>
+              <h3>{{ p.title }}</h3>
+              <p class="muted">{{ (p.listing_type or 'rent')|title }} · {{ p.property_type|replace('_', ' ')|title }} · KSh {{ "{:,.0f}".format(p.price) }} · {{ p.location }}</p>
+              <p class="muted">By {{ p.landlord_name }}{% if p.created_at %} · {{ p.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+            </div>
+            <div class="badges">
+              <span class="badge st-{{ p.status }}">{{ p.status|title }}</span>
+              {% if p.is_verified %}<span class="badge ok">Verified</span>{% endif %}
+            </div>
           </div>
-          <span class="pill st-{{ r.status }}">{{ r.status|title }}</span>
-        </div>
-        <div class="actions">
-          <form class="inline" method="post" action="{{ url_for('admin_update_report_status', report_id=r.id) }}">
-            <select name="status" aria-label="Report status">
-              <option value="pending" {{ 'selected' if r.status == 'pending' else '' }}>Pending</option>
-              <option value="reviewed" {{ 'selected' if r.status == 'reviewed' else '' }}>Reviewed</option>
-              <option value="resolved" {{ 'selected' if r.status == 'resolved' else '' }}>Resolved</option>
-              <option value="dismissed" {{ 'selected' if r.status == 'dismissed' else '' }}>Dismissed</option>
-            </select>
-            <button class="btn ghost" type="submit">Update</button>
-          </form>
-        </div>
-      </article>
-      {% else %}
-      <div class="empty">No reports. Good news.</div>
-      {% endfor %}
-    </div>
-  </section>
+          <div class="links">
+            <a href="{{ url_for('property_details', property_id=p.id) }}" target="_blank" rel="noopener">View</a>
+            {% if p.proof_doc %}<a href="{{ url_for('admin_property_proof', property_id=p.id) }}" target="_blank" rel="noopener">Proof of ownership</a>{% endif %}
+          </div>
+          <details>
+            <summary>Manage this listing</summary>
 
-</main>
+            <form class="inline" method="post" action="{{ url_for('admin_update_property', property_id=p.id) }}">
+              <select name="status" aria-label="Status">
+                <option value="active" {{ 'selected' if p.status == 'active' else '' }}>Active</option>
+                <option value="pending" {{ 'selected' if p.status == 'pending' else '' }}>Pending</option>
+                <option value="unavailable" {{ 'selected' if p.status == 'unavailable' else '' }}>Unavailable</option>
+                <option value="removed" {{ 'selected' if p.status == 'removed' else '' }}>Removed</option>
+                <option value="rejected" {{ 'selected' if p.status == 'rejected' else '' }}>Rejected</option>
+              </select>
+              <select name="available" aria-label="Availability">
+                <option value="1" {{ 'selected' if p.available else '' }}>Available</option>
+                <option value="0" {{ '' if p.available else 'selected' }}>Not available</option>
+              </select>
+              <label class="check"><input type="checkbox" name="is_verified" value="1" {{ 'checked' if p.is_verified else '' }}> Verified</label>
+              <input type="text" name="rejection_reason" maxlength="255" placeholder="Reason (only used when rejecting)">
+              <button class="btn" type="submit">Save</button>
+            </form>
+
+            <form class="inline danger-zone" method="post"
+                  action="{{ url_for('admin_delete_property', property_id=p.id) }}"
+                  onsubmit="return confirm('Permanently delete this listing and its reports? This cannot be undone.');">
+              <span class="muted">Danger zone: removes this listing for good.</span>
+              <button class="btn danger" type="submit">Delete listing</button>
+            </form>
+          </details>
+        </article>
+        {% else %}
+        <div class="empty">There are no listings yet.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- USERS -->
+    <section class="block" id="users">
+      <div class="block-head">
+        <div><h2>Users</h2><p>Verify landlords after you have checked their details, and change account types.</p></div>
+        <a class="btn ghost" href="{{ url_for('admin_users') }}">Open full user management</a>
+      </div>
+      <div class="user-grid">
+        {% for u in users %}
+        <article class="card">
+          <div class="row">
+            <div>
+              <h3>{{ u.full_name }}</h3>
+              <p class="muted">{{ u.email }}{% if u.phone %} · {{ u.phone }}{% endif %}{% if u.created_at %} · joined {{ u.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+            </div>
+            <div class="badges">
+              <span class="badge">{{ 'Tenant' if u.role == 'student' else u.role|title }}</span>
+              {% if u.is_verified %}<span class="badge ok">Verified</span>{% endif %}
+            </div>
+          </div>
+          {% if u.role == 'admin' or u.id == current_user.id %}
+          <p class="muted" style="margin-top:10px">Administrator accounts are protected and cannot be changed here.</p>
+          {% else %}
+          <div class="manage">
+            <form class="inline" method="post" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
+              <select name="role" aria-label="Account type">
+                <option value="student" {{ 'selected' if u.role == 'student' else '' }}>Tenant</option>
+                <option value="landlord" {{ 'selected' if u.role == 'landlord' else '' }}>Landlord</option>
+              </select>
+              <button class="btn ghost" type="submit">Change type</button>
+            </form>
+            <form class="inline" method="post" action="{{ url_for('admin_update_user_verification', user_id=u.id) }}">
+              <input type="hidden" name="is_verified" value="{{ '0' if u.is_verified else '1' }}">
+              <button class="btn {{ 'ghost' if u.is_verified else 'good' }}" type="submit">{{ 'Remove verification' if u.is_verified else 'Verify this user' }}</button>
+            </form>
+          </div>
+          {% endif %}
+        </article>
+        {% else %}
+        <div class="empty">There are no users yet.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="block reports" id="reports">
+      <div class="block-head">
+        <div><h2>Reports</h2><p>Listings that people have reported.</p></div>
+        {% if stats %}<span class="count">{{ stats.pending_reports }} open</span>{% endif %}
+      </div>
+      <div class="list">
+        {% for r in reports %}
+        <article class="card">
+          <div class="row">
+            <div>
+              <h3>{{ r.reason }}</h3>
+              <p class="muted">On <a href="{{ url_for('property_details', property_id=r.property_id) }}" target="_blank" rel="noopener">{{ r.property_title }}</a> · reported by {{ r.reporter_name }}{% if r.created_at %} · {{ r.created_at.strftime('%d %b %Y') }}{% endif %}</p>
+              {% if r.details %}<p class="muted">{{ r.details }}</p>{% endif %}
+            </div>
+            <div class="badges"><span class="badge st-{{ r.status }}">{{ r.status|title }}</span></div>
+          </div>
+          <div class="manage">
+            <form class="inline" method="post" action="{{ url_for('admin_update_report_status', report_id=r.id) }}">
+              <select name="status" aria-label="Report status">
+                <option value="pending" {{ 'selected' if r.status == 'pending' else '' }}>Pending</option>
+                <option value="reviewed" {{ 'selected' if r.status == 'reviewed' else '' }}>Reviewed</option>
+                <option value="resolved" {{ 'selected' if r.status == 'resolved' else '' }}>Resolved</option>
+                <option value="dismissed" {{ 'selected' if r.status == 'dismissed' else '' }}>Dismissed</option>
+              </select>
+              <button class="btn ghost" type="submit">Update</button>
+            </form>
+          </div>
+        </article>
+        {% else %}
+        <div class="empty">No reports. Good news.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {# ---------- numbers used by analytics and the report ---------- #}
+    {% set n_all = properties|length %}
+    {% set n_active = properties|selectattr('status','equalto','active')|list|length %}
+    {% set n_pending = properties|selectattr('status','equalto','pending')|list|length %}
+    {% set n_unavail = properties|selectattr('status','equalto','unavailable')|list|length %}
+    {% set n_removed = properties|selectattr('status','equalto','removed')|list|length %}
+    {% set n_rejected = properties|selectattr('status','equalto','rejected')|list|length %}
+    {% set n_verified = properties|selectattr('is_verified')|list|length %}
+    {% set u_admin = users|selectattr('role','equalto','admin')|list|length %}
+    {% set u_land = users|selectattr('role','equalto','landlord')|list|length %}
+    {% set u_stud = users|selectattr('role','equalto','student')|list|length %}
+    {% set u_verified = users|selectattr('is_verified')|list|length %}
+    {% set r_all = reports|length %}
+    {% set r_pending = reports|selectattr('status','equalto','pending')|list|length %}
+    {% set r_reviewed = reports|selectattr('status','equalto','reviewed')|list|length %}
+    {% set r_resolved = reports|selectattr('status','equalto','resolved')|list|length %}
+    {% set r_dismissed = reports|selectattr('status','equalto','dismissed')|list|length %}
+
+    {% set by_month = {} %}
+    {% set by_type = {} %}
+    {% set users_month = {} %}
+    {% for p in properties %}
+      {% if p.created_at %}
+        {% set k = p.created_at.strftime('%Y-%m') %}
+        {% set _ = by_month.update({k: by_month.get(k, 0) + 1}) %}
+      {% endif %}
+      {% set t = (p.property_type or 'other')|replace('_',' ')|title %}
+      {% set _ = by_type.update({t: by_type.get(t, 0) + 1}) %}
+    {% endfor %}
+    {% for u in users %}
+      {% if u.created_at %}
+        {% set k = u.created_at.strftime('%Y-%m') %}
+        {% set _ = users_month.update({k: users_month.get(k, 0) + 1}) %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- ANALYTICS -->
+    <section class="block printable" id="analytics">
+      <div class="block-head">
+        <div><h2>Analytics</h2><p>How the platform is performing right now.</p></div>
+      </div>
+      <div class="charts">
+        <div class="chart-card">
+          <h3>Listings by status</h3>
+          <div class="chart-box"><canvas id="chStatus"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Users by account type</h3>
+          <div class="chart-box"><canvas id="chUsers"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Listings by property type</h3>
+          <div class="chart-box"><canvas id="chType"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Reports by status</h3>
+          <div class="chart-box"><canvas id="chReports"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <h3>Growth by month: new listings and new users</h3>
+          <div class="chart-box"><canvas id="chGrowth"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERFORMANCE REPORT -->
+    <section class="block printable" id="report">
+      <div class="block-head">
+        <div><h2>Performance report</h2><p>A summary you can print, save as PDF or download as CSV.</p></div>
+        <div class="rep-actions">
+          <button class="btn" type="button" id="genReport">Generate report</button>
+          <button class="btn ghost" type="button" id="printReport">Print / Save as PDF</button>
+          <button class="btn ghost" type="button" id="csvReport">Download CSV</button>
+        </div>
+      </div>
+
+      <div class="rep-body">
+        <div class="card">
+          <h3>CivicNest Africa: platform report</h3>
+          <p class="muted">Prepared by {{ admin_name }} on <span id="repDate"></span></p>
+
+          <table class="rep-table" id="repTable">
+            <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Total users</td><td>{{ users|length }}</td></tr>
+              <tr><td>Tenants</td><td>{{ u_stud }}</td></tr>
+              <tr><td>Landlords</td><td>{{ u_land }}</td></tr>
+              <tr><td>Admins</td><td>{{ u_admin }}</td></tr>
+              <tr><td>Verified users</td><td>{{ u_verified }}</td></tr>
+              <tr><td>Total listings</td><td>{{ n_all }}</td></tr>
+              <tr><td>Active listings</td><td>{{ n_active }}</td></tr>
+              <tr><td>Waiting for review</td><td>{{ n_pending }}</td></tr>
+              <tr><td>Unavailable listings</td><td>{{ n_unavail }}</td></tr>
+              <tr><td>Rejected listings</td><td>{{ n_rejected }}</td></tr>
+              <tr><td>Removed listings</td><td>{{ n_removed }}</td></tr>
+              <tr><td>Verified listings</td><td>{{ n_verified }}</td></tr>
+              <tr><td>Total reports</td><td>{{ r_all }}</td></tr>
+              <tr><td>Open reports (pending)</td><td>{{ r_pending }}</td></tr>
+              <tr><td>Resolved reports</td><td>{{ r_resolved }}</td></tr>
+              <tr><td>Dismissed reports</td><td>{{ r_dismissed }}</td></tr>
+              <tr><td>Share of listings that are active</td><td>{{ ((n_active / n_all * 100) if n_all else 0)|round(1) }}%</td></tr>
+              <tr><td>Share of listings verified</td><td>{{ ((n_verified / n_all * 100) if n_all else 0)|round(1) }}%</td></tr>
+              <tr><td>Share of reports handled</td><td>{{ (((r_resolved + r_dismissed + r_reviewed) / r_all * 100) if r_all else 0)|round(1) }}%</td></tr>
+            </tbody>
+          </table>
+
+          <div class="rep-note">
+            <strong>Key points</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>{{ n_pending }} listing{{ '' if n_pending == 1 else 's' }} {{ 'is' if n_pending == 1 else 'are' }} waiting for review.</li>
+              <li>{{ r_pending }} report{{ '' if r_pending == 1 else 's' }} still need{{ 's' if r_pending == 1 else '' }} attention.</li>
+              <li>{{ u_land }} landlord{{ '' if u_land == 1 else 's' }} and {{ u_stud }} tenant{{ '' if u_stud == 1 else 's' }} are registered.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+  if (typeof Chart === "undefined") return;
+
+  const C = {
+    green: "#1fc8a0", blue: "#2b9cf2", purple: "#9b7fe6",
+    amber: "#f5b638", red: "#ef4444", grey: "#6b7aa6"
+  };
+  Chart.defaults.color = "#c5d0ee";
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.borderColor = "rgba(255,255,255,.08)";
+
+  const listingMonths = {{ by_month|tojson }};
+  const userMonths = {{ users_month|tojson }};
+  const monthKeys = Array.from(
+    new Set([...Object.keys(listingMonths), ...Object.keys(userMonths)])
+  ).sort();
+  const listingsByMonth = monthKeys.map(k => listingMonths[k] || 0);
+  const usersByMonth = monthKeys.map(k => userMonths[k] || 0);
+
+  const typeLabels = {{ by_type.keys()|list|tojson }};
+  const typeValues = {{ by_type.values()|list|tojson }};
+
+  const doughnut = (id, labels, data, colors) => new Chart(document.getElementById(id), {
+    type: "doughnut",
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+    options: { maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom" } } }
+  });
+
+  doughnut("chStatus",
+    ["Active", "Pending", "Unavailable", "Rejected", "Removed"],
+    [{{ n_active }}, {{ n_pending }}, {{ n_unavail }}, {{ n_rejected }}, {{ n_removed }}],
+    [C.green, C.amber, C.grey, C.red, "#44506f"]);
+
+  doughnut("chUsers",
+    ["Tenants", "Landlords", "Admins"],
+    [{{ u_stud }}, {{ u_land }}, {{ u_admin }}],
+    [C.blue, C.green, C.purple]);
+
+  doughnut("chReports",
+    ["Pending", "Reviewed", "Resolved", "Dismissed"],
+    [{{ r_pending }}, {{ r_reviewed }}, {{ r_resolved }}, {{ r_dismissed }}],
+    [C.amber, C.blue, C.green, C.grey]);
+
+  new Chart(document.getElementById("chType"), {
+    type: "bar",
+    data: {
+      labels: typeLabels,
+      datasets: [{ label: "Listings", data: typeValues, backgroundColor: C.blue, borderRadius: 8 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+
+  new Chart(document.getElementById("chGrowth"), {
+    type: "line",
+    data: {
+      labels: monthKeys,
+      datasets: [
+        { label: "New listings", data: listingsByMonth, borderColor: C.green, backgroundColor: "rgba(31,200,160,.15)", fill: true, tension: .35 },
+        { label: "New users", data: usersByMonth, borderColor: C.purple, backgroundColor: "rgba(155,127,230,.15)", fill: true, tension: .35 }
+      ]
+    },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  /* REPORT BUTTONS */
+  const report = document.getElementById("report");
+  const dateEl = document.getElementById("repDate");
+  if (dateEl) dateEl.textContent = new Date().toLocaleString();
+
+  const setChartColor = (color, grid) => {
+    Chart.defaults.color = color;
+    Object.values(Chart.instances).forEach(c => {
+      c.options.color = color;
+      if (c.options.scales) {
+        Object.values(c.options.scales).forEach(s => {
+          s.grid = { color: grid };
+          s.ticks = Object.assign({}, s.ticks, { color });
+        });
+      }
+      if (c.options.plugins && c.options.plugins.legend) {
+        c.options.plugins.legend.labels = { color };
+      }
+      c.update("none");
+    });
+  };
+
+  document.getElementById("genReport")?.addEventListener("click", () => {
+    report.classList.add("open");
+    report.scrollIntoView({ behavior: "smooth" });
+  });
+
+  document.getElementById("printReport")?.addEventListener("click", () => {
+    report.classList.add("open");
+    window.print();
+  });
+
+  window.addEventListener("beforeprint", () => setChartColor("#222222", "rgba(0,0,0,.12)"));
+  window.addEventListener("afterprint", () => setChartColor("#c5d0ee", "rgba(255,255,255,.08)"));
+
+  document.getElementById("csvReport")?.addEventListener("click", () => {
+    const rows = [["Measure", "Value"]];
+    document.querySelectorAll("#repTable tbody tr").forEach(tr => {
+      const t = tr.querySelectorAll("td");
+      rows.push([t[0].textContent.trim(), t[1].textContent.trim()]);
+    });
+    const csv = rows
+      .map(r => r.map(v => '"' + v.replace(/"/g, '""') + '"').join(","))
+      .join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "civicnest-report-" + new Date().toISOString().slice(0, 10) + ".csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+})();
+</script>
+
+<script>
+(() => {
+  const side = document.getElementById("side");
+  const burger = document.getElementById("burger");
+  const greet = document.getElementById("greet");
+
+  if (greet) {
+    const h = new Date().getHours();
+    greet.textContent = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+  }
+
+  if (side && burger) {
+    burger.addEventListener("click", () => side.classList.toggle("open"));
+    side.addEventListener("click", (e) => {
+      if (e.target.closest("a")) side.classList.remove("open");
+    });
+    document.addEventListener("click", (e) => {
+      if (side.classList.contains("open") && !side.contains(e.target) && !burger.contains(e.target)) {
+        side.classList.remove("open");
+      }
+    });
+  }
+})();
+</script>
 </body>
 </html>

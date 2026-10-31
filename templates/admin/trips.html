@@ -1,39 +1,22 @@
-{% extends "admin/travel_base.html" %} {% block title %}Trips overview{%
-endblock %} {% block content %}
+{% extends "admin/admin_base.html" %} {% block title %}Trips overview{% endblock
+%} {% block content %}
 
 <section class="page-head">
   <div>
     <p class="eyebrow">Travel operations</p>
     <h1>Trips &amp; bookings</h1>
     <p class="sub">
-      Manage legacy trip departures, track seat requests and passenger bookings.
+      Manage trip departures, track seat requests and passenger bookings.
     </p>
   </div>
 
-  <a class="btn" href="{{ url_for('admin_trip_form_new') }}">
-    ＋ Create a trip
-  </a>
-</section>
-
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>Transport management</h2>
-      <p class="sub">
-        Manage registered transport companies, their routes and customer
-        availability requests separately from legacy trips.
-      </p>
-    </div>
-  </div>
-
   <div class="actions">
-    <a class="btn small" href="/admin/transport">
-      Transport companies &amp; routes
-    </a>
-
-    <a class="btn small secondary" href="/admin/transport/requests">
-      Availability requests
-    </a>
+    <a class="btn secondary" href="/admin/transport"
+      >Transport companies &amp; routes</a
+    >
+    <a class="btn secondary" href="/admin/transport/requests"
+      >Availability requests</a
+    >
   </div>
 </section>
 
@@ -53,28 +36,20 @@ endblock %} {% block content %}
 
 <section class="stats" aria-label="Booking overview">
   <div class="stat">
-    <span>All bookings</span>
-    <strong>{{ stats.total_bookings or 0 }}</strong>
+    <span>All bookings</span><strong>{{ stats.total_bookings or 0 }}</strong>
   </div>
-
   <div class="stat">
-    <span>Pending requests</span>
-    <strong>{{ stats.pending_bookings or 0 }}</strong>
+    <span>Pending requests</span
+    ><strong>{{ stats.pending_bookings or 0 }}</strong>
   </div>
-
   <div class="stat">
-    <span>Confirmed</span>
-    <strong>{{ stats.confirmed_bookings or 0 }}</strong>
+    <span>Confirmed</span><strong>{{ stats.confirmed_bookings or 0 }}</strong>
   </div>
-
   <div class="stat">
-    <span>Paid bookings</span>
-    <strong>{{ stats.paid_bookings or 0 }}</strong>
+    <span>Paid bookings</span><strong>{{ stats.paid_bookings or 0 }}</strong>
   </div>
-
   <div class="stat">
-    <span>Seats held</span>
-    <strong>{{ stats.held_seats or 0 }}</strong>
+    <span>Seats held</span><strong>{{ stats.held_seats or 0 }}</strong>
   </div>
 </section>
 
@@ -86,14 +61,12 @@ endblock %} {% block content %}
         Confirmed and paid bookings count against seat capacity.
       </p>
     </div>
-
-    <span class="badge">
-      {{ trips|length }} trip{% if trips|length != 1 %}s{% endif %}
-    </span>
+    <span class="badge"
+      >{{ trips|length }} trip{% if trips|length != 1 %}s{% endif %}</span
+    >
   </div>
 
   {% if trips %}
-
   <div class="table-wrap">
     <table>
       <thead>
@@ -107,17 +80,15 @@ endblock %} {% block content %}
           <th>Actions</th>
         </tr>
       </thead>
-
       <tbody>
         {% for trip in trips %}
         <tr>
           <td>
             <div class="route">
               {{ trip.route_from|e }} → {{ trip.route_to|e }}
-
               <small>
-                {{ trip.operator_name|e }} {% if trip.vehicle_type %} · {{
-                trip.vehicle_type|e }} {% endif %}
+                {{ trip.operator_name|e }}{% if trip.vehicle_type %} · {{
+                trip.vehicle_type|e }}{% endif %}
               </small>
             </div>
           </td>
@@ -125,40 +96,28 @@ endblock %} {% block content %}
           <td>
             {{ trip.departure_date.strftime('%d %b %Y') if
             trip.departure_date.strftime is defined else trip.departure_date }}
-
-            <small class="muted" style="display: block">
+            <small>
               {{ trip.departure_time.strftime('%H:%M') if
               trip.departure_time.strftime is defined else trip.departure_time
               }}
             </small>
           </td>
 
-          <td>
-            <strong>KSh {{ "{:,.2f}".format(trip.price) }}</strong>
-          </td>
+          <td><strong>KSh {{ "{:,.2f}".format(trip.price) }}</strong></td>
 
           <td>
             <strong>{{ trip.seats_left }}</strong> / {{ trip.seats_total }} left
-
-            <small class="muted" style="display: block">
-              {{ trip.seats_total - trip.seats_left }} held
-            </small>
+            <small>{{ trip.seats_total - trip.seats_left }} held</small>
           </td>
 
           <td>
-            {{ trip.booking_count or 0 }} total {% if trip.pending_count %}
-            <small class="muted" style="display: block">
-              {{ trip.pending_count }} pending
-            </small>
-            {% endif %}
+            {{ trip.booking_count or 0 }} total {% if trip.pending_count
+            %}<small>{{ trip.pending_count }} pending</small>{% endif %}
           </td>
 
           <td>
-            <span class="badge {{ trip.status|e }}"> {{ trip.status|e }} </span>
-
-            {% if not trip.is_active %}
-            <small class="muted"> · hidden</small>
-            {% endif %}
+            <span class="badge {{ trip.status|e }}">{{ trip.status|e }}</span>
+            {% if not trip.is_active %}<small>hidden</small>{% endif %}
           </td>
 
           <td>
@@ -166,16 +125,13 @@ endblock %} {% block content %}
               <a
                 class="btn small"
                 href="{{ url_for('admin_trip_bookings', trip_id=trip.id) }}"
+                >Bookings</a
               >
-                Bookings
-              </a>
-
               <a
                 class="btn small secondary"
                 href="{{ url_for('admin_trip_form_edit', trip_id=trip.id) }}"
+                >Edit</a
               >
-                Edit
-              </a>
 
               {% if trip.booking_count|int == 0 %}
               <form
@@ -190,7 +146,6 @@ endblock %} {% block content %}
                   value="{{ csrf_token() }}"
                 />
                 {% endif %}
-
                 <button class="btn small danger" type="submit">Delete</button>
               </form>
               {% endif %}
@@ -203,19 +158,16 @@ endblock %} {% block content %}
   </div>
 
   {% else %}
-
   <div class="empty">
-    <strong>No trips have been created</strong>
-
-    <p>Create your first legacy trip departure to manage it here.</p>
-
+    <strong>No trips yet</strong>
+    <p>
+      Trips will appear here. Add transport companies and routes on the
+      Transport page.
+    </p>
     <p style="margin-top: 16px">
-      <a class="btn" href="{{ url_for('admin_trip_form_new') }}">
-        Create your first trip
-      </a>
+      <a class="btn" href="/admin/transport">Open transport management</a>
     </p>
   </div>
-
   {% endif %}
 </section>
 
