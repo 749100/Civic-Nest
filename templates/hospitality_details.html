@@ -554,7 +554,7 @@
         </nav>
 
         <div class="right">
-          <a class="t" href="{{ url_for('home') }}#properties">
+          <a class="t" href="{{ url_for('saved_properties') }}" data-saved-link>
             <svg class="i" aria-hidden="true">
               <use href="#i-heart" />
             </svg>
@@ -563,12 +563,12 @@
 
           <a
             class="t"
-            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+            href="{{ url_for('tenant_inquiries') if current_user.is_authenticated else url_for('login') }}"
           >
             <svg class="i" aria-hidden="true">
               <use href="#i-chat" />
             </svg>
-            Chats
+            Inquiries
           </a>
 
           {% if current_user.is_authenticated %}
@@ -915,12 +915,12 @@
       </a>
 
       <a
-        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+        href="{{ url_for('tenant_inquiries') if current_user.is_authenticated else url_for('login') }}"
       >
         <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
           <use href="#i-chat" />
         </svg>
-        Chats
+        Inquiries
       </a>
 
       <a href="{{ url_for('sell_page') }}">

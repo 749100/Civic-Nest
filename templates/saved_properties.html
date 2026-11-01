@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, follow" />
+    <title>Saved properties | CivicNest Africa</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+  </head>
+  <body>
+    {% include "_site_nav.html" %}
+    <main class="sb">
+      <section class="hero h">
+        <div class="wrap">
+          <div class="eyebrow">Your shortlist</div>
+          <h1>Saved properties</h1>
+          <p>Listings saved in this browser.</p>
+        </div>
+      </section>
+      <section class="sec h">
+        <div class="wrap">
+          {% if properties %}
+          <div class="plist">
+            {% for property in properties %}
+            <article class="card saved-property" data-property-id="{{ property.id }}">
+              <div class="photo">
+                {% if property.cover_image %}
+                <img
+                  src="{{ property.cover_image|photo_url }}"
+                  alt="{{ property.title }}"
+                  loading="lazy"
+                />
+                {% endif %}
+              </div>
+              <div class="info">
+                <div class="price">
+                  KSh {{ "{:,.0f}".format(property.price) }}{% if property.listing_type == 'rent' %}/month{% endif %}
+                </div>
+                <h3>{{ property.title }}</h3>
+                <div class="loc">{{ property.location }}</div>
+                <a
+                  class="more"
+                  href="{{ url_for('property_details', property_id=property.id) }}"
+                  >View Details</a
+                >
+                <button class="remove-saved" type="button">Remove from saved</button>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty">
+            <h3>No saved properties</h3>
+            <p>
+              Save listings with the heart button and they will appear here on
+              this browser.
+            </p>
+            <a class="more" href="{{ url_for('rent_page') }}">Browse properties</a>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+    {% include "_site_foot.html" %}
+    <script>
+      (function () {
+        "use strict";
+        if (!new URLSearchParams(window.location.search).has("ids")) {
+          try {
+            var storedForRedirect = JSON.parse(
+              localStorage.getItem("civicNestFavorites") || "[]",
+            );
+            if (Array.isArray(storedForRedirect) && storedForRedirect.length) {
+              window.location.replace(
+                "{{ url_for('saved_properties') }}?ids=" +
+                  encodeURIComponent(storedForRedirect.slice(0, 50).join(",")),
+              );
+              return;
+            }
+          } catch (error) {}
+        }
+
+        var savedIds = [];
+        try {
+          var stored = JSON.parse(
+            localStorage.getItem("civicNestFavorites") || "[]",
+          );
+          if (Array.isArray(stored)) savedIds = stored.map(String);
+        } catch (error) {
+          savedIds = [];
+        }
+
+        document.querySelectorAll(".remove-saved").forEach(function (button) {
+          button.addEventListener("click", function () {
+            var card = button.closest("[data-property-id]");
+            var id = card.dataset.propertyId;
+            savedIds = savedIds.filter(function (savedId) {
+              return savedId !== id;
+            });
+            localStorage.setItem(
+              "civicNestFavorites",
+              JSON.stringify(savedIds),
+            );
+            window.location.href =
+              "{{ url_for('saved_properties') }}?ids=" +
+              encodeURIComponent(savedIds.join(","));
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

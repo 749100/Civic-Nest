@@ -3,8 +3,6 @@ Allow: /
 Allow: /rent
 Allow: /buy
 Allow: /sell
-Allow: /schools
-Allow: /hospitals
 Allow: /property/*
 
 # Disallow private/authenticated user routes

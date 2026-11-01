@@ -637,7 +637,7 @@
         </nav>
 
         <div class="right">
-          <a class="t" href="{{ url_for('home') }}#properties">
+          <a class="t" href="{{ url_for('saved_properties') }}" data-saved-link>
             <svg class="i" aria-hidden="true">
               <use href="#i-heart" />
             </svg>
@@ -646,12 +646,12 @@
 
           <a
             class="t"
-            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+            href="{{ url_for('tenant_inquiries') if current_user.is_authenticated else url_for('login') }}"
           >
             <svg class="i" aria-hidden="true">
               <use href="#i-chat" />
             </svg>
-            Chats
+            Inquiries
           </a>
 
           {% if current_user.is_authenticated %}
@@ -1063,12 +1063,12 @@
       </a>
 
       <a
-        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
+        href="{{ url_for('tenant_inquiries') if current_user.is_authenticated else url_for('login') }}"
       >
         <svg class="i" style="width: 22px; height: 22px" aria-hidden="true">
           <use href="#i-chat" />
         </svg>
-        Chats
+        Inquiries
       </a>
 
       <a href="{{ url_for('sell_page') }}">
@@ -1128,12 +1128,21 @@
             localStorage.getItem("civicNestFavorites") || "[]",
           );
         } catch (e) {}
+        if (!Array.isArray(favorites)) favorites = [];
 
         const paint = (btn, on) => {
           btn.textContent = on ? "♥" : "♡";
           btn.style.color = on ? "#ef4444" : "";
           btn.setAttribute("aria-pressed", String(on));
         };
+        const updateSavedLinks = () => {
+          document.querySelectorAll("[data-saved-link]").forEach((link) => {
+            link.href =
+              "{{ url_for('saved_properties') }}?ids=" +
+              encodeURIComponent(favorites.slice(0, 50).join(","));
+          });
+        };
+        updateSavedLinks();
 
         document.querySelectorAll(".fav").forEach((btn, i) => {
           const id = btn.closest(".card")?.dataset.propertyId || String(i);
@@ -1155,6 +1164,7 @@
             } catch (err) {}
 
             paint(btn, on);
+            updateSavedLinks();
           });
         });
 

@@ -580,18 +580,18 @@
         </nav>
 
         <div class="right">
-          <a class="t" href="{{ url_for('home') }}#properties">
+          <a class="t" href="{{ url_for('saved_properties') }}" data-saved-link>
             <svg class="i" aria-hidden="true">
               <use href="#i-heart" />
             </svg>
             Saved
           </a>
 
-          <a class="t" href="{{ url_for('landlord_dashboard') }}">
+          <a class="t" href="{{ url_for('tenant_inquiries') }}">
             <svg class="i" aria-hidden="true">
               <use href="#i-chat" />
             </svg>
-            Chats
+            Inquiries
           </a>
 
           <a class="signin" href="{{ url_for('landlord_dashboard') }}"

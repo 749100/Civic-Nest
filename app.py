@@ -1,12 +1,13 @@
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
-    abort, jsonify, send_from_directory, Response
+    abort, jsonify, send_from_directory, Response, session
 )
 import io
 from PIL import Image, ImageOps
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
 import html
+import hmac
 
 load_dotenv()  # Ensure .env is loaded and overrides any existing environment variables
 
@@ -15,6 +16,7 @@ import re
 import html
 import threading
 import json
+import secrets
 import requests
 import psycopg
 from functools import wraps
@@ -992,7 +994,11 @@ def load_user(user_id):
 # =========================================================
 
 
-def get_active_properties(limit, category=None, listing_type="rent"):
+def get_active_properties(limit, category=None, listing_type="rent",
+                          property_ids=None):
+    if property_ids is not None and not property_ids:
+        return []
+
     connection = None
     cursor = None
 
@@ -1022,7 +1028,10 @@ def get_active_properties(limit, category=None, listing_type="rent"):
         """
         params = []
 
-        if listing_type:
+        if property_ids is not None:
+            query += " AND p.id = ANY(%s)"
+            params.append(property_ids)
+        elif listing_type:
             query += " AND p.listing_type = %s"
             params.append(listing_type)
 
@@ -1051,6 +1060,31 @@ def home():
     except Exception:
         app.logger.exception("HOME PAGE ERROR")
         return render_template("index.html", properties=[])            
+
+
+@app.route("/saved")
+def saved_properties():
+    raw_ids = request.args.get("ids", "")
+    property_ids = []
+    for raw_id in raw_ids.split(","):
+        if raw_id.isdecimal():
+            property_id = int(raw_id)
+            if property_id not in property_ids:
+                property_ids.append(property_id)
+        if len(property_ids) >= 50:
+            break
+
+    try:
+        properties = get_active_properties(
+            50, listing_type=None, property_ids=property_ids
+        )
+        return render_template(
+            "saved_properties.html", properties=properties
+        )
+    except Exception:
+        app.logger.exception("SAVED PROPERTIES ERROR")
+        flash("Unable to load saved properties right now.", "error")
+        return redirect(url_for("home"))
 
 
 @app.route("/rent")
@@ -1937,6 +1971,40 @@ def dashboard():
     return redirect(
         url_for("home")
     )
+
+
+@app.route("/inquiries")
+@login_required
+def tenant_inquiries():
+    if current_user.role == "landlord":
+        return redirect(url_for("landlord_dashboard"))
+    if current_user.role == "admin":
+        return redirect(url_for("admin_dashboard"))
+    if current_user.role != "student":
+        return redirect(url_for("dashboard"))
+
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                SELECT i.id, i.message, i.status, i.created_at,
+                       p.id AS property_id, p.title AS property_title
+                FROM inquiries i
+                JOIN properties p ON p.id = i.property_id
+                WHERE i.student_id = %s
+                ORDER BY i.created_at DESC
+                LIMIT 100
+                """,
+                (current_user.id,),
+            )
+            inquiries = cursor.fetchall()
+        return render_template("tenant_inquiries.html", inquiries=inquiries)
+    except Exception:
+        app.logger.exception("TENANT INQUIRIES ERROR")
+        flash("Unable to load your inquiries right now.", "error")
+        return redirect(url_for("home"))
 
 
 # =========================================================
@@ -3456,6 +3524,23 @@ def delete_property(property_id):
 # =========================================================
         
 
+def _roommate_csrf_token():
+    token = session.get("roommate_csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["roommate_csrf_token"] = token
+    return token
+
+
+def _valid_roommate_csrf_token():
+    expected = session.get("roommate_csrf_token")
+    submitted = request.form.get("csrf_token", "")
+    return bool(
+        expected
+        and submitted
+        and hmac.compare_digest(expected, submitted)
+    )
+
 
 @app.route("/roommates")
 @login_required
@@ -3478,11 +3563,12 @@ def roommate_finder():
         cursor.execute(
             """
             SELECT
-                rp.*,
-                u.id AS user_id,
-                u.full_name,
-                u.profile_image,
-                u.phone
+                rp.id,
+                rp.campus,
+                rp.budget_min,
+                rp.budget_max,
+                rp.accommodation_type,
+                rp.people_needed
             FROM roommate_profiles rp
             JOIN users u ON rp.user_id = u.id
             WHERE rp.is_active = TRUE
@@ -3494,15 +3580,60 @@ def roommate_finder():
             (current_user.id,)
         )
         roommates = cursor.fetchall()
-        for roommate in roommates:
-            roommate["whatsapp_phone"] = normalize_whatsapp_number(
-                roommate.get("phone")
+
+        cursor.execute(
+            """
+            SELECT
+                c.id,
+                c.status,
+                c.requester_id,
+                c.receiver_id,
+                c.requester_met_at,
+                c.receiver_met_at,
+                c.released_at,
+                CASE WHEN c.requester_id = %s
+                     THEN c.receiver_id ELSE c.requester_id END AS other_user_id,
+                (
+                    SELECT rp.id
+                    FROM roommate_profiles rp
+                    WHERE rp.user_id = CASE WHEN c.requester_id = %s
+                                            THEN c.receiver_id
+                                            ELSE c.requester_id END
+                ) AS other_profile_id
+            FROM roommate_connections c
+            WHERE c.requester_id = %s OR c.receiver_id = %s
+            ORDER BY c.created_at DESC
+            LIMIT 100
+            """,
+            (
+                current_user.id,
+                current_user.id,
+                current_user.id,
+                current_user.id,
+            ),
+        )
+        connections = cursor.fetchall()
+        for connection_item in connections:
+            connection_item["is_requester"] = (
+                connection_item["requester_id"] == current_user.id
+            )
+            connection_item["my_meeting_confirmed"] = bool(
+                connection_item["requester_met_at"]
+                if connection_item["is_requester"]
+                else connection_item["receiver_met_at"]
+            )
+            connection_item["other_meeting_confirmed"] = bool(
+                connection_item["receiver_met_at"]
+                if connection_item["is_requester"]
+                else connection_item["requester_met_at"]
             )
 
         return render_template(
             "roommate_finder.html",
             roommates=roommates,
-            my_profile=my_profile
+            my_profile=my_profile,
+            connections=connections,
+            csrf_token=_roommate_csrf_token(),
         )
     except Exception:
         app.logger.exception("ROOMMATE FINDER ERROR")
@@ -3707,12 +3838,7 @@ def roommate_profile(profile_id):
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
             """
-            SELECT
-                rp.*,
-                u.id AS user_id,
-                u.full_name,
-                u.profile_image,
-                u.phone
+            SELECT rp.id, rp.user_id
             FROM roommate_profiles rp
             JOIN users u ON rp.user_id = u.id
             WHERE rp.id = %s
@@ -3720,19 +3846,78 @@ def roommate_profile(profile_id):
               AND (rp.is_active = TRUE OR rp.user_id = %s)
             LIMIT 1
             """,
-            (profile_id, current_user.id)
+            (profile_id, current_user.id),
         )
-        profile = cursor.fetchone()
-        if not profile:
+        profile_owner = cursor.fetchone()
+        if not profile_owner:
             flash("That roommate profile is unavailable.", "error")
             return redirect(url_for("roommate_finder"))
 
-        profile["whatsapp_phone"] = normalize_whatsapp_number(
-            profile.get("phone")
+        show_full_details = (
+            current_user.role == "admin"
+            or profile_owner["user_id"] == current_user.id
         )
-        return render_template("roommate_profile.html", profile=profile)
-    except Exception as e:
-        print("ROOMMATE PROFILE ERROR:", e)
+        if not show_full_details:
+            cursor.execute(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM roommate_connections c
+                    WHERE c.status = 'accepted'
+                      AND c.released_at IS NOT NULL
+                      AND (
+                        (c.requester_id = %s AND c.receiver_id = %s)
+                        OR
+                        (c.requester_id = %s AND c.receiver_id = %s)
+                      )
+                ) AS details_released
+                """,
+                (
+                    current_user.id,
+                    profile_owner["user_id"],
+                    profile_owner["user_id"],
+                    current_user.id,
+                ),
+            )
+            show_full_details = cursor.fetchone()["details_released"]
+
+        if show_full_details:
+            cursor.execute(
+                """
+                SELECT rp.*, u.id AS user_id, u.full_name,
+                       u.profile_image, u.phone
+                FROM roommate_profiles rp
+                JOIN users u ON rp.user_id = u.id
+                WHERE rp.id = %s
+                LIMIT 1
+                """,
+                (profile_id,),
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT rp.id, rp.campus, rp.budget_min, rp.budget_max,
+                       rp.accommodation_type, rp.people_needed
+                FROM roommate_profiles rp
+                WHERE rp.id = %s
+                LIMIT 1
+                """,
+                (profile_id,),
+            )
+        profile = cursor.fetchone()
+        if show_full_details:
+            profile["whatsapp_phone"] = normalize_whatsapp_number(
+                profile.get("phone")
+            )
+        return render_template(
+            "roommate_profile.html",
+            profile=profile,
+            show_full_details=show_full_details,
+            is_own_profile=profile_owner["user_id"] == current_user.id,
+            csrf_token=_roommate_csrf_token(),
+        )
+    except Exception:
+        app.logger.exception("ROOMMATE PROFILE ERROR")
         flash("Unable to load that roommate profile right now.", "error")
         return redirect(url_for("roommate_finder"))
     finally:
@@ -3740,6 +3925,186 @@ def roommate_profile(profile_id):
             cursor.close()
         if connection:
             connection.close()
+
+
+@app.route("/roommates/request/<int:profile_id>", methods=["POST"])
+@login_required
+def request_roommate_meeting(profile_id):
+    if not _valid_roommate_csrf_token():
+        abort(400)
+    if current_user.role != "student":
+        flash("Only students can request a roommate meeting.", "error")
+        return redirect(url_for("roommate_finder"))
+
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                SELECT rp.user_id
+                FROM roommate_profiles rp
+                JOIN users u ON u.id = rp.user_id
+                WHERE rp.id = %s AND rp.is_active = TRUE
+                  AND u.role = 'student'
+                """,
+                (profile_id,),
+            )
+            target = cursor.fetchone()
+            if not target or target["user_id"] == current_user.id:
+                flash("That roommate profile is unavailable.", "error")
+                return redirect(url_for("roommate_finder"))
+
+            cursor.execute(
+                """
+                SELECT id, status
+                FROM roommate_connections
+                WHERE (requester_id = %s AND receiver_id = %s)
+                   OR (requester_id = %s AND receiver_id = %s)
+                LIMIT 1
+                """,
+                (
+                    current_user.id,
+                    target["user_id"],
+                    target["user_id"],
+                    current_user.id,
+                ),
+            )
+            existing = cursor.fetchone()
+            if existing:
+                flash(
+                    "A meeting request already exists for this profile.",
+                    "info",
+                )
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO roommate_connections
+                        (requester_id, receiver_id, status, created_at)
+                    VALUES (%s, %s, 'pending', NOW())
+                    ON CONFLICT DO NOTHING
+                    RETURNING id
+                    """,
+                    (current_user.id, target["user_id"]),
+                )
+                if cursor.fetchone():
+                    flash("Your anonymous meeting request was sent.", "success")
+                else:
+                    flash(
+                        "A meeting request was already sent for this profile.",
+                        "info",
+                    )
+        return redirect(url_for("roommate_finder"))
+    except Exception:
+        app.logger.exception("ROOMMATE MEETING REQUEST ERROR")
+        flash("Unable to send the meeting request right now.", "error")
+        return redirect(url_for("roommate_finder"))
+
+
+@app.route(
+    "/roommates/connections/<int:connection_id>/status",
+    methods=["POST"],
+)
+@login_required
+def respond_to_roommate_request(connection_id):
+    if not _valid_roommate_csrf_token():
+        abort(400)
+    if current_user.role != "student":
+        flash("Only students can respond to roommate requests.", "error")
+        return redirect(url_for("roommate_finder"))
+
+    action = request.form.get("action", "")
+    if action not in {"accept", "decline"}:
+        abort(400)
+
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                UPDATE roommate_connections
+                SET status = %s
+                WHERE id = %s AND receiver_id = %s AND status = 'pending'
+                RETURNING id
+                """,
+                (
+                    "accepted" if action == "accept" else "declined",
+                    connection_id,
+                    current_user.id,
+                ),
+            )
+            if cursor.fetchone():
+                flash(
+                    "Meeting request accepted."
+                    if action == "accept"
+                    else "Meeting request declined.",
+                    "success",
+                )
+            else:
+                flash("That meeting request is no longer available.", "error")
+        return redirect(url_for("roommate_finder"))
+    except Exception:
+        app.logger.exception("ROOMMATE REQUEST RESPONSE ERROR")
+        flash("Unable to update the meeting request right now.", "error")
+        return redirect(url_for("roommate_finder"))
+
+
+@app.route(
+    "/roommates/connections/<int:connection_id>/confirm-meeting",
+    methods=["POST"],
+)
+@login_required
+def confirm_roommate_meeting(connection_id):
+    if not _valid_roommate_csrf_token():
+        abort(400)
+    if current_user.role != "student":
+        flash("Only students can confirm a roommate meeting.", "error")
+        return redirect(url_for("roommate_finder"))
+
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                UPDATE roommate_connections
+                SET requester_met_at = CASE
+                        WHEN requester_id = %s
+                        THEN COALESCE(requester_met_at, NOW())
+                        ELSE requester_met_at
+                    END,
+                    receiver_met_at = CASE
+                        WHEN receiver_id = %s
+                        THEN COALESCE(receiver_met_at, NOW())
+                        ELSE receiver_met_at
+                    END
+                WHERE id = %s
+                  AND status = 'accepted'
+                  AND (requester_id = %s OR receiver_id = %s)
+                RETURNING id
+                """,
+                (
+                    current_user.id,
+                    current_user.id,
+                    connection_id,
+                    current_user.id,
+                    current_user.id,
+                ),
+            )
+            if cursor.fetchone():
+                flash(
+                    "Your meeting confirmation was recorded. An admin will "
+                    "review it before sharing contact details.",
+                    "success",
+                )
+            else:
+                flash("This meeting cannot be confirmed yet.", "error")
+        return redirect(url_for("roommate_finder"))
+    except Exception:
+        app.logger.exception("ROOMMATE MEETING CONFIRMATION ERROR")
+        flash("Unable to confirm the meeting right now.", "error")
+        return redirect(url_for("roommate_finder"))
 
 
 @app.route("/roommates/toggle-profile", methods=["POST"])
@@ -3779,6 +4144,95 @@ def toggle_roommate_profile():
             cursor.close()
         if connection:
             connection.close()
+
+
+@app.route("/admin/roommates")
+@admin_required
+def admin_roommates():
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                SELECT rp.*, u.id AS user_id, u.full_name, u.email, u.phone
+                FROM roommate_profiles rp
+                JOIN users u ON u.id = rp.user_id
+                ORDER BY rp.created_at DESC
+                LIMIT 200
+                """
+            )
+            profiles = cursor.fetchall()
+            cursor.execute(
+                """
+                SELECT c.id, c.status, c.requester_met_at,
+                       c.receiver_met_at, c.released_at,
+                       requester.full_name AS requester_name,
+                       requester.phone AS requester_phone,
+                       receiver.full_name AS receiver_name,
+                       receiver.phone AS receiver_phone
+                FROM roommate_connections c
+                JOIN users requester ON requester.id = c.requester_id
+                JOIN users receiver ON receiver.id = c.receiver_id
+                WHERE c.status = 'accepted'
+                ORDER BY c.created_at DESC
+                LIMIT 200
+                """
+            )
+            connections = cursor.fetchall()
+        return render_template(
+            "admin/admin_roommates.html",
+            profiles=profiles,
+            connections=connections,
+            csrf_token=_roommate_csrf_token(),
+        )
+    except Exception:
+        app.logger.exception("ADMIN ROOMMATES ERROR")
+        flash("Unable to load roommate management right now.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+
+@app.route(
+    "/admin/roommates/connections/<int:connection_id>/release",
+    methods=["POST"],
+)
+@admin_required
+def admin_release_roommate_details(connection_id):
+    if not _valid_roommate_csrf_token():
+        abort(400)
+    try:
+        with get_db_connection() as connection, connection.cursor(
+            row_factory=dict_row
+        ) as cursor:
+            cursor.execute(
+                """
+                UPDATE roommate_connections
+                SET released_at = NOW(), released_by = %s
+                WHERE id = %s
+                  AND status = 'accepted'
+                  AND requester_met_at IS NOT NULL
+                  AND receiver_met_at IS NOT NULL
+                  AND released_at IS NULL
+                RETURNING id
+                """,
+                (current_user.id, connection_id),
+            )
+            if cursor.fetchone():
+                flash(
+                    "Roommate details were released to both students.",
+                    "success",
+                )
+            else:
+                flash(
+                    "Both students must confirm their meeting before details "
+                    "can be released.",
+                    "error",
+                )
+        return redirect(url_for("admin_roommates"))
+    except Exception:
+        app.logger.exception("ADMIN ROOMMATE DETAILS RELEASE ERROR")
+        flash("Unable to release roommate details right now.", "error")
+        return redirect(url_for("admin_roommates"))
 
 
 @app.route("/admin/dashboard")

@@ -86,13 +86,13 @@
     </nav>
 
     <div class="right">
-      <a class="t" href="{{ url_for('home') }}#properties"
+      <a class="t" href="{{ url_for('saved_properties') }}" data-saved-link
         ><svg class="i"><use href="#i-heart" /></svg>Saved</a
       >
       <a
         class="t"
-        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
-        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+        href="{{ url_for('tenant_inquiries') if current_user.is_authenticated and current_user.role == 'student' else (url_for('dashboard') if current_user.is_authenticated else url_for('login')) }}"
+        ><svg class="i"><use href="#i-chat" /></svg>Inquiries</a
       >
       {% if current_user.is_authenticated %}
       <a class="signin" href="{{ url_for('logout') }}">Log out</a>
@@ -131,6 +131,27 @@
     {% endif %}
   </nav>
 </header>
+
+<script>
+  (function () {
+    var links = document.querySelectorAll("[data-saved-link]");
+    if (!links.length) return;
+    try {
+      var ids = JSON.parse(localStorage.getItem("civicNestFavorites") || "[]");
+      if (!Array.isArray(ids)) ids = [];
+      var target =
+        "{{ url_for('saved_properties') }}?ids=" +
+        encodeURIComponent(ids.slice(0, 50).join(","));
+      links.forEach(function (link) {
+        link.href = target;
+      });
+    } catch (error) {
+      links.forEach(function (link) {
+        link.href = "{{ url_for('saved_properties') }}";
+      });
+    }
+  })();
+</script>
 
 {% with messages = get_flashed_messages(with_categories=true) %} {% if messages
 %}

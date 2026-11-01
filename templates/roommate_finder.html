@@ -44,8 +44,8 @@
             <input
               type="search"
               id="searchInput"
-              placeholder="Search by name, campus or location..."
-              aria-label="Search by name, campus or location"
+              placeholder="Search by campus or accommodation type..."
+              aria-label="Search by campus or accommodation type"
           /></label>
           <button class="go" type="submit" aria-label="Search roommates">
             <svg class="i"><use href="#i-arrow" /></svg>
@@ -86,7 +86,7 @@
                     my profile' }}</strong
                   >
                   <small
-                    >{{ 'Visible to other students' if my_profile.is_active else
+                    >{{ 'Anonymous summary only; details are private' if my_profile.is_active else
                     'Currently hidden' }}</small
                   >
                 </span>
@@ -116,6 +116,74 @@
             </div>
             {% endif %}
           </div>
+
+          {% if connections %}
+          <div class="rlabel">Meeting requests</div>
+          <div class="rm-grid">
+            {% for connection in connections %}
+            <article class="card rm-card">
+              <div class="rm-who">
+                <div>
+                  <strong>Anonymous roommate request</strong>
+                  <p>
+                    {{ connection.status|capitalize }}
+                    {% if connection.released_at %} · Details released{% endif %}
+                  </p>
+                </div>
+              </div>
+
+              {% if connection.status == 'pending' and not
+              connection.is_requester %}
+              <div class="rm-links">
+                <form
+                  method="post"
+                  action="{{ url_for('respond_to_roommate_request', connection_id=connection.id) }}"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                  <input type="hidden" name="action" value="accept" />
+                  <button class="rbtn" type="submit">Accept meeting request</button>
+                </form>
+                <form
+                  method="post"
+                  action="{{ url_for('respond_to_roommate_request', connection_id=connection.id) }}"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                  <input type="hidden" name="action" value="decline" />
+                  <button class="rbtn ghost" type="submit">Decline</button>
+                </form>
+              </div>
+              {% elif connection.status == 'accepted' %}
+              <p class="rm-bio">
+                Your confirmation:
+                {{ 'received' if connection.my_meeting_confirmed else 'not yet received' }}.
+                Other student:
+                {{ 'confirmed' if connection.other_meeting_confirmed else 'not yet confirmed' }}.
+                Both students must confirm in-person meeting; an admin must then
+                release contact details.
+              </p>
+              {% if not connection.my_meeting_confirmed %}
+              <form
+                method="post"
+                action="{{ url_for('confirm_roommate_meeting', connection_id=connection.id) }}"
+              >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <button class="rbtn" type="submit">
+                  Confirm we met in person
+                </button>
+              </form>
+              {% endif %}
+              {% if connection.released_at and connection.other_profile_id %}
+              <a
+                class="rbtn good block"
+                href="{{ url_for('roommate_profile', profile_id=connection.other_profile_id) }}"
+                >View released roommate details</a
+              >
+              {% endif %}
+              {% endif %}
+            </article>
+            {% endfor %}
+          </div>
+          {% endif %}
 
           <div class="rlabel">Find your match</div>
           <div class="rm-filters">
@@ -166,38 +234,25 @@
             {% for roommate in roommates %}
             <article
               class="card rm-card roommate-card"
-              data-name="{{ roommate.full_name|lower }}"
               data-campus="{{ (roommate.campus or '')|lower }}"
-              data-location="{{ (roommate.preferred_location or '')|lower }}"
               data-type="{{ (roommate.accommodation_type or '')|lower }}"
-              data-budget="{{ roommate.budget_max or 0 }}"
+              data-budget="{{ ((roommate.budget_max|default(0, true)|int / 5000)|round(0, 'ceil')|int * 5000) }}"
             >
               <div class="rm-who">
                 <span class="ravatar">
-                  {% if roommate.profile_image %}
-                  <img
-                    src="{{ url_for('static', filename='uploads/' ~ roommate.profile_image) }}"
-                    alt="Profile photo of {{ roommate.full_name }}"
-                    loading="lazy"
-                  />
-                  {% else %}{{ roommate.full_name[0]|upper }}{% endif %}
+                  {{ loop.index }}
                 </span>
                 <div>
-                  <strong>{{ roommate.full_name }}</strong>
+                  <strong>Anonymous roommate</strong>
                   <p>{{ roommate.campus or 'Campus not specified' }}</p>
                 </div>
               </div>
 
               <div class="rtags">
-                {% if roommate.preferred_location %}<span class="rtag"
-                  >{{ roommate.preferred_location }}</span
-                >{% endif %} {% if roommate.budget_min or roommate.budget_max %}
+                {% if roommate.budget_max %}
+                {% set budget_ceiling = ((roommate.budget_max|int / 5000)|round(0, 'ceil')|int * 5000) %}
                 <span class="rtag g"
-                  >KSh {% if roommate.budget_min %}{{
-                  "{:,.0f}".format(roommate.budget_min) }}{% endif %}{% if
-                  roommate.budget_min and roommate.budget_max %} – {% endif %}{%
-                  if roommate.budget_max %}{{
-                  "{:,.0f}".format(roommate.budget_max) }}{% endif %}</span
+                  >Budget up to KSh {{ "{:,.0f}".format(budget_ceiling) }}/month</span
                 >
                 {% endif %} {% if roommate.accommodation_type %}<span
                   class="rtag p"
@@ -206,26 +261,25 @@
               </div>
 
               <p class="rm-bio">
-                {% if roommate.bio %}{{ roommate.bio[:150] }}{% if
-                roommate.bio|length > 150 %}...{% endif %}{% else %}This person
-                has not added a bio yet.{% endif %}
+                Personal profile details stay private until after an in-person
+                meeting and admin approval.
               </p>
 
               <div class="rm-links">
                 <a
                   class="rbtn block"
                   href="{{ url_for('roommate_profile', profile_id=roommate.id) }}"
-                  >View profile</a
+                  >View anonymous summary</a
                 >
-                {% if roommate.whatsapp_phone %}
-                <a
-                  class="rbtn good block"
-                  href="https://wa.me/{{ roommate.whatsapp_phone }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Message on WhatsApp</a
+                <form
+                  method="post"
+                  action="{{ url_for('request_roommate_meeting', profile_id=roommate.id) }}"
                 >
-                {% endif %}
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                  <button class="rbtn good block" type="submit">
+                    Request a meeting
+                  </button>
+                </form>
               </div>
             </article>
             {% endfor %}
@@ -286,9 +340,8 @@
             var maxBudget = parseFloat(card.dataset.budget || "0");
             var matchesSearch =
               !q ||
-              (card.dataset.name || "").indexOf(q) !== -1 ||
               (card.dataset.campus || "").indexOf(q) !== -1 ||
-              (card.dataset.location || "").indexOf(q) !== -1;
+              (card.dataset.type || "").indexOf(q) !== -1;
             var matchesType =
               !type || (card.dataset.type || "").indexOf(type) !== -1;
             var matchesBudget = !budget || maxBudget <= parseFloat(budget);

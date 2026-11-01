@@ -9,7 +9,7 @@
     </nav>
 
     <div class="cn-header-actions">
-      <a class="cn-saved-link" href="{{ url_for('home') }}#properties">
+      <a class="cn-saved-link" href="{{ url_for('saved_properties') }}" data-saved-link>
         <span aria-hidden="true">♡</span>
         Saved
         <span id="savedCount">0</span>
@@ -90,7 +90,7 @@
     <a href="{{ url_for('roommate_finder') }}" {% if request.endpoint in ['roommate_finder', 'roommate_profile', 'roommate_requests', 'create_roommate_profile', 'edit_roommate_profile'] %}aria-current="page"{% endif %}>Roommate finder <span aria-hidden="true">→</span></a>
   </nav>
   <div class="cn-drawer-footer">
-    <a class="cn-drawer-secondary" href="{{ url_for('home') }}#properties">Saved properties</a>
+    <a class="cn-drawer-secondary" href="{{ url_for('saved_properties') }}" data-saved-link>Saved properties</a>
     {% if current_user.is_authenticated %}
     <a class="cn-drawer-secondary" href="{{ url_for('dashboard') }}">My account</a>
     {% if current_user.role == 'admin' %}

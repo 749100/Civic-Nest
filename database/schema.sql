@@ -301,6 +301,14 @@ CREATE TABLE roommate_connections (
 
     created_at DATETIME NOT NULL,
 
+    requester_met_at DATETIME NULL,
+
+    receiver_met_at DATETIME NULL,
+
+    released_at DATETIME NULL,
+
+    released_by INT NULL,
+
     UNIQUE(requester_id, receiver_id),
 
     FOREIGN KEY (requester_id)
@@ -309,7 +317,11 @@ CREATE TABLE roommate_connections (
 
     FOREIGN KEY (receiver_id)
         REFERENCES users(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (released_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 

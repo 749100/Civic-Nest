@@ -1,0 +1,103 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Roommate privacy{% endblock %}
+
+{% block content %}
+<section class="welcome">
+  <div>
+    <h1>Roommate privacy &amp; meeting review</h1>
+    <p>Full profiles are admin-only until both students confirm an in-person meeting and you release the details.</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="block-head">
+    <div>
+      <h2>Meeting confirmations</h2>
+      <p>Review confirmations before releasing contact details to either student.</p>
+    </div>
+  </div>
+  <div class="list">
+    {% for connection in connections %}
+    <article class="card">
+      <div class="row">
+        <div>
+          <h3>{{ connection.requester_name }} &amp; {{ connection.receiver_name }}</h3>
+          <p class="muted">
+            {{ connection.requester_phone or 'No phone on file' }} ·
+            {{ connection.receiver_phone or 'No phone on file' }}
+          </p>
+        </div>
+        <span class="badge {{ 'ok' if connection.released_at else 'st-pending' }}">
+          {{ 'Details released' if connection.released_at else 'Awaiting review' }}
+        </span>
+      </div>
+      <p class="muted" style="margin-top: 10px">
+        Requester confirmed: {{ 'Yes' if connection.requester_met_at else 'No' }}.
+        Receiver confirmed: {{ 'Yes' if connection.receiver_met_at else 'No' }}.
+      </p>
+      {% if not connection.released_at %}
+      <form
+        class="manage"
+        method="post"
+        action="{{ url_for('admin_release_roommate_details', connection_id=connection.id) }}"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button
+          class="btn"
+          type="submit"
+          {% if not connection.requester_met_at or not connection.receiver_met_at %}disabled{% endif %}
+        >
+          Release details to both students
+        </button>
+      </form>
+      {% endif %}
+    </article>
+    {% else %}
+    <article class="card">
+      <p class="muted">No accepted meeting requests need review.</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="block">
+  <div class="block-head">
+    <div>
+      <h2>All roommate profiles</h2>
+      <p>Private information on this page is visible to administrators only.</p>
+    </div>
+    <span class="count">{{ profiles|length }} profiles</span>
+  </div>
+  <div class="list">
+    {% for profile in profiles %}
+    <article class="card">
+      <div class="row">
+        <div>
+          <h3>{{ profile.full_name }}</h3>
+          <p class="muted">{{ profile.email }} · {{ profile.phone or 'No phone on file' }}</p>
+        </div>
+        <span class="badge {{ 'ok' if profile.is_active else 'st-unavailable' }}">
+          {{ 'Active' if profile.is_active else 'Hidden' }}
+        </span>
+      </div>
+      <p class="muted" style="margin-top: 10px">
+        Campus: {{ profile.campus or 'Not provided' }} ·
+        Preferred location: {{ profile.preferred_location or 'Not provided' }} ·
+        Budget: KSh {{ profile.budget_min or '—' }}–{{ profile.budget_max or '—' }} ·
+        Type: {{ profile.accommodation_type or 'Not provided' }}
+      </p>
+      <p style="margin-top: 8px">{{ profile.bio or 'No bio provided.' }}</p>
+      <p class="muted" style="margin-top: 8px">
+        Lifestyle: {{ profile.lifestyle_preferences or 'Not provided' }} ·
+        Study preferences: {{ profile.study_preferences or 'Not provided' }}
+      </p>
+    </article>
+    {% else %}
+    <article class="card">
+      <p class="muted">No roommate profiles have been published.</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

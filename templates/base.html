@@ -12,11 +12,11 @@
     {% block seo %}
     <meta
       name="description"
-      content="Find verified rental houses, student hostels, apartments, and plots for sale across Kenya. Explore neighborhood insights, nearby schools, and amenities on CivicNest Africa."
+      content="Find rental homes, student accommodation, homes for sale, hospitality listings, travel services, and roommate summaries across Kenya with CivicNest Africa."
     />
     <meta
       name="keywords"
-      content="rentals in kenya, hostels near kibabii, houses for rent, property for sale, civicnest, student housing, roommate finder kenya"
+      content="rentals in Kenya, houses for rent, property for sale, student accommodation, hospitality, travel services, CivicNest Africa, roommate finder"
     />
     <meta name="author" content="CivicNest Africa" />
     <meta name="robots" content="index, follow" />
@@ -256,13 +256,15 @@
         href="{{ url_for('travel_page') }}"
         ><svg class="i"><use href="#i-plane" /></svg>Travel</a
       >
-      <a class="tab" href="#"
+      <a class="tab" id="savedLink" href="{{ url_for('saved_properties') }}"
         ><svg class="i"><use href="#i-bookmark" /></svg>Saved<em id="savedCount"
           >0</em
         ></a
       >
-      <a class="tab" href="#"
-        ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+      <a
+        class="tab"
+        href="{{ url_for('tenant_inquiries') if current_user.is_authenticated and current_user.role == 'student' else (url_for('dashboard') if current_user.is_authenticated else url_for('login')) }}"
+        ><svg class="i"><use href="#i-chat" /></svg>Inquiries</a
       >
     </nav>
 
@@ -321,8 +323,14 @@
         var saved = JSON.parse(
           localStorage.getItem("civicNestFavorites") || "[]",
         );
+        if (!Array.isArray(saved)) saved = [];
         document.getElementById("savedCount").textContent = saved.length;
-      } catch (e) {}
+        document.getElementById("savedLink").href =
+          "{{ url_for('saved_properties') }}?ids=" +
+          encodeURIComponent(saved.slice(0, 50).join(","));
+      } catch (error) {
+        document.getElementById("savedCount").textContent = "0";
+      }
     </script>
     {% block scripts %}{% endblock %}
   </body>

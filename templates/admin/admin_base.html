@@ -842,7 +842,11 @@
           class="{{ 'on' if request.path.startswith('/admin/transport') else '' }}"
           >Transport management</a
         >
-        <a href="{{ url_for('roommate_finder') }}">Roommates</a>
+        <a
+          href="{{ url_for('admin_roommates') }}"
+          class="{{ 'on' if ep == 'admin_roommates' or ep == 'admin_release_roommate_details' else '' }}"
+          >Roommate privacy</a
+        >
 
         <div class="menu-title">Switch view</div>
         <a href="{{ url_for('landlord_dashboard') }}">Landlord side</a>

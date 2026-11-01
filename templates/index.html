@@ -13,7 +13,7 @@
     />
     <meta
       name="description"
-      content="Find verified rental houses, student hostels, apartments and plots for sale in Kenya, plus guest houses and roommates, on CivicNest Africa."
+      content="Find rental homes, student accommodation, homes for sale, hospitality listings, travel services, and anonymous roommate summaries across Kenya with CivicNest Africa."
     />
     <meta
       name="google-site-verification"
@@ -21,7 +21,7 @@
     />
     <meta
       name="keywords"
-      content="rentals in Kenya, hostels near Kibabii, houses for rent, property for sale, CivicNest, student housing, roommate finder Kenya"
+      content="rentals in Kenya, houses for rent, property for sale, student accommodation, hospitality, travel services, CivicNest Africa, anonymous roommate finder"
     />
     <meta name="author" content="CivicNest Africa" />
     <meta name="robots" content="index, follow" />
@@ -163,13 +163,13 @@
         </nav>
 
         <div class="right">
-          <a class="t" href="#properties"
+          <a class="t" href="{{ url_for('saved_properties') }}" data-saved-link
             ><svg class="i"><use href="#i-heart" /></svg>Saved</a
           >
           <a
             class="t"
-            href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}"
-            ><svg class="i"><use href="#i-chat" /></svg>Chats</a
+            href="{{ url_for('tenant_inquiries') if current_user.is_authenticated else url_for('login') }}"
+            ><svg class="i"><use href="#i-chat" /></svg>Inquiries</a
           >
           {% if current_user.is_authenticated %}
           <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
@@ -545,13 +545,15 @@
             </div>
 
             <div class="mapview" id="mapView">
-              <span class="mapnote">Map preview</span>
-              <i style="top: 26%; left: 22%"></i
-              ><i style="top: 34%; left: 62%"></i
-              ><i style="top: 48%; left: 40%"></i
-              ><i style="top: 30%; left: 80%"></i
-              ><i style="top: 58%; left: 75%"></i>
               {% if properties %}{% set first = properties[0] %}
+              <iframe
+                title="Google Maps showing {{ first.location }}, Kenya"
+                src="https://maps.google.com/maps?q={{ (first.location ~ ', Kenya')|urlencode }}&amp;output=embed"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+              <span class="mapnote">Google Maps · {{ first.location }}</span>
               <div class="mini">
                 <strong>{{ first.title }}</strong>
                 <strong
@@ -563,11 +565,17 @@
                   href="{{ url_for('property_details', property_id=first.id) }}"
                   >View Details</a
                 >
+                <a
+                  href="https://www.google.com/maps/search/?api=1&amp;query={{ (first.location ~ ', Kenya')|urlencode }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Open in Google Maps</a
+                >
               </div>
               {% else %}
               <div class="mini">
-                <strong>Discover properties across Kenya</strong
-                ><span>New listings will appear here.</span>
+                <strong>No properties to map yet</strong
+                ><span>Explore active listings across Kenya.</span>
                 <a href="{{ url_for('rent_page') }}">Explore Properties</a>
               </div>
               {% endif %}
@@ -653,7 +661,7 @@
           <use href="#i-house" /></svg
         >Home</a
       >
-      <a href="#properties"
+      <a href="{{ url_for('saved_properties') }}" data-saved-link
         ><svg class="i" style="width: 22px; height: 22px">
           <use href="#i-heart" /></svg
         >Saved<em id="savedCountM">0</em></a
@@ -714,6 +722,12 @@
       };
       const updateSavedCount = () => {
         savedCountM.textContent = favorites.length;
+        document.querySelectorAll("[data-saved-link]").forEach((savedLink) => {
+          savedLink.href =
+            "{{ url_for('saved_properties') }}" +
+            "?ids=" +
+            encodeURIComponent(favorites.slice(0, 50).join(","));
+        });
       };
       document.querySelectorAll(".fav").forEach((btn, i) => {
         const id = String(btn.closest(".card")?.dataset.propertyId || i);

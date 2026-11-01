@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>My inquiries | CivicNest Africa</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}?v=1"
+    />
+  </head>
+  <body>
+    {% include "_site_nav.html" %}
+    <main class="sb">
+      <section class="hero h">
+        <div class="wrap">
+          <div class="eyebrow">Property inquiries</div>
+          <h1>My inquiries</h1>
+          <p>Review the messages you have sent about property listings.</p>
+        </div>
+      </section>
+      <section class="sec h">
+        <div class="wrap">
+          {% if inquiries %}
+          <div class="plist">
+            {% for inquiry in inquiries %}
+            <article class="card">
+              <div class="info">
+                <span class="badge">{{ inquiry.status|title }}</span>
+                <h3>{{ inquiry.property_title }}</h3>
+                <p>{{ inquiry.message }}</p>
+                <small>
+                  Sent
+                  {{ inquiry.created_at.strftime('%d %B %Y') if inquiry.created_at.strftime is defined else inquiry.created_at }}
+                </small>
+                <a
+                  class="more"
+                  href="{{ url_for('property_details', property_id=inquiry.property_id) }}"
+                  >View property</a
+                >
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty">
+            <h3>No inquiries yet</h3>
+            <p>
+              When you contact a landlord about a property, your inquiry will
+              appear here.
+            </p>
+            <a class="more" href="{{ url_for('rent_page') }}">Browse properties</a>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+    {% include "_site_foot.html" %}
+  </body>
+</html>

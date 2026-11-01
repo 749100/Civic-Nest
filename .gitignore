@@ -4,3 +4,4 @@ __pycache__/
 instance/
 static/uploads/properties/*
 migrate.py
+test_telegram.py

@@ -1,4 +1,23 @@
 (() => {
+  const savedLinks = document.querySelectorAll("[data-saved-link]");
+  if (savedLinks.length) {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("civicNestFavorites") || "[]",
+      );
+      const ids = Array.isArray(saved) ? saved.slice(0, 50) : [];
+      const savedUrl =
+        "/saved?ids=" + encodeURIComponent(ids.join(","));
+      savedLinks.forEach((link) => {
+        link.href = savedUrl;
+      });
+    } catch (error) {
+      savedLinks.forEach((link) => {
+        link.href = "/saved";
+      });
+    }
+  }
+
   const toggle = document.querySelector(".cn-menu-toggle");
   const drawer = document.querySelector(".cn-site-drawer");
   const backdrop = document.querySelector(".cn-drawer-backdrop");

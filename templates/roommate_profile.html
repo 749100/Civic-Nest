@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>{{ profile.full_name }} | Roommate | CivicNest Africa</title>
+    <title>Roommate summary | CivicNest Africa</title>
     <meta name="robots" content="noindex, follow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,7 +30,7 @@
       <section class="hero rm" style="padding-bottom: 44px">
         <div class="wrap">
           <div class="eyebrow">Roommate profile</div>
-          <h1>{{ profile.full_name }}</h1>
+          <h1>{{ profile.full_name if show_full_details else 'Anonymous roommate' }}</h1>
           <p>{{ profile.campus or 'Looking for a roommate' }}</p>
         </div>
       </section>
@@ -46,6 +46,7 @@
 
             <div class="card">
               <div class="pf-head">
+                {% if show_full_details %}
                 <span class="ravatar">
                   {% if profile.profile_image %}
                   <img
@@ -54,14 +55,18 @@
                   />
                   {% else %}{{ profile.full_name[0]|upper }}{% endif %}
                 </span>
+                {% else %}
+                <span class="ravatar">?</span>
+                {% endif %}
                 <div>
-                  <h2>{{ profile.full_name }}</h2>
+                  <h2>{{ profile.full_name if show_full_details else 'Anonymous roommate' }}</h2>
                   {% if profile.campus %}
                   <p class="rmuted">{{ profile.campus }}</p>
                   {% endif %}
                 </div>
               </div>
 
+              {% if show_full_details %}
               <div class="pf-sec">
                 <h3>Accommodation preferences</h3>
                 <div class="rtags">
@@ -115,10 +120,37 @@
                 <p>{{ profile.bio }}</p>
               </div>
               {% endif %}
+              {% else %}
+              <div class="pf-sec">
+                <h3>Anonymous summary</h3>
+                <div class="rtags">
+                  {% if profile.accommodation_type %}
+                  <span class="rtag p">{{ profile.accommodation_type }}</span>
+                  {% endif %}
+                  {% if profile.budget_max %}
+                  {% set budget_ceiling = ((profile.budget_max|int / 5000)|round(0, 'ceil')|int * 5000) %}
+                  <span class="rtag g"
+                    >Budget up to KSh {{ "{:,.0f}".format(budget_ceiling) }}/month</span
+                  >
+                  {% endif %}
+                  {% if profile.people_needed %}
+                  <span class="rtag">Looking for {{ profile.people_needed }} roommate{{ 's' if profile.people_needed != 1 else '' }}</span>
+                  {% endif %}
+                </div>
+                <p class="pf-note">
+                  Name, contact information, exact preferences, photo and bio
+                  remain private. Request a meeting to start the approval
+                  process.
+                </p>
+              </div>
+              {% endif %}
 
               <div class="pf-actions">
-                {% if profile.user_id != current_user.id and
-                profile.whatsapp_phone %}
+                {% if is_own_profile %}
+                <a class="rbtn" href="{{ url_for('edit_roommate_profile') }}"
+                  >Edit my profile</a
+                >
+                {% elif show_full_details and profile.whatsapp_phone %}
                 <a
                   class="rbtn good"
                   href="https://wa.me/{{ profile.whatsapp_phone }}"
@@ -126,10 +158,14 @@
                   rel="noopener noreferrer"
                   >Contact {{ profile.full_name }} on WhatsApp</a
                 >
-                {% elif profile.user_id == current_user.id %}
-                <a class="rbtn" href="{{ url_for('edit_roommate_profile') }}"
-                  >Edit my profile</a
+                {% elif not show_full_details %}
+                <form
+                  method="post"
+                  action="{{ url_for('request_roommate_meeting', profile_id=profile.id) }}"
                 >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                  <button class="rbtn good" type="submit">Request a meeting</button>
+                </form>
                 {% else %}
                 <button class="rbtn ghost" type="button" disabled>
                   WhatsApp contact unavailable
@@ -137,10 +173,10 @@
                 {% endif %}
               </div>
 
-              {% if profile.user_id != current_user.id %}
+              {% if show_full_details and not is_own_profile %}
               <p class="pf-note">
-                WhatsApp opens in a new tab so you can contact this student
-                directly.
+                Contact details are shown only after both students confirm
+                their meeting and an admin releases the profile.
               </p>
               {% endif %}
             </div>
