@@ -225,7 +225,7 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
 
         <div class="ta-detail">
           <small>Departure time</small>
-          <strong>{{ item.departure_time_snapshot }}</strong>
+          <strong>{{ item.departure_time_snapshot }} EAT</strong>
         </div>
 
         <div class="ta-detail">
@@ -298,8 +298,8 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
         <div class="ta-detail">
           <small>Submitted</small>
           <strong>
-            {{ item.created_at.strftime('%d %b %Y, %H:%M') if
-            item.created_at.strftime is defined else item.created_at }}
+            {{ item.created_local.strftime('%d %b %Y, %H:%M') if
+            item.created_local else '—' }} EAT
           </strong>
         </div>
       </div>
@@ -310,7 +310,7 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
           📞 Call <strong>{{ item.company_name_snapshot }}</strong> on
           <strong>{{ item.company_phone }}</strong> to confirm seats for {{
           item.passenger_count }} passenger(s) on {{ item.travel_date }} at {{
-          item.departure_time_snapshot }}, then record the decision below.
+          item.departure_time_snapshot }} EAT, then record the decision below.
         </div>
         <a class="ta-call-btn" href="tel:{{ company_tel }}">Call company</a>
       </div>

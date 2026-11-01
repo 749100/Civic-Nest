@@ -6641,9 +6641,10 @@ def my_transport_requests():
                     admin_note,
                     availability_checked_at,
                     final_confirmed_at,
-                    created_at
+                    created_at AT TIME ZONE 'Africa/Nairobi' AS created_local
                 FROM civicnest.transport_booking_requests
                 WHERE user_id = %s
+                  AND status <> 'cancelled'
                 ORDER BY created_at DESC
             """, (current_user.id,))
 
@@ -6667,6 +6668,67 @@ def my_transport_requests():
             conn.close()
 
 
+@app.route(
+    "/my-travel-requests/<int:request_id>/remove",
+    methods=["POST"]
+)
+def remove_my_transport_request(request_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for("login"))
+
+    if not _transport_customer_required():
+        abort(403)
+
+    conn = None
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE civicnest.transport_booking_requests
+                SET
+                    status = 'cancelled',
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND user_id = %s
+                  AND status IN (
+                      'pending',
+                      'availability_confirmed',
+                      'unavailable'
+                  )
+                RETURNING id
+            """, (request_id, current_user.id))
+
+            updated_requests = _transport_rows(cur)
+
+        if not updated_requests:
+            conn.rollback()
+            flash(
+                "This request could not be removed. Confirmed bookings are kept in your travel history.",
+                "error"
+            )
+            return redirect(url_for("my_transport_requests"))
+
+        conn.commit()
+        flash("Your transport request has been removed from your list.", "success")
+
+    except Exception:
+        if conn:
+            conn.rollback()
+        app.logger.exception(
+            "Could not remove transport request %s for user %s.",
+            request_id,
+            current_user.id
+        )
+        flash("Could not remove your transport request. Please try again.", "error")
+
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(url_for("my_transport_requests"))
+
+
 # ------------------------------------------------------------
 # 4. ADMIN: VIEW ALL TRANSPORT REQUESTS
 # GET /admin/transport/requests
@@ -6683,6 +6745,7 @@ def admin_transport_requests():
             cur.execute("""
                 SELECT
                     r.*,
+                    r.created_at AT TIME ZONE 'Africa/Nairobi' AS created_local,
                     u.email AS customer_email,
                     c.company_phone AS company_phone
 
@@ -6980,7 +7043,8 @@ def my_transport_receipt(request_id):
                     boarding_point_snapshot,
                     dropoff_point_snapshot,
                     vehicle_type_snapshot,
-                    final_confirmed_at
+                    final_confirmed_at AT TIME ZONE 'Africa/Nairobi'
+                        AS final_confirmed_local
                 FROM civicnest.transport_booking_requests
                 WHERE id = %s
                   AND user_id = %s

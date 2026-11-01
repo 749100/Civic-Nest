@@ -9,17 +9,40 @@ hero_sub %}
 </p>
 {% endblock %} {% block head %}
 <style>
+  .rc,
+  .rc * {
+    box-sizing: border-box;
+  }
   .rc-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    max-width: 760px;
+    max-width: 820px;
     margin: 0 auto 16px;
   }
   .rc {
-    max-width: 760px;
+    max-width: 820px;
     margin: 0 auto;
-    padding: 22px;
+    padding: 32px;
+    border: 1px solid #d1d1d1;
+    border-top: 5px solid #111;
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  }
+  .rc .eb,
+  .rc .sub {
+    color: #555;
+  }
+  .rc .eb {
+    letter-spacing: 1.4px;
+  }
+  .rc-head h2,
+  .rc-place strong,
+  .rc-item strong,
+  .rc-total strong {
+    color: #111;
   }
   .rc-head {
     display: flex;
@@ -27,52 +50,54 @@ hero_sub %}
     align-items: flex-start;
     justify-content: space-between;
     gap: 14px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #d3e0f5;
+    padding-bottom: 22px;
+    border-bottom: 2px solid #111;
   }
   .rc-head h2 {
     margin: 0 0 3px;
-    color: #001b5e;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
+    letter-spacing: -0.5px;
   }
   .rc-ref {
     text-align: right;
   }
   .rc-ref small {
     display: block;
-    color: #405578;
+    color: #555;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.6px;
     text-transform: uppercase;
   }
   .rc-ref strong {
-    color: #1456d8;
+    color: #111;
     font-size: 20px;
     font-weight: 800;
   }
   .rc-status {
     display: inline-flex;
     margin-top: 6px;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: #dcfce7;
-    color: #166534;
+    padding: 5px 9px;
+    border: 1px solid #111;
+    border-radius: 2px;
+    background: #fff;
+    color: #111;
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 0.6px;
   }
   .rc-route {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
-    margin: 18px 0;
-    padding: 15px;
-    border: 1px solid #d3e0f5;
-    border-radius: 14px;
-    background: #f2f7fd;
+    gap: 18px;
+    margin: 22px 0;
+    padding: 18px;
+    border: 1px solid #c9c9c9;
+    border-radius: 3px;
+    background: #f7f7f7;
   }
   .rc-place {
     flex: 1;
@@ -81,53 +106,61 @@ hero_sub %}
   .rc-place small {
     display: block;
     margin-bottom: 4px;
-    color: #405578;
+    color: #555;
     font-size: 10px;
     font-weight: 700;
   }
   .rc-place strong {
     display: block;
-    color: #001b5e;
+    color: #111;
     font-size: 15px;
     overflow-wrap: anywhere;
   }
   .rc-arrow {
-    color: #1456d8;
+    color: #555;
     font-size: 20px;
     font-weight: 800;
   }
   .rc-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    column-gap: 24px;
+    row-gap: 0;
   }
   .rc-item small {
     display: block;
-    margin-bottom: 4px;
-    color: #405578;
+    margin-bottom: 5px;
+    color: #555;
     font-size: 10px;
     font-weight: 700;
   }
   .rc-item strong {
     display: block;
-    color: #001b5e;
+    min-height: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e1e1e1;
+    color: #111;
     font-size: 13px;
     overflow-wrap: anywhere;
+  }
+  .rc-item {
+    padding: 12px 0 2px;
   }
   .rc-total {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 20px;
-    padding: 16px;
-    border-radius: 14px;
-    color: #fff;
-    background: linear-gradient(135deg, #0066ff, #001b5e);
+    margin-top: 22px;
+    padding: 17px 18px;
+    border: 2px solid #111;
+    border-radius: 3px;
+    color: #111;
+    background: #f4f4f4;
   }
   .rc-total small {
     display: block;
-    color: rgba(255, 255, 255, 0.8);
+    color: #444;
     font-size: 11px;
   }
   .rc-total strong {
@@ -136,21 +169,24 @@ hero_sub %}
   }
   .rc-note {
     margin: 16px 0 0;
-    color: #405578;
+    color: #444;
     font-size: 11px;
     line-height: 1.8;
   }
   .rc-footer {
     margin-top: 20px;
     padding-top: 12px;
-    border-top: 1px dashed #b7ceff;
-    color: #405578;
+    border-top: 1px solid #aaa;
+    color: #555;
     font-size: 10px;
     text-align: center;
   }
   @media (max-width: 600px) {
     .rc {
       padding: 16px;
+    }
+    .rc-head {
+      flex-direction: column;
     }
     .rc-ref {
       text-align: left;
@@ -165,7 +201,7 @@ hero_sub %}
   }
   @page {
     size: A4;
-    margin: 15mm;
+    margin: 14mm;
   }
   @media print {
     body {
@@ -185,8 +221,10 @@ hero_sub %}
     .rc {
       max-width: 100%;
       margin: 0;
-      padding: 15px;
-      border: 1px solid #999;
+      padding: 20px;
+      border: 1px solid #888;
+      border-top: 4px solid #111;
+      border-radius: 0;
       box-shadow: none !important;
     }
     .rc-route,
@@ -194,10 +232,6 @@ hero_sub %}
     .rc-status {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-    }
-    .rc-total {
-      background: #001b5e !important;
-      color: #fff !important;
     }
     .rc-note {
       color: #333;
@@ -278,6 +312,7 @@ hero_sub %}
     <div class="rc-item">
       <small>Departure time</small>
       <strong>{{ booking.departure_time_snapshot or '—' }}</strong>
+      <small>Kenya time (EAT)</small>
     </div>
 
     <div class="rc-item">
@@ -305,8 +340,8 @@ hero_sub %}
     <div class="rc-item">
       <small>Booking confirmed on</small>
       <strong>
-        {{ booking.final_confirmed_at.strftime('%d %b %Y, %H:%M') if
-        booking.final_confirmed_at else '—' }}
+        {{ booking.final_confirmed_local.strftime('%d %b %Y, %H:%M') if
+        booking.final_confirmed_local else '—' }} EAT
       </strong>
     </div>
   </div>
