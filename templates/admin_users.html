@@ -1,4 +1,4 @@
-{% extends "site_base.html" %}
+{% extends "admin/admin_base.html" %}
 {% set active_page = 'admin' %}
 
 {% block title %}Manage users{% endblock %}
@@ -393,6 +393,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="am">
 
 {# One user card, reused for every group #}
 {% macro user_card(u) %}
@@ -553,5 +554,6 @@
     </div>
   </section>
 
+</div>
 </div>
 {% endblock %}

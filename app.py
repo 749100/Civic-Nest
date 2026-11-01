@@ -643,14 +643,17 @@ def _send_telegram(message):
 
         return True
 
-    except requests.RequestException:
-        app.logger.exception("TELEGRAM CONNECTION ERROR")
+    except requests.RequestException as exc:
+        app.logger.error(
+            "Telegram connection failed (%s).",
+            type(exc).__name__,
+        )
         return False
 
     except ValueError:
         app.logger.exception("TELEGRAM INVALID RESPONSE")
         return False
-
+        
 
 def notify_admin_listing(property_title, landlord_name, location):
     esc = lambda value: html.escape(str(value or ""))
@@ -724,6 +727,10 @@ def notify_admin_transport_request(
 ):
     esc = lambda value: html.escape(str(value or "—"))
 
+    customer_role = (
+        getattr(current_user, "role", "") or "customer"
+    ).strip().title()
+
     lines = [
         f"🚌 <b>NEW TRANSPORT REQUEST CN-{request_id}</b>",
     ]
@@ -735,7 +742,7 @@ def notify_admin_transport_request(
 
     lines += [
         "",
-        "👤 <b>STUDENT</b>",
+        f"👤 <b>CUSTOMER ({esc(customer_role)})</b>",
         f"Name: {esc(student_name)}",
         f"Phone: {esc(student_phone)}",
         f"WhatsApp: https://wa.me/{esc(student_whatsapp)}",
@@ -748,13 +755,13 @@ def notify_admin_transport_request(
         "🛣️ <b>JOURNEY</b>",
         f"Route: {esc(route_from)} → {esc(route_to)}",
         f"Date: {esc(travel_date)}",
-        f"Departure: {esc(departure_time)}",
+        f"Departure (approx.): {esc(departure_time)}",
         f"Passengers: {esc(passengers)}",
         f"Vehicle: {esc(vehicle_type)}",
         f"Company boarding point: {esc(boarding_point)}",
         f"Company drop-off point: {esc(dropoff_point)}",
         "",
-        "📍 <b>STUDENT'S PICKUP / DROP-OFF</b>",
+        "📍 <b>CUSTOMER'S PICKUP / DROP-OFF</b>",
         f"Pickup: {esc(pickup_location)}",
         f"Drop-off: {esc(dropoff_location)}",
     ]
@@ -771,7 +778,7 @@ def notify_admin_transport_request(
         admin_url,
     ]
 
-    # Background thread so a slow Telegram response never delays the student.
+    # Background thread so a slow Telegram response never delays the customer.
     threading.Thread(
         target=_send_telegram,
         args=("\n".join(lines),),
@@ -5071,7 +5078,7 @@ TRANSPORT_REQUEST_STATUSES = (
 
 
 def _transport_customer_required():
-    """Only logged-in student/customer accounts can make requests."""
+    """Logged-in students, customers and landlords can make requests."""
     if not current_user.is_authenticated:
         return False
 
@@ -5079,7 +5086,7 @@ def _transport_customer_required():
         getattr(current_user, "role", "") or ""
     ).strip().lower()
 
-    return role in {"student", "customer"}
+    return role in {"student", "customer", "landlord"}
 
 
 
@@ -6807,7 +6814,85 @@ def admin_add_transport_departure():
         app.logger.exception("ADD TRANSPORT DEPARTURE ERROR")
         flash("Could not add the departure.", "error")
 
-    return redirect(url_for("admin_transport_page"))  
+    return redirect(url_for("admin_transport_page")) 
+
+@app.route("/travel/locations", methods=["GET"])
+def transport_locations():
+    """Starting points and destinations for the travel search dropdowns."""
+    origin = (request.args.get("from") or "").strip()
+
+    base_query = """
+        FROM civicnest.transport_routes r
+        JOIN civicnest.transport_companies c
+            ON c.id = r.company_id
+        WHERE c.is_active IS TRUE
+          AND r.is_active IS TRUE
+          AND EXISTS (
+              SELECT 1
+              FROM civicnest.transport_departures d
+              WHERE d.route_id = r.id
+                AND d.is_active IS TRUE
+          )
+    """
+
+    def unique_places(rows):
+        seen = set()
+        places = []
+
+        for row in rows:
+            name = (row[0] or "").strip()
+            key = name.casefold()
+
+            if name and key not in seen:
+                seen.add(key)
+                places.append(name)
+
+        return sorted(places, key=str.casefold)
+
+    conn = None
+
+    try:
+        conn = get_db_connection()
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT DISTINCT TRIM(r.route_from) AS place "
+                + base_query
+            )
+            origins = unique_places(cur.fetchall())
+
+            if origin:
+                cur.execute(
+                    "SELECT DISTINCT TRIM(r.route_to) AS place "
+                    + base_query
+                    + " AND LOWER(TRIM(r.route_from)) = LOWER(%s)",
+                    (origin,)
+                )
+            else:
+                cur.execute(
+                    "SELECT DISTINCT TRIM(r.route_to) AS place "
+                    + base_query
+                )
+
+            destinations = unique_places(cur.fetchall())
+
+        return jsonify({
+            "success": True,
+            "origins": origins,
+            "destinations": destinations
+        })
+
+    except Exception:
+        app.logger.exception("TRANSPORT LOCATIONS ERROR")
+        return jsonify({
+            "success": False,
+            "origins": [],
+            "destinations": []
+        }), 500
+
+    finally:
+        if conn is not None:
+            conn.close()     
 
 
 @app.route("/admin/transport/routes/bulk", methods=["POST"])
@@ -6844,6 +6929,19 @@ def admin_add_transport_routes_bulk():
                     f"Route {index}: departure and destination cannot be the same."
                 )
 
+            vehicle_type = str(route.get("vehicle_type", "")).strip()
+
+            if not vehicle_type:
+                raise ValueError(
+                    f"Route {index}: choose the vehicle type."
+                )
+
+            if len(vehicle_type) > 60:
+                raise ValueError(
+                    f"Route {index}: vehicle type is too long "
+                    "(60 characters maximum)."
+                )
+
             departures = route.get("departures", [])
 
             if not isinstance(departures, list) or not departures:
@@ -6869,8 +6967,9 @@ def admin_add_transport_routes_bulk():
                     )
 
                 # Accept HTML time input format HH:MM.
-                import re
-                if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", departure_time):
+                if not re.fullmatch(
+                    r"(?:[01]\d|2[0-3]):[0-5]\d", departure_time
+                ):
                     raise ValueError(
                         f"Route {index}: enter a valid departure time."
                     )
@@ -6894,9 +6993,7 @@ def admin_add_transport_routes_bulk():
                 "dropoff_point": str(
                     route.get("dropoff_point", "")
                 ).strip() or None,
-                "vehicle_type": str(
-                    route.get("vehicle_type", "")
-                ).strip() or None,
+                "vehicle_type": vehicle_type,
                 "departures": cleaned_departures
             })
 
@@ -6982,7 +7079,23 @@ def admin_add_transport_routes_bulk():
 def about_page():
     return render_template("about.html", current_year=datetime.utcnow().year)    
 
+@app.route("/admin/test-telegram")
+@admin_required
+def admin_test_telegram():
+    token_set = bool(os.getenv("TELEGRAM_BOT_TOKEN"))
+    chat_id_set = bool(os.getenv("TELEGRAM_CHAT_ID"))
 
+    sent = _send_telegram(
+        "✅ <b>CivicNest test</b>\nTelegram is connected."
+    )
+
+    return jsonify({
+        "token_set": token_set,
+        "chat_id_set": chat_id_set,
+        "message_sent": sent,
+        "threading_imported": "threading" in globals(),
+        "transport_notify_defined": "notify_admin_transport_request" in globals(),
+    })
 
 # =========================================================
 # LOGOUT

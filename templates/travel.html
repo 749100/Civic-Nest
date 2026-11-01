@@ -37,11 +37,13 @@
 
       .hero.h {
         padding-bottom: 150px;
+        overflow: visible;
       }
 
       .search.s6 {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         bottom: -80px;
+        z-index: 30;
       }
 
       .search.s6 .field select {
@@ -106,14 +108,75 @@
 
       .h a:focus-visible,
       .h button:focus-visible,
-      .h input:focus-visible,
       .h select:focus-visible,
       .h textarea:focus-visible,
       .search.s6 button:focus-visible,
-      .search.s6 input:focus-visible,
       .search.s6 select:focus-visible {
         outline: 3px solid #8fc2ff;
         outline-offset: 3px;
+      }
+
+      /* No blue box around the search inputs */
+      .search.s6 input,
+      .search.s6 input:focus,
+      .search.s6 input:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Location dropdowns */
+      .search.s6 .field.combo {
+        position: relative;
+      }
+
+      .combo-list {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 60;
+        min-width: 100%;
+        width: max-content;
+        max-width: 280px;
+        max-height: 240px;
+        margin: 0;
+        padding: 6px;
+        overflow-y: auto;
+        list-style: none;
+        border: 1px solid #d5e3fc;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 15px 45px rgba(0, 35, 120, 0.18);
+      }
+
+      .combo-list[hidden] {
+        display: none;
+      }
+
+      .combo-list li {
+        padding: 10px 12px;
+        border-radius: 9px;
+        color: #071a42;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .combo-list li.active,
+      .combo-list li:hover {
+        background: #eaf2ff;
+        color: #1456d8;
+      }
+
+      .combo-list li.combo-empty {
+        color: #60708d;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: default;
+      }
+
+      .combo-list li.combo-empty:hover {
+        background: transparent;
+        color: #60708d;
       }
 
       /* Listing grid (same as Stay & Dine) */
@@ -756,7 +819,7 @@
         </div>
 
         <form class="search s6" id="searchForm" role="search" autocomplete="off">
-          <label class="field">
+          <label class="field combo">
             <svg class="i" aria-hidden="true">
               <use href="#i-pin" />
             </svg>
@@ -766,12 +829,17 @@
               name="from"
               placeholder="From (departure town)"
               aria-label="Departure town"
+              aria-controls="fromList"
+              aria-expanded="false"
+              role="combobox"
+              autocomplete="off"
               required
               value="{{ alternative_search.route_from if alternative_search else '' }}"
             />
+            <ul class="combo-list" id="fromList" role="listbox" hidden></ul>
           </label>
 
-          <label class="field">
+          <label class="field combo">
             <svg class="i" aria-hidden="true">
               <use href="#i-pin" />
             </svg>
@@ -781,9 +849,14 @@
               name="to"
               placeholder="To (destination town)"
               aria-label="Destination town"
+              aria-controls="toList"
+              aria-expanded="false"
+              role="combobox"
+              autocomplete="off"
               required
               value="{{ alternative_search.route_to if alternative_search else '' }}"
             />
+            <ul class="combo-list" id="toList" role="listbox" hidden></ul>
           </label>
 
           <label class="field">
@@ -1046,7 +1119,7 @@
             </svg>
 
             <div>
-              www.mokuajoshuaongeri@gmail.com
+              mokuajoshuaongeri@gmail.com
               <small>We’ll respond within 24 hours</small>
             </div>
           </div>
@@ -1149,6 +1222,7 @@
 
         // TRANSPORT SEARCH
         const SEARCH_URL = {{ url_for('transport_search')|tojson }};
+        const LOCATIONS_URL = {{ url_for('transport_locations')|tojson }};
 
         const fromInput = document.getElementById("fromInput");
         const toInput = document.getElementById("toInput");
@@ -1598,6 +1672,150 @@
 
           submitRequestButton.disabled = true;
           submitRequestButton.textContent = "Submitting request...";
+        });
+
+        // LOCATION DROPDOWNS
+        async function fetchLocations(from) {
+          try {
+            const response = await fetch(
+              `${LOCATIONS_URL}?from=${encodeURIComponent(from || "")}`,
+              {
+                headers: { Accept: "application/json" },
+                credentials: "same-origin"
+              }
+            );
+            const data = await response.json();
+            return data.success ? data : { origins: [], destinations: [] };
+          } catch (error) {
+            console.error("Could not load locations:", error);
+            return { origins: [], destinations: [] };
+          }
+        }
+
+        function setupCombo(input, list, loadItems, emptyText) {
+          let items = [];
+          let active = -1;
+
+          function close() {
+            list.hidden = true;
+            input.setAttribute("aria-expanded", "false");
+            active = -1;
+          }
+
+          function highlight(index) {
+            const rows = list.querySelectorAll("li[data-name]");
+            rows.forEach((row) => row.classList.remove("active"));
+
+            if (!rows.length) return;
+
+            active = (index + rows.length) % rows.length;
+            rows[active].classList.add("active");
+            rows[active].scrollIntoView({ block: "nearest" });
+          }
+
+          function choose(name) {
+            input.value = name;
+            close();
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+
+          function render() {
+            const query = input.value.trim().toLowerCase();
+            const shown = items.filter((name) =>
+              name.toLowerCase().includes(query)
+            );
+
+            list.innerHTML = "";
+            active = -1;
+
+            if (!shown.length) {
+              const row = document.createElement("li");
+              row.className = "combo-empty";
+              row.textContent = emptyText();
+              list.appendChild(row);
+            } else {
+              shown.forEach((name) => {
+                const row = document.createElement("li");
+                row.setAttribute("role", "option");
+                row.dataset.name = name;
+                row.textContent = name;
+
+                // mousedown fires before the input loses focus
+                row.addEventListener("mousedown", (event) => {
+                  event.preventDefault();
+                  choose(name);
+                });
+
+                list.appendChild(row);
+              });
+            }
+
+            list.hidden = false;
+            input.setAttribute("aria-expanded", "true");
+          }
+
+          async function open() {
+            items = await loadItems();
+            render();
+          }
+
+          // Stops the surrounding <label> from re-focusing the input
+          list.addEventListener("click", (event) => event.preventDefault());
+
+          input.addEventListener("focus", open);
+          input.addEventListener("click", () => {
+            if (list.hidden) open();
+          });
+          input.addEventListener("input", () => {
+            if (list.hidden) {
+              open();
+            } else {
+              render();
+            }
+          });
+          input.addEventListener("blur", () => setTimeout(close, 120));
+
+          input.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              if (list.hidden) {
+                open();
+              } else {
+                highlight(active + 1);
+              }
+            } else if (event.key === "ArrowUp") {
+              event.preventDefault();
+              highlight(active - 1);
+            } else if (event.key === "Enter" && !list.hidden && active >= 0) {
+              event.preventDefault();
+              const row = list.querySelectorAll("li[data-name]")[active];
+              if (row) choose(row.dataset.name);
+            } else if (event.key === "Escape") {
+              close();
+            }
+          });
+        }
+
+        setupCombo(
+          fromInput,
+          document.getElementById("fromList"),
+          async () => (await fetchLocations("")).origins,
+          () => "No starting points registered yet."
+        );
+
+        setupCombo(
+          toInput,
+          document.getElementById("toList"),
+          async () => (await fetchLocations(fromInput.value.trim())).destinations,
+          () =>
+            fromInput.value.trim()
+              ? `No destinations registered from ${fromInput.value.trim()} yet.`
+              : "No destinations registered yet."
+        );
+
+        // After choosing a starting point, jump to the destination box
+        fromInput.addEventListener("change", () => {
+          if (!toInput.value.trim()) toInput.focus();
         });
 
         // Automatically search when opened from an unavailable request.

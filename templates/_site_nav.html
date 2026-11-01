@@ -95,7 +95,7 @@
         ><svg class="i"><use href="#i-chat" /></svg>Chats</a
       >
       {% if current_user.is_authenticated %}
-      <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+      <a class="signin" href="{{ url_for('logout') }}">Log out</a>
       {% else %}
       <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
       {% endif %}

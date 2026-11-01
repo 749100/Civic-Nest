@@ -650,6 +650,152 @@
       }
     </style>
     {% block head %}{% endblock %}
+    {% block page_head %}{% endblock %}
+    <style>
+      .am {
+        color: var(--ink);
+      }
+      .am a {
+        color: var(--blue);
+      }
+      .am h1,
+      .am h2,
+      .am h3,
+      .am .route,
+      .am .empty strong {
+        color: #fff;
+      }
+      .am .sub,
+      .am .muted,
+      .am .count,
+      .am .stat span,
+      .am .summary span,
+      .am .field label,
+      .am .inline-form label,
+      .am .ta-detail small,
+      .am .ta-detail strong {
+        color: var(--muted);
+      }
+      .am .page-head {
+        border: 1px solid var(--line);
+        background: linear-gradient(120deg, #1d3a8a, #4a2fa0 70%, #6d3fc0);
+      }
+      .am .page-head .eyebrow,
+      .am .page-head h1,
+      .am .page-head .sub {
+        color: #fff;
+      }
+      .am .panel,
+      .am .stat,
+      .am .summary,
+      .am .empty {
+        border-color: var(--line);
+        background: var(--card);
+        box-shadow: none;
+        color: var(--ink);
+      }
+      .am .panel-head {
+        border-color: var(--line);
+      }
+      .am th {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--muted);
+      }
+      .am th,
+      .am td {
+        border-color: var(--line);
+      }
+      .am tbody tr:hover,
+      .am .inline-form,
+      .am .ta-details {
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .am .badge,
+      .am .group-count {
+        background: rgba(43, 156, 242, 0.16);
+        color: var(--blue);
+      }
+      .am .badge.ok,
+      .am .badge.open,
+      .am .badge.paid,
+      .am .badge.availability_confirmed,
+      .am .group.landlords .group-count {
+        background: rgba(31, 200, 160, 0.16);
+        color: var(--green);
+      }
+      .am .badge.pending,
+      .am .ta-alt {
+        background: rgba(245, 182, 56, 0.16);
+        color: var(--amber);
+      }
+      .am .badge.suspended,
+      .am .badge.cancelled,
+      .am .badge.unavailable,
+      .am .btn.danger {
+        background: rgba(239, 68, 68, 0.16);
+        color: #ff9b9b;
+      }
+      .am .badge.admin {
+        background: rgba(155, 127, 230, 0.2);
+        color: #c4b5fd;
+      }
+      .am input[type="search"],
+      .am input[type="text"],
+      .am input[type="email"],
+      .am input[type="password"],
+      .am input[type="tel"],
+      .am input[type="number"],
+      .am input[type="date"],
+      .am input[type="time"],
+      .am select,
+      .am textarea {
+        border-color: var(--line);
+        background: var(--bg);
+        color: var(--ink);
+        color-scheme: dark;
+      }
+      .am input::placeholder,
+      .am textarea::placeholder {
+        color: var(--muted);
+      }
+      .am .inline-form,
+      .am .checkrow {
+        border-color: var(--line);
+      }
+      .am details,
+      .am .group-head {
+        border-color: var(--line);
+      }
+      .am summary,
+      .am .ta-detail a {
+        color: var(--blue);
+      }
+      .am .ta-call {
+        border-color: var(--line);
+        background: rgba(43, 156, 242, 0.12);
+        color: var(--ink);
+      }
+      .am .ta-call.warn,
+      .am .ta-note {
+        border-color: rgba(245, 182, 56, 0.35);
+        background: rgba(245, 182, 56, 0.12);
+        color: var(--amber);
+      }
+      .am .ta-call-btn {
+        color: #fff;
+      }
+      .anav a {
+        border-color: var(--line);
+        background: var(--card);
+        color: var(--blue);
+      }
+      .anav a:hover,
+      .anav a.on {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+      }
+    </style>
   </head>
   <body>
     {% set admin_name = (current_user.full_name or 'Admin') if
@@ -721,6 +867,7 @@
       </header>
 
       <main class="content">
+        {% block subnav %}{% endblock %}
         {% with messages = get_flashed_messages(with_categories=true) %} {% for
         category, message in messages %}
         <div class="flash {{ category }}" role="alert">{{ message }}</div>

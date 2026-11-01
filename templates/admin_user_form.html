@@ -1,59 +1,142 @@
-{% extends "base.html" %}
+{% extends "admin/admin_base.html" %}
 
 {% block title %}Create an account{% endblock %}
-{% block stage_class %}compact{% endblock %}
-{% block page_title %}Create an account.{% endblock %}
-{% block page_sub %}
-<p class="page-sub">Make an account for a tenant or a landlord and give them the password. They can change nothing until you share it.</p>
-{% endblock %}
 
 {% block head %}
 <style>
-.sf{max-width:760px;margin:0 auto}
-.fgrid{display:grid;grid-template-columns:1fr;gap:14px}
-.fgrid .full{grid-column:1/-1}
-.check{display:flex;align-items:center;gap:10px;min-height:48px;font-size:15px;font-weight:500}
-.check input{width:22px;height:22px;accent-color:var(--blue)}
-.pw-row{display:flex;gap:10px}
-.pw-row input{flex:1}
-.form-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-@media(min-width:700px){.fgrid{grid-template-columns:1fr 1fr}.form-actions{flex-direction:row;justify-content:flex-end}}
+  .sf {
+    max-width: 760px;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--green);
+  }
+  .pw-row {
+    display: flex;
+    gap: 10px;
+  }
+  .pw-row input {
+    flex: 1;
+  }
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  @media (max-width: 640px) {
+    .form-actions > * {
+      flex: 1;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="sf">
-<form class="card" method="post">
-  <div class="fgrid">
-    <label class="f full"><span>Full name</span>
-      <input type="text" name="full_name" maxlength="150" required value="{{ form.get('full_name') or '' }}">
-    </label>
-    <label class="f"><span>Email</span>
-      <input type="email" name="email" maxlength="255" required value="{{ form.get('email') or '' }}" placeholder="name@example.com">
-    </label>
-    <label class="f"><span>Phone <small>(optional)</small></span>
-      <input type="tel" name="phone" maxlength="30" value="{{ form.get('phone') or '' }}" placeholder="0712 345 678">
-    </label>
-    <label class="f"><span>Account type</span>
-      <select name="role">
-        <option value="student" {{ 'selected' if (form.get('role') or 'student') == 'student' else '' }}>Tenant (looking for a home)</option>
-        <option value="landlord" {{ 'selected' if form.get('role') == 'landlord' else '' }}>Landlord (lists properties)</option>
-      </select>
-    </label>
-    <label class="f"><span>Password</span>
-      <div class="pw-row">
-        <input type="password" id="password" name="password" minlength="8" required placeholder="8+ characters" autocomplete="new-password">
-        <button class="btn ghost" type="button" id="genBtn">Generate</button>
+<section class="page-head">
+  <div>
+    <p class="eyebrow">User administration</p>
+    <h1>Create an account</h1>
+    <p class="sub">
+      Create a tenant or landlord account and share the initial password with
+      them.
+    </p>
+  </div>
+</section>
+
+<section class="panel sf">
+  <div class="panel-body">
+    <form method="post">
+      <div class="form-grid">
+        <div class="field full">
+          <label for="full_name">Full name</label>
+          <input
+            id="full_name"
+            type="text"
+            name="full_name"
+            maxlength="150"
+            required
+            value="{{ form.get('full_name') or '' }}"
+          />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            maxlength="255"
+            required
+            value="{{ form.get('email') or '' }}"
+            placeholder="name@example.com"
+          />
+        </div>
+        <div class="field">
+          <label for="phone">Phone <span class="muted">(optional)</span></label>
+          <input
+            id="phone"
+            type="tel"
+            name="phone"
+            maxlength="30"
+            value="{{ form.get('phone') or '' }}"
+            placeholder="0712 345 678"
+          />
+        </div>
+        <div class="field">
+          <label for="role">Account type</label>
+          <select id="role" name="role">
+            <option value="student" {{ 'selected' if (form.get('role') or 'student') == 'student' else '' }}>
+              Tenant (looking for a home)
+            </option>
+            <option value="landlord" {{ 'selected' if form.get('role') == 'landlord' else '' }}>
+              Landlord (lists properties)
+            </option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-row">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              minlength="8"
+              required
+              placeholder="8+ characters"
+              autocomplete="new-password"
+            />
+            <button class="btn secondary" type="button" id="genBtn">
+              Generate
+            </button>
+          </div>
+        </div>
+        <label class="check field full">
+          <input
+            type="checkbox"
+            name="is_verified"
+            {{ 'checked' if form.get('is_verified') else '' }}
+          />
+          Mark this person as verified
+        </label>
       </div>
-    </label>
-    <label class="check full"><input type="checkbox" name="is_verified" {{ 'checked' if form.get('is_verified') else '' }}> Mark this person as verified</label>
+      <div class="form-actions">
+        <a class="btn secondary" href="{{ url_for('admin_users') }}">Cancel</a>
+        <button class="btn" type="submit">Create account</button>
+      </div>
+    </form>
   </div>
-  <div class="form-actions">
-    <a class="btn ghost" href="{{ url_for('admin_users') }}">Cancel</a>
-    <button class="btn" type="submit">Create account</button>
-  </div>
-</form>
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}

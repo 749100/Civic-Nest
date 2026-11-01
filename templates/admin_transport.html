@@ -67,6 +67,12 @@ endblock %} {% block head %}
     align-items: end;
     margin-bottom: 10px;
   }
+  .bulk-vehicle-other {
+    margin-top: 8px;
+  }
+  .bulk-vehicle-other[hidden] {
+    display: none !important;
+  }
   .bulk-route-error {
     margin: 0 0 14px;
     padding: 11px 13px;
@@ -340,6 +346,7 @@ endblock %} {% block head %}
         <tr>
           <th>Company</th>
           <th>Route</th>
+          <th>Vehicle</th>
           <th>Stops</th>
           <th>Boarding</th>
           <th>Drop-off</th>
@@ -355,6 +362,7 @@ endblock %} {% block head %}
               >{{ route.route_from }} → {{ route.route_to }}</span
             >
           </td>
+          <td>{{ route.vehicle_type or "—" }}</td>
           <td>{{ route.intermediate_stops or "—" }}</td>
           <td>{{ route.boarding_point or "—" }}</td>
           <td>{{ route.dropoff_point or "—" }}</td>
@@ -457,6 +465,10 @@ endblock %} {% block head %}
       return;
     }
 
+    // Vehicle types offered in the dropdown. "Other" lets you type your own.
+    const VEHICLE_TYPES = ["Bus", "Shuttle / Matatu", "Private vehicle"];
+    const OTHER_VALUE = "__other__";
+
     let isSubmitting = false;
 
     function showError(message) {
@@ -494,6 +506,77 @@ endblock %} {% block head %}
       field.appendChild(input);
 
       return field;
+    }
+
+    function createVehicleField() {
+      const field = document.createElement("div");
+      field.className = "field full";
+
+      const label = document.createElement("label");
+      label.textContent = "Vehicle type *";
+
+      const select = document.createElement("select");
+      select.className = "bulk-vehicle-select";
+
+      select.add(new Option("Select vehicle type", ""));
+      VEHICLE_TYPES.forEach(function (type) {
+        select.add(new Option(type, type));
+      });
+      select.add(new Option("Other (type it)", OTHER_VALUE));
+
+      const other = document.createElement("input");
+      other.type = "text";
+      other.className = "bulk-vehicle-other";
+      other.placeholder = "e.g. Tuk-tuk, boat, 14-seater van";
+      other.maxLength = 60;
+      other.hidden = true;
+
+      select.addEventListener("change", function () {
+        const isOther = select.value === OTHER_VALUE;
+        other.hidden = !isOther;
+
+        if (isOther) {
+          other.focus();
+        } else {
+          other.value = "";
+        }
+      });
+
+      field.appendChild(label);
+      field.appendChild(select);
+      field.appendChild(other);
+
+      return field;
+    }
+
+    function readVehicle(card) {
+      const select = card.querySelector(".bulk-vehicle-select");
+      const other = card.querySelector(".bulk-vehicle-other");
+
+      if (select.value === OTHER_VALUE) {
+        return other.value.trim();
+      }
+
+      return select.value;
+    }
+
+    function setVehicle(card, value) {
+      const select = card.querySelector(".bulk-vehicle-select");
+      const other = card.querySelector(".bulk-vehicle-other");
+
+      if (!value) {
+        select.value = "";
+        other.hidden = true;
+        other.value = "";
+      } else if (VEHICLE_TYPES.indexOf(value) !== -1) {
+        select.value = value;
+        other.hidden = true;
+        other.value = "";
+      } else {
+        select.value = OTHER_VALUE;
+        other.hidden = false;
+        other.value = value;
+      }
     }
 
     function addDeparture(card, data = {}) {
@@ -572,7 +655,7 @@ endblock %} {% block head %}
         intermediate_stops: card.querySelector(".bulk-stops").value.trim(),
         boarding_point: card.querySelector(".bulk-boarding").value.trim(),
         dropoff_point: card.querySelector(".bulk-dropoff").value.trim(),
-        vehicle_type: card.querySelector(".bulk-vehicle").value.trim(),
+        vehicle_type: readVehicle(card),
 
         departures: Array.from(
           card.querySelectorAll(".bulk-departure-row"),
@@ -693,15 +776,7 @@ endblock %} {% block head %}
         ),
       );
 
-      fields.appendChild(
-        createField(
-          "Vehicle type",
-          "full",
-          "bulk-vehicle",
-          "text",
-          "e.g. 50-seater bus",
-        ),
-      );
+      fields.appendChild(createVehicleField());
 
       const departureSection = document.createElement("div");
       departureSection.className = "bulk-departure-section";
@@ -741,7 +816,7 @@ endblock %} {% block head %}
           copyData.boarding_point || "";
         card.querySelector(".bulk-dropoff").value =
           copyData.dropoff_point || "";
-        card.querySelector(".bulk-vehicle").value = copyData.vehicle_type || "";
+        setVehicle(card, copyData.vehicle_type || "");
 
         if (Array.isArray(copyData.departures) && copyData.departures.length) {
           copyData.departures.forEach(function (departure) {
@@ -818,6 +893,16 @@ endblock %} {% block head %}
             "Route " +
               routeNumber +
               ": departure and destination cannot be the same.",
+          );
+          return;
+        }
+
+        if (!route.vehicle_type) {
+          event.preventDefault();
+          showError(
+            "Route " +
+              routeNumber +
+              ": choose the vehicle type (or type it in if you chose Other).",
           );
           return;
         }

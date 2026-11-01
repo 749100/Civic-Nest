@@ -235,7 +235,7 @@
           </a>
 
           {% if current_user.is_authenticated %}
-          <a class="signin" href="{{ url_for('dashboard') }}">My account</a>
+          <a class="signin" href="{{ url_for('logout') }}">Log out</a>
           {% else %}
           <a class="signin" href="{{ url_for('login') }}">Sign In / Register</a>
           {% endif %}
@@ -264,8 +264,20 @@
         <a href="{{ url_for('hospitality_page') }}">Stay &amp; Dine</a>
         <a href="{{ url_for('travel_page') }}">Travel With Us</a>
         <a href="{{ url_for('about_page') }}">About us</a>
+        {% if current_user.is_authenticated %}
+        <hr />
+        <a href="{{ url_for('dashboard') }}">My dashboard</a>
+        {% if current_user.role in ['landlord', 'admin'] %}
+        <a href="{{ url_for('landlord_dashboard') }}">Landlord dashboard</a>
+        {% endif %}
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}">Admin console</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}">Log out</a>
+        {% else %}
         <a href="{{ url_for('login', role='landlord') }}">Landlord login</a>
         <a href="{{ url_for('register') }}">Create account</a>
+        {% endif %}
       </nav>
     </header>
 

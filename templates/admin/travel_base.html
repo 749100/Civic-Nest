@@ -1,4 +1,4 @@
-{% extends "site_base.html" %} {% set active_page = 'travel' %} {% block title
+{% extends "admin/admin_base.html" %} {% set active_page = 'travel' %} {% block title
 %}Travel Admin{% endblock %} {% block robots %}noindex, nofollow{% endblock %}
 {% block hero_eyebrow %}Travel administration{% endblock %} {% block hero_title
 %}Manage <em>travel.</em>{% endblock %} {% block hero_sub %}
@@ -517,7 +517,7 @@
   }
 </style>
 
-{% block page_head %}{% endblock %} {% endblock %} {% block subnav %}
+{% endblock %} {% block subnav %}
 <nav class="anav" aria-label="Travel admin navigation">
   <a
     href="{{ url_for('admin_trips') }}"

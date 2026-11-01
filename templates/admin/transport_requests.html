@@ -152,6 +152,7 @@ available_count = requests|selectattr('status', 'equalto',
 'availability_confirmed')|list|length %} {% set confirmed_count =
 requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
 
+<div class="am">
 <section class="page-head">
   <div>
     <p class="eyebrow">Transport</p>
@@ -320,7 +321,8 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
           management so you can call them for future requests.
         </div>
       </div>
-      {% endif %} {% endif %} {% if item.admin_note %}
+      {% endif %}
+      </div> {% endif %} {% if item.admin_note %}
       <div class="ta-note">
         <strong>Admin note:</strong> {{ item.admin_note }}
       </div>
@@ -398,4 +400,5 @@ requests|selectattr('status', 'equalto', 'booking_confirmed')|list|length %}
     <p>New customer availability requests will appear here.</p>
   </div>
 </section>
-{% endif %} {% endblock %}
+{% endif %}
+</div> {% endblock %}
